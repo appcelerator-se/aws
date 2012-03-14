@@ -1,1 +1,9 @@
-Test commit, David Sanchez
+ A Test Application which exercises the AWS Module being developed.
+ Requires Titanium Mobile SDK 1.8.0+.
+  
+ Currently, the Application Tests only the 'SimpleDb' service.
+  
+Some of the outstanding Issues on the 'Test App' front.
+ - Structure of the app needs to be fixed, for it to be extended for writing additional test-services.
+ - Incorporation of Drillbit test suite
+ - Elegant way of managing the Security keys
