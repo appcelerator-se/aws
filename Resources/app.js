@@ -30,10 +30,12 @@ else {
 	popup.addEventListener('close',function(e){
 		var accessKey=Ti.App.Properties.getString('aws.access_key');
 		var secretKey=Ti.App.Properties.getString('aws.secret_key');
-		Ti.API.info('Popup Closed, logging in...');
 		
+		Ti.API.info('Popup Closed, logging in...');
+
 		Ti.App.AWS=require('ti.aws'); //Make the AWS Module publically available across the App
 		Ti.App.AWS.authorize(accessKey, secretKey);
+					
 		//require and open top level UI component
 		var Window;
 		if (osname === 'android') {
