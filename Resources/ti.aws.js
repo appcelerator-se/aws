@@ -147,7 +147,7 @@ _sessionOBJ.bedFrame.build(AWS, {
 		endpoint : "https://sdb.amazonaws.com",
 		methods : [
 		{
-			method : 'BatchPutAttributes',
+			method : 'batchPutAttributes',
 			validations : {required : {params : ['DomainName']},
 				patternExistsValidator : {params : ['Item.*.Attribute.*.Name','Item.*.ItemName' ]}}
 		}, {

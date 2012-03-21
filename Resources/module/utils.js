@@ -59,6 +59,26 @@ exports.generateStringToSign=function(params) {
 }
 
 
+/* Standard validators supported by the AWS API */
+validators = {
+	//Checks if all the mandatory parameters specified under data.params, have some value in them
+	required:function(request_params, data){
+		var param_names=data.params; //Array of parameter names to be checked
+		param_names.forEach(function(name){
+			var val=request_params[name]; //value of a parameter
+			if ((undefined == val) || (val == null) || (val != ""))
+				return false; //Validation failed
+				//TBD: Need to write mechanism to raise an Error with all relevant details
+		});
+		return true;
+	},
+	//Checks to see if there are any matching regualar expressions within the Parameters
+	//Useful for validating collection of input parameters.
+	patternExistsValidator:function(request_params, data){
+		return true;
+	}
+}
+
 /**
  * Routine that validates the Parameters provided by the User based upon the Rules associated with the method.
  * 
@@ -67,9 +87,12 @@ exports.generateStringToSign=function(params) {
  * @param params - Parameters to be serialized into the URL
  * @param validations - List of Validation rules to apply, along with their inherent parameters
  */
-exports.validateParams = function(params, validations) {
-/*	for(var validationRule in validations){
-	
+exports.validateParams = function(request_params, validations) {
+	for (var validationRule in validations) {
+		fnValidate=validators[validationRule];
+		data=validations[validationRule];
+		
+		res=fnValidate(request_params, data);
+		Ti.API.info('Validation '+validationRule+' = '+res)
 	}
-*/
 }
