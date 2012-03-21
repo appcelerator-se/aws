@@ -169,17 +169,14 @@ _sessionOBJ.bedFrame.build(AWS, {
 		}, {
 			method : 'select',
 			validations : {required : {params : ['SelectExpression']}}
-		},
-		{
+		}, {
 			method : 'domainMetadata',
 			validations : {required : {params : ['DomainName']}}
-		},
-		{
+		}, {
 			method : 'getAttributes',
 			validations : {required : {params : ['DomainName', 'ItemName']},
 			patternExistsValidator : {params : ['Attribute.*.Name']}}
-		},
-		{
+		}, {
 			method : 'deleteAttributes',
 			validations : {required : {params : ['DomainName', 'ItemName']}}
 		}
