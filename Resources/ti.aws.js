@@ -72,13 +72,12 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
  * @param cbOnError - Callback to be invoked for Error
  */
 var s3Executor = function(params, cbOnData, cbOnError) {
-	Ti.API.info('S3 Executor invoked');
 	params.contentMD5 = '';
 	params.contentType = '';
 	if(!params.hasOwnProperty('subverb')) {
 		params.subverb = '';
 	}
-	var curDate = _sessionOBJ.date.formatDate(new Date(), 'E, d MMM yyyy HH:mm:ss ') + this.gsm;
+	var curDate = (new Date()).toUTCString();
 	params.verb=this.verb;
 	params.curDate=curDate;
 	var stringToSign =	_sessionOBJ.utility.generateStringToSign(params);
