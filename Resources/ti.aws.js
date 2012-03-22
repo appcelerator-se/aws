@@ -21,7 +21,6 @@
 		x2j : require('/module/xml2json'), //Common to all namespaces
 		utf8 : require('/module/utf8').load(), //Used for s3
 		sha: require('/module/hmacsha1').load(),
-		date : require('/module/date').load(), //Used for s3
 		accessKeyId : null, //To be initalized via the authorize method
 		secretKey : null	//To be initalized via the authorize method
 	};
@@ -74,49 +73,43 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 var s3Executor = function(params, cbOnData, cbOnError) {
 	params.contentMD5 = '';
 	params.contentType = '';
-	if(!params.hasOwnProperty('subverb')) {
-		params.subverb = '';
+	if(!params.hasOwnProperty('subresource')) {
+		params.subresource = this.subresource;
 	}
 	var curDate = (new Date()).toUTCString();
 	params.verb=this.verb;
 	params.curDate=curDate;
-	var stringToSign =	_sessionOBJ.utility.generateStringToSign(params);
-
-	var signature = _sessionOBJ.sha.b64_hmac_sha1(_sessionOBJ.utf8.encode(_sessionOBJ.secretKey), _sessionOBJ.utf8.encode(stringToSign));
+	params.url=this.endpoint;
+	params.stringToSign='';
+	params.verb = this.verb;
+	_sessionOBJ.utility.generateS3Params(params);	
+	var signature = _sessionOBJ.sha.b64_hmac_sha1(_sessionOBJ.utf8.encode(_sessionOBJ.secretKey), _sessionOBJ.utf8.encode(params.stringToSign));
 	var awsAuthHeader = "AWS " + _sessionOBJ.accessKeyId + ":" + signature;
 	var xhr = Ti.Network.createHTTPClient();
-	xhr.open(this.verb, this.endpoint);
+	xhr.open(this.verb, params.url);
 	xhr.setRequestHeader('Authorization', awsAuthHeader);
 	xhr.setRequestHeader('Date', curDate);
-	
-	if(params.hasOwnProperty('bucketName')) {
-		xhr.setRequestHeader('Host', params.bucketName + '.s3.amazonaws.com');
-	} else {
-		xhr.setRequestHeader('Host', 's3.amazonaws.com');
-	}
-
-	
+	xhr.setRequestHeader('Host', 's3.amazonaws.com');
 	xhr.onload = function(response) {
-		Ti.API.info('S3 Data retured');
-
 		if(this.connectionType == "GET") {
-			if(cbOnData)
+			if(cbOnData){
 				cbOnData(_sessionOBJ.x2j.parser(this.responseText));
+			}
 		} else {
-			if(cbOnData)
-				cbOnData(response);
+			if(cbOnData){
+				cbOnData(response.responseText);
+			}
 		}
 	};
 
 	xhr.onerror = function(e) {
-		Ti.API.info('S3 Error retured');
 		if(cbOnError) {
 			var error = _sessionOBJ.x2j.parser(this.responseText);
 			error.summary = this.responseText;
 			cbOnError(error);
 		}
 	}
-	xhr.send();
+	xhr.send();	
 }
 
 var AWS = {};
@@ -184,15 +177,37 @@ _sessionOBJ.bedFrame.build(AWS, {
 	},
 	{
 		namespace: 'S3',
-		gsm : '+0530 GMT',
 		endpoint: 'https://s3.amazonaws.com/',
 		executor : s3Executor,
 		methods: [
 			{method: 'putBucket', verb: 'PUT'},
 			{method: 'getBucket', verb: 'GET'},
-			{method: 'deleteBucket', verb: 'DELETE'}
+			{method: 'deleteBucket', verb: 'DELETE'},
+			{method : 'getService', verb: 'GET', subresource:''},
+			{method : 'putBucketAcl', verb: 'PUT', subresource:'?acl'},
+			{method : 'deleteBucketLifecycle', verb: 'DELETE', subresource:'?lifecycle'},
+			{method : 'deleteBucketPolicy', verb: 'DELETE', subresource:'?policy'},
+			{method : 'deleteBucketWebsite', verb: 'DELETE', subresource:'?website'},
+			{method : 'getBucketLifecycle', verb: 'GET', subresource:'?lifecycle'},
+			{method : 'getBucketPolicy', verb: 'GET', subresource:'?policy'},
+			{method : 'getBucketLocation', verb: 'GET', subresource:'?location'},
+			{method : 'getBucketLogging', verb: 'GET', subresource:'?logging'},
+			{method : 'getBucketNotification', verb: 'GET', subresource:'?notification'},
+			{method : 'getBucketObjectVersions', verb: 'GET', subresource:'?versions'},
+			{method : 'getBucketRequestPayment', verb: 'GET', subresource:'?requestPayment'},
+			{method : 'getBucketVersioning', verb: 'GET', subresource:'?versioning'},
+			{method : 'getBucketWebsite', verb: 'GET', subresource:'?website'},
+			{method : 'headBucket', verb: 'HEAD', subresource:''},
+			{method : 'listMultipartUploads', verb: 'GET', subresource:'?uploads'},
+			{method : 'getObject', verb: 'GET', subresource:''},
+			{method : 'getObjectAcl', verb: 'GET', subresource:'?acl'},
+			{method : 'putObject', verb: 'PUT', subresource:''},
+			{method : 'putObjectAcl', verb: 'PUT', subresource:'?acl'},
+			{method : 'deleteObject', verb: 'DELETE', subresource:''},
+			{method : 'headObject', verb: 'HEAD', subresource:''}
 		]
 	}
+	
 	]
 });
 

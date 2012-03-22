@@ -44,19 +44,21 @@ exports.generateSignedURL = function(actionName, params, accessKeyId, secretKey,
  * @param - Its a javascript object ar contains all elements required for creating signed string
  * more on the signing string here --http://docs.amazonwebservices.com/AmazonS3/2006-03-01/dev/RESTAuthentication.html 
  */
-exports.generateStringToSign=function(params) {
-	var signedString = '';
-	if(params.hasOwnProperty('bucketName')) {
-		if(params.hasOwnProperty('fileName')) {
-			signedString = params.verb + params.subverb + '\n' + params.contentMD5 + '\n' + params.contentType + '\n' + params.curDate + '\n/' + params.bucketName + '/' + params.fileName;
-		} else {
-			signedString = params.verb + params.subverb + '\n' + params.contentMD5 + '\n' + params.contentType + '\n' + params.curDate + '\n/' + params.bucketName + '/';
-		}
-	} else {
-		signedString = params.verb + params.subverb + '\n' + params.contentMD5 + '\n' + params.contentType + '\n' + params.curDate + '\n/';
-	}
-	return signedString;
+exports.generateS3Params=function(params){	
+	if(params.hasOwnProperty('bucketName')){
+		if(params.hasOwnProperty('objectName')){
+			params.stringToSign = params.verb+'\n'+params.contentMD5+'\n'+params.contentType+'\n'+params.curDate+'\n/'+params.bucketName+'/'+params.objectName+params.subresource;
+			params.url = params.url.concat(params.bucketName+'/'+params.objectName+params.subresource);			
+		}else{
+			params.stringToSign = params.verb+'\n'+params.contentMD5+'\n'+params.contentType+'\n'+params.curDate+'\n/'+params.bucketName+'/'+params.subresource;			
+			params.url = params.url.concat(params.bucketName+'/'+params.subresource);
+		}		
+	}else{
+		params.stringToSign = params.verb+'\n'+params.contentMD5+'\n'+params.contentType+'\n'+params.curDate+'\n/'+params.subresource;
+	}	
+	return;
 }
+
 
 
 /* Standard validators supported by the AWS API */
