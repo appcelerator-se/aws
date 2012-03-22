@@ -1,18 +1,15 @@
-function MasterView() {
-	var self = Ti.UI.createView({
-		backgroundColor:'white'
+windowFunctions['List Domains'] = function (evt) {
+    var win = createWindow();
+    var offset = addBackButton(win);
+    
+    var table = Ti.UI.createTableView({
+		top:44
 	});
-	var table = Ti.UI.createTableView();
-	self.add(table);
-
-	table.addEventListener('click', function(e) {
-		self.fireEvent('itemSelected', {
-			DomainName:e.rowData.title,
-		});
-	});		
 	
+	win.add(table);
+
 	var arrDomains=[];
- 
+	
 	Ti.App.AWS.SimpleDB.listDomains({'MaxNumberOfDomains':20},
 		function(response){
 			arrDomains=[];
@@ -32,7 +29,7 @@ function MasterView() {
 			//error handling code here.
 		}
 	);
-	return self;
+	
+    win.open();
+    
 };
-
-module.exports = MasterView;
