@@ -71,33 +71,56 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
  * @param cbOnError - Callback to be invoked for Error
  */
 var s3Executor = function(params, cbOnData, cbOnError) {
+	var xhr = Ti.Network.createHTTPClient();
 	params.contentMD5 = '';
 	params.contentType = '';
-	if(!params.hasOwnProperty('subresource')) {
-		params.subresource = this.subresource;
+	if(this.contentType) {
+		params.contentType = this.contentType;
+	}
+
+	if(!params.hasOwnProperty('subResource')) {
+		params.subResource = this.subResource;
+	}
+	if(params.hasOwnProperty('copySource')) {
+		xhr.setRequestHeader('x-amz-copy-source', params.copySource);
+		// will be passed from client
 	}
 	var curDate = (new Date()).toUTCString();
-	params.verb=this.verb;
-	params.curDate=curDate;
-	params.url=this.endpoint;
-	params.stringToSign='';
 	params.verb = this.verb;
-	_sessionOBJ.utility.generateS3Params(params);	
+	params.curDate = curDate;
+	params.url = this.endpoint;
+	params.stringToSign = '';
+	params.verb = this.verb;
+
+	if(this.uploadFile) {
+		var fileContents = params.file.read();
+		params.contentType = fileContents.mimeType;
+		params.contentLength = params.file.size;
+	}
+
+	_sessionOBJ.utility.generateS3Params(params);
 	var signature = _sessionOBJ.sha.b64_hmac_sha1(_sessionOBJ.utf8.encode(_sessionOBJ.secretKey), _sessionOBJ.utf8.encode(params.stringToSign));
 	var awsAuthHeader = "AWS " + _sessionOBJ.accessKeyId + ":" + signature;
-	var xhr = Ti.Network.createHTTPClient();
+
 	xhr.open(this.verb, params.url);
 	xhr.setRequestHeader('Authorization', awsAuthHeader);
 	xhr.setRequestHeader('Date', curDate);
 	xhr.setRequestHeader('Host', 's3.amazonaws.com');
+	if(this.contentType) {
+		xhr.setRequestHeader('Content-Type', params.contentType);
+	}
+	if(this.uploadFile) {
+		xhr.setRequestHeader('Content-Type', params.contentType);
+		xhr.setRequestHeader('Content-Length', params.contentLength);
+	}
 	xhr.onload = function(response) {
-		if(this.connectionType == "GET") {
-			if(cbOnData){
+		if(this.connectionType == "GET" || this.connectionType == "POST") {
+			if(cbOnData) {
 				cbOnData(_sessionOBJ.x2j.parser(this.responseText));
 			}
 		} else {
-			if(cbOnData){
-				cbOnData(response.responseText);
+			if(cbOnData) {
+				cbOnData(this.responseText);
 			}
 		}
 	};
@@ -109,7 +132,14 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 			cbOnError(error);
 		}
 	}
-	xhr.send();	
+	if(params.hasOwnProperty('xmlTemplate')) {//for sending xml in request object
+		xhr.send(params.xmlTemplate);
+	} else if(this.uploadFile) {// for sending file in request object
+		xhr.send(fileContents);
+	} else {
+		xhr.send();
+	}
+
 }
 
 var AWS = {};
@@ -176,36 +206,148 @@ _sessionOBJ.bedFrame.build(AWS, {
 		]
 	},
 	{
-		namespace: 'S3',
-		endpoint: 'https://s3.amazonaws.com/',
+		namespace : 'S3',
+		endpoint : 'https://s3.amazonaws.com/',
 		executor : s3Executor,
-		methods: [
-			{method: 'putBucket', verb: 'PUT'},
-			{method: 'getBucket', verb: 'GET'},
-			{method: 'deleteBucket', verb: 'DELETE'},
-			{method : 'getService', verb: 'GET', subresource:''},
-			{method : 'putBucketAcl', verb: 'PUT', subresource:'?acl'},
-			{method : 'deleteBucketLifecycle', verb: 'DELETE', subresource:'?lifecycle'},
-			{method : 'deleteBucketPolicy', verb: 'DELETE', subresource:'?policy'},
-			{method : 'deleteBucketWebsite', verb: 'DELETE', subresource:'?website'},
-			{method : 'getBucketLifecycle', verb: 'GET', subresource:'?lifecycle'},
-			{method : 'getBucketPolicy', verb: 'GET', subresource:'?policy'},
-			{method : 'getBucketLocation', verb: 'GET', subresource:'?location'},
-			{method : 'getBucketLogging', verb: 'GET', subresource:'?logging'},
-			{method : 'getBucketNotification', verb: 'GET', subresource:'?notification'},
-			{method : 'getBucketObjectVersions', verb: 'GET', subresource:'?versions'},
-			{method : 'getBucketRequestPayment', verb: 'GET', subresource:'?requestPayment'},
-			{method : 'getBucketVersioning', verb: 'GET', subresource:'?versioning'},
-			{method : 'getBucketWebsite', verb: 'GET', subresource:'?website'},
-			{method : 'headBucket', verb: 'HEAD', subresource:''},
-			{method : 'listMultipartUploads', verb: 'GET', subresource:'?uploads'},
-			{method : 'getObject', verb: 'GET', subresource:''},
-			{method : 'getObjectAcl', verb: 'GET', subresource:'?acl'},
-			{method : 'putObject', verb: 'PUT', subresource:''},
-			{method : 'putObjectAcl', verb: 'PUT', subresource:'?acl'},
-			{method : 'deleteObject', verb: 'DELETE', subresource:''},
-			{method : 'headObject', verb: 'HEAD', subresource:''}
-		]
+		uploadFile : false,
+		subResource : '',
+		methods : [{
+			method : 'getService'
+		}, {
+			method : 'deleteBucket',
+			verb : 'DELETE'
+		}, {
+			method : 'deleteBucketLifecycle',
+			verb : 'DELETE',
+			subResource : '?lifecycle'
+		}, {
+			method : 'deleteBucketPolicy',
+			verb : 'DELETE',
+			subResource : '?policy'
+		}, {
+			method : 'deleteBucketWebsite',
+			verb : 'DELETE',
+			subResource : '?website'
+		}, {
+			method : 'getBucket',
+		}, {
+			method : 'getBucketAcl', // Xml Parsing Problem.
+			subResource : '?acl'
+		}, {
+			method : 'getBucketLifecycle',
+			subResource : '?lifecycle'
+		}, {
+			method : 'getBucketPolicy',
+			subResource : '?policy'
+		}, {
+			method : 'getBucketLocation',
+			subResource : '?location'
+		}, {
+			method : 'getBucketLogging',
+			subResource : '?logging'
+		}, {
+			method : 'getBucketNotification',
+			subResource : '?notification'
+		}, {
+			method : 'getBucketObjectVersions',
+			subResource : '?versions'
+		}, {
+			method : 'getBucketRequestPayment',
+			subResource : '?requestPayment'
+		}, {
+			method : 'getBucketVersioning',
+			subResource : '?versioning'
+		}, {
+			method : 'getBucketWebsite',
+			subResource : '?website'
+		}, {
+			method : 'headBucket',
+			verb : 'HEAD'
+		}, {
+			method : 'listMultipartUploads',
+			subResource : '?uploads'
+		}, {
+			method : 'putBucket',
+			verb : 'PUT'
+		}, {
+			method : 'putBucketAcl',
+			verb : 'PUT',
+			subResource : '?acl',
+			contentType : 'application/xml'
+		}, {
+			method : 'putBucketLifecycle', //Content MD-5 not Generated.
+			verb : 'PUT',
+			subResource : '?lifecycle',
+			contentType : 'application/xml'
+		}, {
+			method : 'putBucketPolicy',
+			verb : 'PUT',
+			subResource : '?policy',
+			contentType : 'application/json'
+		}, {
+			method : 'putBucketLogging',
+			verb : 'PUT',
+			subResource : '?logging',
+			contentType : 'application/xml'
+		}, {
+			method : 'putBucketNotification',
+			verb : 'PUT',
+			subResource : '?notification',
+			contentType : 'application/xml'
+		}, {
+			method : 'putBucketRequestPayment',
+			verb : 'PUT',
+			subResource : '?requestPayment',
+			contentType : 'application/xml'
+		}, {
+			method : 'putBucketVersioning',
+			verb : 'PUT',
+			subResource : '?versioning',
+			contentType : 'application/xml'
+		}, {
+			method : 'putBucketWebsite',
+			verb : 'PUT',
+			subResource : '?website',
+			contentType : 'application/xml'
+		}, {
+			method : 'deleteObject',
+			verb : 'DELETE'
+		}, {
+			method : 'deleteMultipleObject', //Content MD-5 not Generated.
+			verb : 'DELETE',
+			subResource : '?delete',
+			contentType : 'application/xml'
+		}, {
+			method : 'getObject' // Returning Blob Data.
+		}, {
+			method : 'getObjectAcl', // Xml Parsing Problem.
+			subResource : '?acl'
+		}, {
+			method : 'headObject',
+			verb : 'HEAD'
+		}, {
+			method : 'putObject', //Working on Ios only.Content Length Header Value Cannot be Override in Android.
+			verb : 'PUT',
+			uploadFile : true
+		}, {
+			method : 'putObjectAcl',
+			verb : 'PUT',
+			subResource : '?acl'
+		}, {
+			method : 'putObjectCopy',
+			verb : 'PUT'
+		}, {
+			method : 'initiateMultipartUpload',
+			verb : 'POST',
+			subResource : '?uploads'
+		}, {
+			method : 'abortMultipartUpload',
+			verb : 'DELETE',
+			subResource : '?'
+		}, {
+			method : 'listParts',
+			subResource : '?'
+		}]
 	}
 	
 	]

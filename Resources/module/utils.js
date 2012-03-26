@@ -44,21 +44,35 @@ exports.generateSignedURL = function(actionName, params, accessKeyId, secretKey,
  * @param - Its a javascript object ar contains all elements required for creating signed string
  * more on the signing string here --http://docs.amazonwebservices.com/AmazonS3/2006-03-01/dev/RESTAuthentication.html 
  */
-exports.generateS3Params=function(params){	
-	if(params.hasOwnProperty('bucketName')){
-		if(params.hasOwnProperty('objectName')){
-			params.stringToSign = params.verb+'\n'+params.contentMD5+'\n'+params.contentType+'\n'+params.curDate+'\n/'+params.bucketName+'/'+params.objectName+params.subresource;
-			params.url = params.url.concat(params.bucketName+'/'+params.objectName+params.subresource);			
-		}else{
-			params.stringToSign = params.verb+'\n'+params.contentMD5+'\n'+params.contentType+'\n'+params.curDate+'\n/'+params.bucketName+'/'+params.subresource;			
-			params.url = params.url.concat(params.bucketName+'/'+params.subresource);
-		}		
-	}else{
-		params.stringToSign = params.verb+'\n'+params.contentMD5+'\n'+params.contentType+'\n'+params.curDate+'\n/'+params.subresource;
-	}	
+exports.generateS3Params = function(params) {
+	if(params.hasOwnProperty('bucketName')) {
+		if(params.hasOwnProperty('objectName')) {
+			if(params.hasOwnProperty('copySource')) {
+				params.canonicalizedAmzHeaders = '\n' + 'x-amz-copy-source:' + params.copySource;
+			} else {
+				params.canonicalizedAmzHeaders = '';
+			}
+			if(params.hasOwnProperty('uploadId')) {
+				if(params.hasOwnProperty('partNumber')) {
+					params.stringToSign = params.verb + '\n' + params.contentMD5 + '\n' + params.contentType + '\n' + params.curDate + params.canonicalizedAmzHeaders + '\n/' + params.bucketName + '/' + params.objectName + params.subResource + 'partNumber=' + params.partNumber + '&' + 'uploadId=' + params.uploadId;
+					params.url = params.url.concat(params.bucketName + '/' + params.objectName + params.subResource + 'partNumber=' + params.partNumber + '&' + 'uploadId=' + params.uploadId);
+				} else {
+					params.stringToSign = params.verb + '\n' + params.contentMD5 + '\n' + params.contentType + '\n' + params.curDate + params.canonicalizedAmzHeaders + '\n/' + params.bucketName + '/' + params.objectName + params.subResource + 'uploadId=' + params.uploadId;
+					params.url = params.url.concat(params.bucketName + '/' + params.objectName + params.subResource + 'uploadId=' + params.uploadId);
+				}
+			} else {
+				params.stringToSign = params.verb + '\n' + params.contentMD5 + '\n' + params.contentType + '\n' + params.curDate + params.canonicalizedAmzHeaders + '\n/' + params.bucketName + '/' + params.objectName + params.subResource;
+				params.url = params.url.concat(params.bucketName + '/' + params.objectName + params.subResource);
+			}
+		} else {
+			params.stringToSign = params.verb + '\n' + params.contentMD5 + '\n' + params.contentType + '\n' + params.curDate + '\n/' + params.bucketName + '/' + params.subResource;
+			params.url = params.url.concat(params.bucketName + '/' + params.subResource);
+		}
+	} else {
+		params.stringToSign = params.verb + '\n' + params.contentMD5 + '\n' + params.contentType + '\n' + params.curDate + '\n/' + params.subResource;
+	}
 	return;
 }
-
 
 
 /* Standard validators supported by the AWS API */
