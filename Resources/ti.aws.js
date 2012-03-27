@@ -34,7 +34,11 @@
  * @param cbOnError - Callback to be invoked for Error
  */
 var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
-
+	if (this.preparer && !this.prepared) {
+		this.preparer();
+		this.prepared=true;
+	}
+	
 	if(this.validations)
 		_sessionOBJ.utility.validateParams(params, this.validations);	//TBD
 
@@ -71,6 +75,11 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
  * @param cbOnError - Callback to be invoked for Error
  */
 var s3Executor = function(params, cbOnData, cbOnError) {
+	if (this.preparer && !this.prepared) {
+		this.preparer();
+		this.prepared=true;
+	}
+	
 	var xhr = Ti.Network.createHTTPClient();
 	params.contentMD5 = '';
 	params.contentType = '';
@@ -165,10 +174,10 @@ _sessionOBJ.bedFrame.build(AWS, {
 			// Action is Usually same as Method Name, unless explicitly stated
 		}
 	},
-	namespaces : [{
-		namespace : 'SimpleDB',
+	children : [{
+		property : 'SimpleDB',
 		endpoint : "https://sdb.amazonaws.com",
-		methods : [
+		children : [
 		{
 			method : 'batchPutAttributes',
 			validations : {required : {params : ['DomainName']},
@@ -206,12 +215,13 @@ _sessionOBJ.bedFrame.build(AWS, {
 		]
 	},
 	{
-		namespace : 'S3',
+		property : 'S3',
 		endpoint : 'https://s3.amazonaws.com/',
 		executor : s3Executor,
 		uploadFile : false,
 		subResource : '',
-		methods : [{
+		children : [
+		{
 			method : 'getService'
 		}, {
 			method : 'deleteBucket',
