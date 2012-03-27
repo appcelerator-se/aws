@@ -78,6 +78,7 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 		this.preparer();
 		this.prepared = true;
 	}
+	
 	if(this.validations)
 		_sessionOBJ.utility.validateParams(params, this.validations);
 
@@ -98,13 +99,14 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	params.stringToSign = '';
 	params.verb = this.verb;
 
+	//get the file mime type and size from the file object passed by client
 	if(this.uploadFile) {
 		var fileContents = params.file.read();
 		params.contentType = fileContents.mimeType;
 		params.contentLength = params.file.size;
 	}
 
-	_sessionOBJ.utility.generateS3Params(params);
+	_sessionOBJ.utility.generateS3Params(params);//generates stringTosign string and passes it back as part of 'params' parameter
 	var signature = _sessionOBJ.sha.b64_hmac_sha1(_sessionOBJ.utf8.encode(_sessionOBJ.secretKey), _sessionOBJ.utf8.encode(params.stringToSign));
 	var awsAuthHeader = "AWS " + _sessionOBJ.accessKeyId + ":" + signature;
 
@@ -112,23 +114,27 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	xhr.setRequestHeader('Authorization', awsAuthHeader);
 	xhr.setRequestHeader('Date', curDate);
 	xhr.setRequestHeader('Host', 's3.amazonaws.com');
+	//set the content type if its required by the api.
 	if(this.contentType) {
 		xhr.setRequestHeader('Content-Type', params.contentType);
 	}
+	// For api's that upload files we need to pass content type and content length
 	if(this.uploadFile) {
 		xhr.setRequestHeader('Content-Type', params.contentType);
 		xhr.setRequestHeader('Content-Length', params.contentLength);
 	}
+	
+	//used for apis like Put object copy and upload part-copy
 	if(params.hasOwnProperty('copySource')) {
-		xhr.setRequestHeader('x-amz-copy-source', params.copySource);
-		// will be passed from client
+		xhr.setRequestHeader('x-amz-copy-source', params.copySource);// will be passed by client
 	}
 	xhr.onload = function(response) {
+		//For Get and POST xml is returned as response hence converting it to javascript object and passing back to user
 		if(this.connectionType == "GET" || this.connectionType == "POST") {
 			if(cbOnData) {
 				cbOnData(_sessionOBJ.x2j.parser(this.responseText));
 			}
-		} else {
+		} else {// Api's other then GET and POST does not return any xml as part of response object so passing the complete obect back to client
 			if(cbOnData) {
 				cbOnData(this.responseText);
 			}
