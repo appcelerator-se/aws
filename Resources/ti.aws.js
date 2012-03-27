@@ -220,147 +220,329 @@ _sessionOBJ.bedFrame.build(AWS, {
 		executor : s3Executor,
 		uploadFile : false,
 		subResource : '',
-		children : [
-		{
+		children : [{
 			method : 'getService'
 		}, {
 			method : 'deleteBucket',
-			verb : 'DELETE'
+			verb : 'DELETE',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'deleteBucketLifecycle',
 			verb : 'DELETE',
-			subResource : '?lifecycle'
+			subResource : '?lifecycle',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'deleteBucketPolicy',
 			verb : 'DELETE',
-			subResource : '?policy'
+			subResource : '?policy',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'deleteBucketWebsite',
 			verb : 'DELETE',
-			subResource : '?website'
+			subResource : '?website',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'getBucket',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'getBucketAcl', // Xml Parsing Problem.
-			subResource : '?acl'
+			subResource : '?acl',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'getBucketLifecycle',
-			subResource : '?lifecycle'
+			subResource : '?lifecycle',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'getBucketPolicy',
-			subResource : '?policy'
+			subResource : '?policy',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'getBucketLocation',
-			subResource : '?location'
+			subResource : '?location',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'getBucketLogging',
-			subResource : '?logging'
+			subResource : '?logging',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'getBucketNotification',
-			subResource : '?notification'
+			subResource : '?notification',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'getBucketObjectVersions',
-			subResource : '?versions'
+			subResource : '?versions',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'getBucketRequestPayment',
-			subResource : '?requestPayment'
+			subResource : '?requestPayment',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'getBucketVersioning',
-			subResource : '?versioning'
+			subResource : '?versioning',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'getBucketWebsite',
-			subResource : '?website'
+			subResource : '?website',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'headBucket',
-			verb : 'HEAD'
+			verb : 'HEAD',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'listMultipartUploads',
-			subResource : '?uploads'
+			subResource : '?uploads',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'putBucket',
-			verb : 'PUT'
+			verb : 'PUT',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
 		}, {
 			method : 'putBucketAcl',
 			verb : 'PUT',
 			subResource : '?acl',
-			contentType : 'application/xml'
+			contentType : 'application/xml',
+			validations : {
+				required : {
+					params : ['bucketName', 'xmlTemplate']
+				}
+			}
 		}, {
-			method : 'putBucketLifecycle', //Content MD-5 not Generated.
+			method : 'putBucketLifecycle', //Function not working yet, facing issue in generating ContentMD5 hash
 			verb : 'PUT',
 			subResource : '?lifecycle',
-			contentType : 'application/xml'
+			contentType : 'application/xml',
+			validations : {
+				required : {
+					params : ['bucketName', 'xmlTemplate']
+				}
+			}
 		}, {
 			method : 'putBucketPolicy',
 			verb : 'PUT',
 			subResource : '?policy',
-			contentType : 'application/json'
+			contentType : 'application/json',
+			validations : {
+				required : {
+					params : ['bucketName', 'xmlTemplate']
+				}
+			}
 		}, {
 			method : 'putBucketLogging',
 			verb : 'PUT',
 			subResource : '?logging',
-			contentType : 'application/xml'
+			contentType : 'application/xml',
+			validations : {
+				required : {
+					params : ['bucketName', 'xmlTemplate']
+				}
+			}
 		}, {
 			method : 'putBucketNotification',
 			verb : 'PUT',
 			subResource : '?notification',
-			contentType : 'application/xml'
+			contentType : 'application/xml',
+			validations : {
+				required : {
+					params : ['bucketName', 'xmlTemplate']
+				}
+			}
 		}, {
 			method : 'putBucketRequestPayment',
 			verb : 'PUT',
 			subResource : '?requestPayment',
-			contentType : 'application/xml'
+			contentType : 'application/xml',
+			validations : {
+				required : {
+					params : ['bucketName', 'xmlTemplate']
+				}
+			}
 		}, {
 			method : 'putBucketVersioning',
 			verb : 'PUT',
 			subResource : '?versioning',
-			contentType : 'application/xml'
+			contentType : 'application/xml',
+			validations : {
+				required : {
+					params : ['bucketName', 'xmlTemplate']
+				}
+			}
 		}, {
 			method : 'putBucketWebsite',
 			verb : 'PUT',
 			subResource : '?website',
-			contentType : 'application/xml'
+			contentType : 'application/xml',
+			validations : {
+				required : {
+					params : ['bucketName', 'xmlTemplate']
+				}
+			}
 		}, {
 			method : 'deleteObject',
-			verb : 'DELETE'
+			verb : 'DELETE',
+			validations : {
+				required : {
+					params : ['bucketName', 'objectName']
+				}
+			}
 		}, {
-			method : 'deleteMultipleObject', //Content MD-5 not Generated.
+			method : 'deleteMultipleObject', //Function not working yet, facing issue in generating ContentMD5 hash
 			verb : 'DELETE',
 			subResource : '?delete',
-			contentType : 'application/xml'
+			contentType : 'application/xml',
+			validations : {
+				required : {
+					params : ['bucketName', 'xmlTemplate']
+				}
+			}
 		}, {
-			method : 'getObject' // Returning Blob Data.
+			method : 'getObject', // Returning Blob Data.
+			validations : {
+				required : {
+					params : ['bucketName', 'objectName']
+				}
+			}
 		}, {
 			method : 'getObjectAcl', // Xml Parsing Problem.
-			subResource : '?acl'
+			subResource : '?acl',
+			validations : {
+				required : {
+					params : ['bucketName', 'objectName']
+				}
+			}
 		}, {
 			method : 'headObject',
-			verb : 'HEAD'
+			verb : 'HEAD',
+			validations : {
+				required : {
+					params : ['bucketName', 'objectName']
+				}
+			}
 		}, {
 			method : 'putObject', //Working on Ios only.Content Length Header Value Cannot be Override in Android.
 			verb : 'PUT',
-			uploadFile : true
+			uploadFile : true,
+			validations : {
+				required : {
+					params : ['bucketName', 'objectName']
+				}
+			}
 		}, {
 			method : 'putObjectAcl',
 			verb : 'PUT',
-			subResource : '?acl'
+			subResource : '?acl',
+			validations : {
+				required : {
+					params : ['bucketName', 'objectName', 'xmlTemplate']
+				}
+			}
 		}, {
 			method : 'putObjectCopy',
-			verb : 'PUT'
+			verb : 'PUT',
+			validations : {
+				required : {
+					params : ['bucketName', 'objectName', 'copySource']
+				}
+			}
 		}, {
 			method : 'initiateMultipartUpload',
 			verb : 'POST',
-			subResource : '?uploads'
+			subResource : '?uploads',
+			validations : {
+				required : {
+					params : ['bucketName', 'objectName']
+				}
+			}
 		}, {
 			method : 'abortMultipartUpload',
 			verb : 'DELETE',
-			subResource : '?'
+			subResource : '?',
+			validations : {
+				required : {
+					params : ['bucketName', 'objectName', 'uploadId', 'partNumber']
+				}
+			}
 		}, {
 			method : 'listParts',
-			subResource : '?'
+			subResource : '?',
+			validations : {
+				required : {
+					params : ['bucketName', 'objectName', 'uploadId', 'partNumber']
+				}
+			}
 		}]
-	}
-	
-	]
+	}]
 });
 
 module.exports = AWS
