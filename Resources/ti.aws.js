@@ -15,16 +15,15 @@
 */
 //Session variables used across all methods
 
-	var _sessionOBJ = {
-		utility : require('/module/utils'), //Common to all namespaces
-		bedFrame : require('/module/bedframe'), //Common to all namespaces
-		x2j : require('/module/xml2json'), //Common to all namespaces
-		utf8 : require('/module/utf8').load(), //Used for s3
-		sha: require('/module/hmacsha1').load(),
-		accessKeyId : null, //To be initalized via the authorize method
-		secretKey : null	//To be initalized via the authorize method
-	};
-
+var _sessionOBJ = {
+	utility : require('/module/utils'), //Common to all namespaces
+	bedFrame : require('/module/bedframe'), //Common to all namespaces
+	x2j : require('/module/xml2json'), //Common to all namespaces
+	utf8 : require('/module/utf8').load(), //Used for s3
+	sha : require('/module/hmacsha1').load(),
+	accessKeyId : null, //To be initalized via the authorize method
+	secretKey : null	//To be initalized via the authorize method
+};
 
 /**
  * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
@@ -34,13 +33,14 @@
  * @param cbOnError - Callback to be invoked for Error
  */
 var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
-	if (this.preparer && !this.prepared) {
+	if(this.preparer && !this.prepared) {
 		this.preparer();
-		this.prepared=true;
+		this.prepared = true;
 	}
-	
+
 	if(this.validations)
-		_sessionOBJ.utility.validateParams(params, this.validations);	//TBD
+		_sessionOBJ.utility.validateParams(params, this.validations);
+	//TBD
 
 	sUrl = _sessionOBJ.utility.generateSignedURL(this.action, params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint, this.version)
 	httpClient = Ti.Network.createHTTPClient({
@@ -55,9 +55,9 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 				cbOnData(jsResp);
 		},
 		onerror : function(e) {
-			if(cbOnError){
-				var error=_sessionOBJ.x2j.parser(this.responseText);
-				error.summary=this.responseText;
+			if(cbOnError) {
+				var error = _sessionOBJ.x2j.parser(this.responseText);
+				error.summary = this.responseText;
 				cbOnError(error);
 			}
 		},
@@ -66,7 +66,6 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 	httpClient.open(this.verb, sUrl);
 	httpClient.send();
 }
-
 /**
  * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
  * returns the response returned by the Service, and raises an Error callback in case of a failure.
@@ -75,11 +74,13 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
  * @param cbOnError - Callback to be invoked for Error
  */
 var s3Executor = function(params, cbOnData, cbOnError) {
-	if (this.preparer && !this.prepared) {
+	if(this.preparer && !this.prepared) {
 		this.preparer();
-		this.prepared=true;
+		this.prepared = true;
 	}
-	
+	if(this.validations)
+		_sessionOBJ.utility.validateParams(params, this.validations);
+
 	var xhr = Ti.Network.createHTTPClient();
 	params.contentMD5 = '';
 	params.contentType = '';
@@ -89,10 +90,6 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 
 	if(!params.hasOwnProperty('subResource')) {
 		params.subResource = this.subResource;
-	}
-	if(params.hasOwnProperty('copySource')) {
-		xhr.setRequestHeader('x-amz-copy-source', params.copySource);
-		// will be passed from client
 	}
 	var curDate = (new Date()).toUTCString();
 	params.verb = this.verb;
@@ -122,6 +119,10 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 		xhr.setRequestHeader('Content-Type', params.contentType);
 		xhr.setRequestHeader('Content-Length', params.contentLength);
 	}
+	if(params.hasOwnProperty('copySource')) {
+		xhr.setRequestHeader('x-amz-copy-source', params.copySource);
+		// will be passed from client
+	}
 	xhr.onload = function(response) {
 		if(this.connectionType == "GET" || this.connectionType == "POST") {
 			if(cbOnData) {
@@ -148,9 +149,7 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	} else {
 		xhr.send();
 	}
-
 }
-
 var AWS = {};
 /**
  * Stores the security credentials in the Module Session scope
@@ -177,44 +176,86 @@ _sessionOBJ.bedFrame.build(AWS, {
 	children : [{
 		property : 'SimpleDB',
 		endpoint : "https://sdb.amazonaws.com",
-		children : [
-		{
+		children : [{
 			method : 'batchPutAttributes',
-			validations : {required : {params : ['DomainName']},
-				patternExistsValidator : {params : ['Item.*.Attribute.*.Name','Item.*.ItemName' ]}}
+			validations : {
+				required : {
+					params : ['DomainName']
+				},
+				patternExistsValidator : {
+					params : ['Item.*.Attribute.*.Name', 'Item.*.ItemName']
+				}
+			}
 		}, {
 			method : 'putAttributes',
-			validations : {required : {params : ['DomainName', 'ItemName']},
-				patternExistsValidator : {params : ['Attribute.*.Name']}}
+			validations : {
+				required : {
+					params : ['DomainName', 'ItemName']
+				},
+				patternExistsValidator : {
+					params : ['Attribute.*.Name']
+				}
+			}
 		}, {
 			method : 'batchDeleteAttributes',
-			validations : {required : {params : ['DomainName']},
-				patternExistsValidator : {params : ['Item.*.ItemName']}}
+			validations : {
+				required : {
+					params : ['DomainName']
+				},
+				patternExistsValidator : {
+					params : ['Item.*.ItemName']
+				}
+			}
 		}, {
-			method : 'listDomains',	arrayOverride : ['/ListDomainsResponse/ListDomainsResult/DomainName']
+			method : 'listDomains',
+			arrayOverride : ['/ListDomainsResponse/ListDomainsResult/DomainName']
 		}, {
 			method : 'createDomain',
-			validations : {required : {params : ['DomainName']}}
+			validations : {
+				required : {
+					params : ['DomainName']
+				}
+			}
 		}, {
 			method : 'deleteDomain',
-			validations : {required : {params : ['DomainName']}}
+			validations : {
+				required : {
+					params : ['DomainName']
+				}
+			}
 		}, {
 			method : 'select',
-			validations : {required : {params : ['SelectExpression']}}
+			validations : {
+				required : {
+					params : ['SelectExpression']
+				}
+			}
 		}, {
 			method : 'domainMetadata',
-			validations : {required : {params : ['DomainName']}}
+			validations : {
+				required : {
+					params : ['DomainName']
+				}
+			}
 		}, {
 			method : 'getAttributes',
-			validations : {required : {params : ['DomainName', 'ItemName']},
-			patternExistsValidator : {params : ['Attribute.*.Name']}}
+			validations : {
+				required : {
+					params : ['DomainName', 'ItemName']
+				},
+				patternExistsValidator : {
+					params : ['Attribute.*.Name']
+				}
+			}
 		}, {
 			method : 'deleteAttributes',
-			validations : {required : {params : ['DomainName', 'ItemName']}}
-		}
-		]
-	},
-	{
+			validations : {
+				required : {
+					params : ['DomainName', 'ItemName']
+				}
+			}
+		}]
+	}, {
 		property : 'S3',
 		endpoint : 'https://s3.amazonaws.com/',
 		executor : s3Executor,
