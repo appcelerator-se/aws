@@ -41,12 +41,15 @@ exports.generateSignedURL = function(actionName, params, accessKeyId, secretKey,
 /**
  * Routine that generates the signed string based upn the params passed
  * 
- * @param - Its a javascript object ar contains all elements required for creating signed string
+ * @param - Its a javascript object that contains all elements required for creating signed string
  * more on the signing string here --http://docs.amazonwebservices.com/AmazonS3/2006-03-01/dev/RESTAuthentication.html 
  */
 exports.generateS3Params = function(params) {
+	//check if the bucket name is passed by the user. If its passed then include it as part of stringtosign data
 	if(params.hasOwnProperty('bucketName')) {
+		//check if objectName is passed by user if yes then include it as part of stringtosign data
 		if(params.hasOwnProperty('objectName')) {
+			//copySource is used by 'Put object copy and Upload part ' api's, which needs to be part of stringtosign  
 			if(params.hasOwnProperty('copySource')) {
 				params.canonicalizedAmzHeaders = '\n' + 'x-amz-copy-source:' + params.copySource;
 			} else {
