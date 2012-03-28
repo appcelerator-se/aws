@@ -78,7 +78,7 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 		this.preparer();
 		this.prepared = true;
 	}
-	
+
 	if(this.validations)
 		_sessionOBJ.utility.validateParams(params, this.validations);
 
@@ -106,7 +106,8 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 		params.contentLength = params.file.size;
 	}
 
-	_sessionOBJ.utility.generateS3Params(params);//generates stringTosign string and passes it back as part of 'params' parameter
+	_sessionOBJ.utility.generateS3Params(params);
+	//generates stringTosign string and passes it back as part of 'params' parameter
 	var signature = _sessionOBJ.sha.b64_hmac_sha1(_sessionOBJ.utf8.encode(_sessionOBJ.secretKey), _sessionOBJ.utf8.encode(params.stringToSign));
 	var awsAuthHeader = "AWS " + _sessionOBJ.accessKeyId + ":" + signature;
 
@@ -123,10 +124,11 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 		xhr.setRequestHeader('Content-Type', params.contentType);
 		xhr.setRequestHeader('Content-Length', params.contentLength);
 	}
-	
+
 	//used for apis like Put object copy and upload part-copy
 	if(params.hasOwnProperty('copySource')) {
-		xhr.setRequestHeader('x-amz-copy-source', params.copySource);// will be passed by client
+		xhr.setRequestHeader('x-amz-copy-source', params.copySource);
+		// will be passed by client
 	}
 	xhr.onload = function(response) {
 		//For Get and POST xml is returned as response hence converting it to javascript object and passing back to user
@@ -155,6 +157,48 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	} else {
 		xhr.send();
 	}
+}
+/**
+ * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
+ * returns the response returned by the Service, and raises an Error callback in case of a failure.
+ * @param params - Parameters to be sent
+ * @param cbOnData - CallBack to be invoked for Response
+ * @param cbOnError - Callback to be invoked for Error
+ */
+var sesExecutor = function(params, cbOnData, cbOnError) {
+	if(this.preparer && !this.prepared) {
+		this.preparer();
+		this.prepared = true;
+	}
+	params.paramString = '';
+	_sessionOBJ.utility.generateSESParams(params);
+	var curDate = (new Date()).toUTCString();
+	var requestBody = _sessionOBJ.utf8.encode('AWSAccessKeyId=' + _sessionOBJ.accessKeyId + '&Action=' + this.action + params.paramString + '&Timestamp=' + curDate);
+
+	var authorization = 'AWS3-HTTPS AWSAccessKeyId=' + _sessionOBJ.accessKeyId + ',Algorithm='+ this.algorithm + ',Signature=' + _sessionOBJ.sha.b64_hmac_sha1(_sessionOBJ.secretKey, curDate);
+	var xhr = Titanium.Network.createHTTPClient();
+	xhr.onload = function(response) {
+			Ti.API.info(this.responseText);	//Print the XML Retrieved from the Service
+			jsResp = _sessionOBJ.x2j.parser(this.responseText);	//Build a JavaScript Object from the XML
+
+			//Check if this is a proper response, or an Error Response, and call the necessary callback Method
+			if(cbOnData)
+				cbOnData(jsResp);
+	};
+
+	xhr.onerror = function(e) {
+		if(cbOnError) {
+			var error = _sessionOBJ.x2j.parser(this.responseText);
+			error.summary = this.responseText;
+			cbOnError(this.responseText);
+		}
+	}
+	xhr.open(this.verb, this.endpoint);
+	xhr.setRequestHeader('Content-Type', this.contentType);
+	xhr.setRequestHeader('Host', this.host);
+	xhr.setRequestHeader('Date', curDate);
+	xhr.setRequestHeader('X-Amzn-Authorization', authorization);
+	xhr.send(requestBody);
 }
 var AWS = {};
 /**
@@ -588,6 +632,29 @@ _sessionOBJ.bedFrame.build(AWS, {
 					params : ['bucketName', 'objectName', 'uploadId', 'partNumber']
 				}
 			}
+		}]
+	}, {
+		property : 'SES',
+		endpoint : "https://email.us-east-1.amazonaws.com",
+		verb : 'POST',
+		host: 'email.us-east-1.amazonaws.com',
+		contentType : 'application/x-www-form-urlencoded',
+		algorithm : 'HmacSHA1',
+		executor : sesExecutor,
+		children : [{
+			method : 'deleteVerifiedEmailAddress',
+		}, {
+			method : 'getSendQuota', 
+		}, {
+			method : 'getSendStatistics',
+		}, {
+			method : 'listVerifiedEmailAddresses',
+		}, {
+			method : 'sendEmail',
+		}, {
+			method : 'sendRawEmail',
+		}, {
+			method : 'verifyEmailAddress',
 		}]
 	}]
 });

@@ -85,7 +85,8 @@ function error(e) {
 // Include the window hierarchy.
 Ti.include(
     'windows/simpledb/table.js',
-    'windows/s3/table.js'
+    'windows/s3/table.js',
+    'windows/ses/table.js'
 );
 
 var AccessCredentialsWindow = require('/windows/common/AccessCredentialsWindow');
@@ -115,7 +116,8 @@ function finishLaunching(){
     	backgroundColor: '#fff',
     	data: createRows([
         	'SimpleDb',
-        	'S3'
+        	'S3',
+        	'SES'
     	])
 	});
 	table.addEventListener('click', handleOpenWindow);
