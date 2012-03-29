@@ -12,6 +12,11 @@ function AWSSigner(accessKeyId, secretKey) {
 AWSSigner.prototype.sign = function(params, time, requestInfo) {
 	var timeUtc = time.toISO8601();
 	params = this.addFields(params, timeUtc);
+	//deleting the accountID and queueName as they are only used for SQS and are not required after we are done making the url
+	if(params.hasOwnProperty('AWSAccountId') && params.hasOwnProperty('QueueName')) {
+		delete params['AWSAccountId'];
+		delete params['QueueName'];
+	}
 	params.Signature = this.generateSignature(this.canonicalize(params, requestInfo));
 	return params;
 }

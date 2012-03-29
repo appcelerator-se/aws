@@ -656,6 +656,82 @@ _sessionOBJ.bedFrame.build(AWS, {
 		}, {
 			method : 'verifyEmailAddress',
 		}]
+	},
+	{
+		property : 'SQS',
+		endpoint : "http://sqs.us-east-1.amazonaws.com",
+		version:'2009-02-01',		
+		children : [
+		{
+			method : 'createQueue',
+			version:'2011-10-01',
+			validations : {required : {params : ['QueueName']}}
+				
+		}, {
+			method : 'listQueues',
+			version:'2011-10-01',
+	        arrayOverride : ['/ListQueuesResponse/ListQueuesResult/QueueUrl']
+		},
+		{
+			method : 'getQueueUrl',
+			version:'2011-10-01',
+	        validations : {required : {params : ['QueueName']}}
+		},
+		{
+			method : 'addPermission',
+		},
+		{
+			method : 'setQueueAttributes',
+			validations : {required : {params : ['AWSAccountId','QueueName','Attribute.Name','Attribute.Value']}}
+		},
+			{
+			method : 'getQueueAttributes',
+			validations : {required : {params : ['AWSAccountId','QueueName']}},
+			patternExistsValidator : {params : ['AttributeName.*']}
+		},
+		{
+			method : 'sendMessage',
+			validations : {required : {params : ['AWSAccountId','QueueName','MessageBody']}}
+		},
+		{
+			method : 'sendMessageBatch',
+			version:'2011-10-01',
+			validations : {required : {params : ['AWSAccountId','QueueName']}},
+			patternExistsValidator : {params : ['SendMessageBatchRequestEntry.*.Id','SendMessageBatchRequestEntry.*.MessageBody']}
+		},
+		{
+			method : 'receiveMessage',
+			validations : {required : {params : ['AWSAccountId','QueueName']}},
+		},
+		{
+			method : 'deleteMessage',
+			validations : {required : {params : ['ReceiptHandle','AWSAccountId','QueueName']}}
+		},
+		{
+			method : 'deleteMessageBatch',
+			version:'2011-10-01',
+			validations : {required : {params : ['AWSAccountId','QueueName']}},
+			patternExistsValidator : {params : ['DeleteMessageBatchRequestEntry.*.Id','DeleteMessageBatchRequestEntry.*.ReceiptHandle']}
+		},
+		{
+			method : 'deleteQueue',
+			validations : {required : {params : ['AWSAccountId','QueueName']}},
+		},
+		{
+			method : 'changeMessageVisibility',
+			validations : {required : {params : ['AWSAccountId','QueueName','ReceiptHandle','VisibilityTimeout']}}
+		},
+		{
+			method : 'changeMessageVisibilityBatch',
+			version:'2011-10-01',
+			validations : {required : {params : ['AWSAccountId','QueueName']}},
+			patternExistsValidator : {params : ['ChangeMessageVisibilityBatchRequestEntry.*.Id','ChangeMessageVisibilityBatchRequestEntry.*.ReceiptHandle','ChangeMessageVisibilityBatchRequestEntry.*.VisibilityTimeout']}
+		},
+		{
+			method : 'removePermission',
+			validations : {required : {params : ['AWSAccountId','QueueName','Lable']}}
+		},								 
+		]
 	}]
 });
 

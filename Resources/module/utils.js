@@ -40,14 +40,22 @@ exports.generateSignedURL = function(actionName, params, accessKeyId, secretKey,
 	var host = endpoint.replace(/.*:\/\//, "");
 	var payload = null;
 	var displayUri = endpoint;
+	var uriPath = "/";
 
 	params.Action = actionName;
 	params.Version = version;
 	var signer = new AWSV2Signer(accessKeyId, secretKey);
+	
+	//This is to append AWSAccountId along with QueueName in Endpoint for SQS	
+	if(params.hasOwnProperty('AWSAccountId') && params.hasOwnProperty('QueueName')) {
+		uriPath += params.AWSAccountId + "/" + params.QueueName+"/";
+		displayUri += "/" + params.AWSAccountId + "/" + params.QueueName+"/";
+	}
+	
 	params = signer.sign(params, new Date(), {
 		"verb" : "GET",
 		"host" : host,
-		"uriPath" : "/"
+		"uriPath" : uriPath
 	});
 
 	var encodedParams = [];
