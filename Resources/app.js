@@ -87,7 +87,8 @@ Ti.include(
     'windows/simpledb/table.js',
     'windows/s3/table.js',
     'windows/ses/table.js',
-    'windows/sqs/table.js'
+    'windows/sqs/table.js',
+    'windows/sns/table.js'
 );
 
 var AccessCredentialsWindow = require('/windows/common/AccessCredentialsWindow');
@@ -119,7 +120,8 @@ function finishLaunching(){
         	'SimpleDb',
         	'S3',
         	'SES',
-        	'SQS'
+        	'SQS',
+        	'SNS'
     	])
 	});
 	table.addEventListener('click', handleOpenWindow);

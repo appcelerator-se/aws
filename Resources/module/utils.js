@@ -11,12 +11,17 @@
 
 Ti.include("/module/awssigner.js");
 
-exports.generateSessionTokenPayload = function(actionName, params, accessKeyId, secretKey, endpoint, version) {
+/**
+ * Routine that contructs querystring as payload without an URl with it. This payload will be passed to HttpClient as parameter in send 
+ * @param - params- Its a javascript object that contains all elements required to create payload
+ * @param - accessKeyId - Used to sign the payload
+ * @param - secretKey - Used to sign the payload
+ * @param - endpoint - contains the url which need to be hit, is used to extract the host part from it
+ */
+exports.generatePayload = function( params, accessKeyId, secretKey, endpoint) {
 	var host = endpoint.replace(/.*:\/\//, "");
 	var payload = null;
-	//host = 'sts.amazonaws.com';
-	params.Action = actionName;
-	params.Version = version;
+	
 	var signer = new AWSV2Signer(accessKeyId, secretKey);
 	params = signer.sign(params, new Date(), {
 		"verb" : "POST",

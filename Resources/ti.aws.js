@@ -66,6 +66,45 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 	httpClient.open(this.verb, sUrl);
 	httpClient.send();
 }
+
+/**
+ * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
+ * returns the response returned by the Service, and raises an Error callback in case of a failure.
+ * @param params - Parameters to be sent
+ * @param cbOnData - CallBack to be invoked for Response
+ * @param cbOnError - Callback to be invoked for Error
+ */
+var snsExecutor = function(params, cbOnData, cbOnError) {
+	if(this.preparer && !this.prepared) {
+		this.preparer();
+		this.prepared = true;
+	}
+	if(this.validations)
+		_sessionOBJ.utility.validateParams(params, this.validations);
+		
+	var xhr = Ti.Network.createHTTPClient();
+	//generates complete querystring without url
+	params.Action = this.action;
+	params.Version = this.version;
+	payload = _sessionOBJ.utility.generatePayload(params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint)
+	xhr.open(this.verb, this.endpoint);
+	xhr.setRequestHeader('Host', 'sns.us-east-1.amazonaws.com');
+	xhr.onload = function(response) {
+		jsResp = _sessionOBJ.x2j.parser(this.responseText);
+			cbOnData(jsResp);
+	};
+	xhr.onerror = function(e) {
+		Ti.API.info('~~~~~~~~~~~~~~~~~~   ' + this.responseText);
+		if(cbOnError) {
+			var error = _sessionOBJ.x2j.parser(this.responseText);
+			error.summary = this.responseText;
+			cbOnError(error);
+		}
+	}
+	xhr.send(payload);
+}
+
+
 /**
  * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
  * returns the response returned by the Service, and raises an Error callback in case of a failure.
@@ -732,6 +771,113 @@ _sessionOBJ.bedFrame.build(AWS, {
 			validations : {required : {params : ['AWSAccountId','QueueName','Lable']}}
 		},								 
 		]
+	},
+		{
+		property : 'SNS',
+		endpoint : "http://sns.us-east-1.amazonaws.com",
+		verb : 'POST',						
+		executor : snsExecutor,
+		version : '2010-03-31',
+		children : [{
+			method : 'addPermission',
+			validations : {
+				required : {
+					params : ['Label', 'TopicArn']
+				},
+				patternExistsValidator : {
+					params : ['AWSAccountId.member.*', 'ActionName.member.*']
+				}
+			}
+		}, {
+			method : 'confirmSubscription',
+			validations : {
+				required : {
+					params : ['Token', 'TopicArn']
+				}
+			
+			} 
+		}, {
+			method : 'createTopic',
+			validations : {
+				required : {
+					params : ['Name']
+				}
+            } 
+		}, {
+			method : 'deleteTopic',
+			validations : {
+				required : {
+					params : ['TopicArn']
+				}
+            } 
+		}, {
+			method : 'getSubscriptionAttributes',
+			validations : {
+				required : {
+					params : ['SubscriptionArn']
+				}
+            } 
+		}, {
+			method : 'getTopicAttributes',
+			validations : {
+				required : {
+					params : ['TopicArn']
+				}
+            } 
+		}, {
+			method : 'listSubscriptions',
+		}, {
+			method : 'listSubscriptionsByTopic',
+			validations : {
+				required : {
+					params : ['TopicArn']
+				}
+            } 
+		}, {
+			method : 'listTopics',
+		}, {
+			method : 'publish',
+			validations : {
+				required : {
+					params : ['TopicArn','Message']
+				}
+            } 
+		}, {
+			method : 'removePermission',
+			validations : {
+				required : {
+					params : ['Label','TopicArn']
+				}
+            }
+		}, {
+			method : 'setSubscriptionAttributes',
+			validations : {
+				required : {
+					params : ['AttributeName','AttributeValue','SubscriptionArn']
+				}
+            }
+		}, {
+			method : 'setTopicAttributes',
+			validations : {
+				required : {
+					params : ['AttributeName','AttributeValue','TopicArn']
+				}
+            }
+		}, {
+			method : 'subscribe',
+			validations : {
+				required : {
+					params : ['TopicArn','Endpoint','Protocol']
+				}
+            }
+		}, {
+			method : 'unsubscribe',
+			validations : {
+				required : {
+					params : ['SubscriptionArn']
+				}
+            }
+		}]
 	}]
 });
 
