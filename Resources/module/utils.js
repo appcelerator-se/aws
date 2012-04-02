@@ -12,16 +12,16 @@
 Ti.include("/module/awssigner.js");
 
 /**
- * Routine that contructs querystring as payload without an URl with it. This payload will be passed to HttpClient as parameter in send 
+ * Routine that contructs querystring as payload without an URl with it. This payload will be passed to HttpClient as parameter in send
  * @param - params- Its a javascript object that contains all elements required to create payload
  * @param - accessKeyId - Used to sign the payload
  * @param - secretKey - Used to sign the payload
  * @param - endpoint - contains the url which need to be hit, is used to extract the host part from it
  */
-exports.generatePayload = function( params, accessKeyId, secretKey, endpoint) {
+exports.generatePayload = function(params, accessKeyId, secretKey, endpoint) {
 	var host = endpoint.replace(/.*:\/\//, "");
 	var payload = null;
-	
+
 	var signer = new AWSV2Signer(accessKeyId, secretKey);
 	params = signer.sign(params, new Date(), {
 		"verb" : "POST",
@@ -50,13 +50,12 @@ exports.generateSignedURL = function(actionName, params, accessKeyId, secretKey,
 	params.Action = actionName;
 	params.Version = version;
 	var signer = new AWSV2Signer(accessKeyId, secretKey);
-	
-	//This is to append AWSAccountId along with QueueName in Endpoint for SQS	
+
+	//This is to append AWSAccountId along with QueueName in Endpoint for SQS
 	if(params.hasOwnProperty('AWSAccountId') && params.hasOwnProperty('QueueName')) {
-		uriPath += params.AWSAccountId + "/" + params.QueueName+"/";
-		displayUri += "/" + params.AWSAccountId + "/" + params.QueueName+"/";
+		uriPath += params.AWSAccountId + "/" + params.QueueName + "/";
+		displayUri += "/" + params.AWSAccountId + "/" + params.QueueName + "/";
 	}
-	
 	params = signer.sign(params, new Date(), {
 		"verb" : "GET",
 		"host" : host,
@@ -84,7 +83,7 @@ exports.generateSESParams = function(params) {
 	if(params.hasOwnProperty('emailAddress')) {
 		params.paramString += '&EmailAddress=' + params.emailAddress;
 	} else if(params.hasOwnProperty('destination')) {
-		params.paramString += generateDestination(params.destination);
+		params.paramString += generateDestination(params.destination, params.isRawMessage);
 		if(params.hasOwnProperty('message')) {
 			if(params.message.hasOwnProperty('body')) {
 				params.paramString += generateMessageBody(params.message.body);
@@ -96,27 +95,39 @@ exports.generateSESParams = function(params) {
 		if(params.hasOwnProperty('replyTo')) {
 			params.paramString += generateReplyTo(params.replyTo);
 		}
+		if(params.hasOwnProperty('returnPath')) {
+			params.paramString += '&ReturnPath=' + params.returnPath;
+		}
 		if(params.hasOwnProperty('source')) {
 			params.paramString += '&Source=' + params.source;
 		}
 	}
+	if(params.hasOwnProperty('rawMessage')) {
+		params.paramString += '&RawMessage.Data=' + params.rawMessage;
+	}
+	return;
 }
-
 /**
  *  Loops through all the email address given by the user and adds it to destination
  *  For Ex "To" can have more then 1 email address this function loops on that value.
  * * For more info pls refer to : http://docs.amazonwebservices.com/ses/latest/APIReference/API_SendEmail.html
  */
-    
-function generateDestination(destination){
-	var destinationString='';
-	for(key in destination){
+
+function generateDestination(destination, isRawMessage) {
+	var destinationString = '';
+	if(isRawMessage) {
+		for( i = 1; i <= destination.length; i++) {
+			destinationString += '&Destinations.member.' + i + '=' + destination[i - 1];
+		}
+	} else {
+		for(key in destination) {
 		//The value for "key" could be "to", "cc", "bcc", so we need to make the first letter as caps
 		//we can also get rid of the below line of code but in that case user will have to pass "To" instead "to", which is not a 
 		//good coding practice while making javascript objects 
-		var type = key.substr(0, 1).toUpperCase()+key.substr(1); 
-		for(i=1;i<=destination[key].length;i++){
-			destinationString +='&Destination.'+ type +'Addresses.member.'+i+'='+destination[key][i-1];
+			var type = key.substr(0, 1).toUpperCase() + key.substr(1);
+			for( i = 1; i <= destination[key].length; i++) {
+				destinationString += '&Destination.' + type + 'Addresses.member.' + i + '=' + destination[key][i - 1];
+			}
 		}
 	}
 	return destinationString;
@@ -127,10 +138,10 @@ function generateDestination(destination){
  * For more info pls refer to : http://docs.amazonwebservices.com/ses/latest/APIReference/API_SendEmail.html
  */
 
-function generateReplyTo(replyTo){
-	var replyToString='';
-	for(i=1;i<=replyTo.length;i++){		
-		replyToString +='&ReplyToAddresses.member.'+i+'='+replyTo[i-1];		
+function generateReplyTo(replyTo) {
+	var replyToString = '';
+	for( i = 1; i <= replyTo.length; i++) {
+		replyToString += '&ReplyToAddresses.member.' + i + '=' + replyTo[i - 1];
 	}
 	return replyToString;
 }
@@ -139,16 +150,14 @@ function generateReplyTo(replyTo){
  * The message to be sent.
  * For more info pls refer to : http://docs.amazonwebservices.com/ses/latest/APIReference/API_SendEmail.html
  */
-function generateMessageBody(messageBody){
-	var messageBodyString='';
-	for(key in messageBody){
-		var type = key.substr(0, 1).toUpperCase()+key.substr(1);
-		messageBodyString +='&Message.Body.'+type+'.Data='+messageBody[key];
+function generateMessageBody(messageBody) {
+	var messageBodyString = '';
+	for(key in messageBody) {
+		var type = key.substr(0, 1).toUpperCase() + key.substr(1);
+		messageBodyString += '&Message.Body.' + type + '.Data=' + messageBody[key];
 	}
 	return messageBodyString;
 }
-
-
 
 /**
  * Routine that generates the signed string based upn the params passed

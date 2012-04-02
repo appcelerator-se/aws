@@ -14,7 +14,8 @@ windowFunctions['SES'] = function (evt) {
             'getSendQuota',
             'getSendStatistics',
             'listVerifiedEmailAddresses',
-            'sendEmail'
+            'sendEmail',
+            'sendRawEmail'
         ])
     });
     table.addEventListener('click', handleOpenWindow);

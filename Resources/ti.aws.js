@@ -210,6 +210,7 @@ var sesExecutor = function(params, cbOnData, cbOnError) {
 		this.prepared = true;
 	}
 	params.paramString = '';
+	params.isRawMessage = this.isRawMessage;
 	_sessionOBJ.utility.generateSESParams(params);
 	var curDate = (new Date()).toUTCString();
 	var requestBody = _sessionOBJ.utf8.encode('AWSAccessKeyId=' + _sessionOBJ.accessKeyId + '&Action=' + this.action + params.paramString + '&Timestamp=' + curDate);
@@ -226,6 +227,7 @@ var sesExecutor = function(params, cbOnData, cbOnError) {
 	};
 
 	xhr.onerror = function(e) {
+		Ti.API.info('~~~~~~~~~~~~~~~ '+  this.responseText);
 		if(cbOnError) {
 			var error = _sessionOBJ.x2j.parser(this.responseText);
 			error.summary = this.responseText;
@@ -677,23 +679,45 @@ _sessionOBJ.bedFrame.build(AWS, {
 		endpoint : "https://email.us-east-1.amazonaws.com",
 		verb : 'POST',
 		host: 'email.us-east-1.amazonaws.com',
-		contentType : 'application/x-www-form-urlencoded',
 		algorithm : 'HmacSHA1',
+		contentType: 'application/x-www-form-urlencoded',
 		executor : sesExecutor,
+		isRawMessage: false,
 		children : [{
 			method : 'deleteVerifiedEmailAddress',
+			validations : {
+				required : {
+					params : ['emailAddress']
+				}				
+			}
 		}, {
-			method : 'getSendQuota', 
+			method : 'getSendQuota',
 		}, {
 			method : 'getSendStatistics',
 		}, {
 			method : 'listVerifiedEmailAddresses',
 		}, {
 			method : 'sendEmail',
+			validations : {
+				required : {
+					params : ['source','destination','message']
+				}				
+			}
 		}, {
 			method : 'sendRawEmail',
+			isRawMessage: true,
+			validations : {
+				required : {
+					params : ['rawMessage']
+				}				
+			}
 		}, {
 			method : 'verifyEmailAddress',
+			validations : {
+				required : {
+					params : ['emailAddress']
+				}				
+			}
 		}]
 	},
 	{

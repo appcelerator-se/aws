@@ -9,7 +9,7 @@ windowFunctions['verifyEmailAddress'] = function(evt) {
 	var arrDomains = [];
 
 	Ti.App.AWS.SES.verifyEmailAddress({
-		'emailAddress' : 'test@test.com'
+		'emailAddress' : 'amit.sood@globallogic.com'
 	}, function(response) {
 		
 	}, function(error) {
@@ -123,6 +123,32 @@ windowFunctions['sendEmail'] = function(evt) {
 		}
 		
 	});
+	win.open();
+
+};
+
+windowFunctions['sendRawEmail'] = function(evt) {
+	var win = createWindow();
+	var offset = addBackButton(win);
+
+	var table = Ti.UI.createTableView({
+		top : 44
+	});
+	win.add(table);
+	var arrDomains = [];
+
+	Ti.App.AWS.SES.sendRawEmail({
+		rawMessage : Ti.Utils.base64encode('From:'+'rahul0789@gmail.com'+'\nTo:'+'amit.sood@globallogic.com'+'\nSubject:'+'Test Email'+'\nContent-Type:'+'text/plain'+'\nMIME-Version:'+'1.0'+'/n/n')				
+	},
+	function(response){
+			alert('Success: '+response);
+			Ti.API.info('~~~~~~~~~~~~~~~~~~~~Success: '+response);
+		},
+		function(error){
+			alert('Error: '+error);
+			Ti.API.info('~~~~~~~~~~~~~~~~~~~~Error: '+error);
+			//error handling code here.
+		});
 	win.open();
 
 };
