@@ -39,9 +39,19 @@
 			this.prepared = true;
 		}
 
-		if(this.validations)
-			_sessionOBJ.utility.validateParams(params, this.validations);
-		//TBD
+	
+	if(this.validations) {
+		var errorResponse = _sessionOBJ.utility.validateParams(params, this.validations);
+		if(errorResponse != "") {//means validations failed
+			Titanium.API.info(errorResponse);
+			if(cbOnError) {
+				var error = _sessionOBJ.x2j.parser(errorResponse);
+				cbOnError(error);
+				return;
+			}
+		}
+	}
+
 
 		sUrl = _sessionOBJ.utility.generateSignedURL(this.action, params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint, this.version)
 		httpClient = Ti.Network.createHTTPClient({
@@ -307,7 +317,7 @@
 					params : ['DomainName', 'ItemName']
 				},
 				patternExistsValidator : {
-					params : ['Attribute.*.Name']
+					params : ['Attribute.*.Name','Attribute.*.Value']
 				}
 			}
 		}, {
@@ -319,6 +329,7 @@
 				patternExistsValidator : {
 					params : ['Item.*.ItemName']
 				}
+				
 			}
 		}, {
 			method : 'listDomains',
@@ -328,7 +339,12 @@
 			validations : {
 				required : {
 					params : ['DomainName']
-				}
+				},
+				rangeValidator :{
+					min:3,
+					max:255,
+					params:['DomainName']
+			    }
 			}
 		}, {
 			method : 'deleteDomain',

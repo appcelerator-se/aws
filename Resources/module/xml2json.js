@@ -52,7 +52,8 @@ xml2json={
 				var tabort=oldniva-niva+1;
 				for (var j=0;j<tabort;j++){objname=objname.substring(0,objname.lastIndexOf("."))}
 			};
-			objname+="."+tagnamn;
+			//objname+="."+tagnamn;
+			objname+="."+tagnamn.replace(/%3a/g,"_");
 			var pobject=objname.substring(0,objname.lastIndexOf("."));
 			if (eval("typeof "+pobject) != "object"){preeval+=pobject+"={value:"+pobject+"};\n"};
 			var objlast=objname.substring(objname.lastIndexOf(".")+1);

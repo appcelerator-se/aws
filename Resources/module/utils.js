@@ -201,22 +201,33 @@ exports.generateS3Params = function(params) {
 validators = {
 	//Checks if all the mandatory parameters specified under data.params, have some value in them
 	required : function(request_params, data) {
-		var param_names = data.params;
-		//Array of parameter names to be checked
-		param_names.forEach(function(name) {
-			var val = request_params[name];
-			//value of a parameter
-			if((undefined == val) || (val == null) || (val != ""))
-				return false;
-			//Validation failed
-			//TBD: Need to write mechanism to raise an Error with all relevant details
-		});
-		return true;
+		var req_key = data.params;
+		for( x = 0; x < req_key.length; x++) {
+			if((request_params[req_key[x]] == undefined ) || (request_params[req_key[x]] == null) || (request_params[req_key[x]] == "")) {
+				return req_key[x];
+			} 
+		}
+		return "";
+	},
+	rangeValidator : function(request_params, data) {
+		var range_key = data.params;
+		for( x = 0; x < range_key.length; x++) {
+			if(request_params[range_key[x]].length < data.min || request_params[range_key[x]].length > data.max) {
+				return   L('lengthValidation');
+			} else {
+				var iChars = '!@#$%^&*()+=-[]\\\';,./{}|\":<>?';
+				for( i = 0; i < iChars.length; i++) {
+					if(request_params[range_key[x]].indexOf(iChars[i]) != -1) {
+						return iChars +" "+ L('symbolValidation');
+					}
+				}
+			}
+		}
+		return "";
 	},
 	//Checks to see if there are any matching regualar expressions within the Parameters
 	//Useful for validating collection of input parameters.
 	patternExistsValidator : function(request_params, data) {
-		return true;
 	}
 }
 
@@ -228,11 +239,22 @@ validators = {
  * @param params - Parameters to be serialized into the URL
  * @param validations - List of Validation rules to apply, along with their inherent parameters
  */
-exports.validateParams = function(request_params, validations) {
+exports.validateParams = function(request_params, validations,min,max) {
+	var finalresponse = "";
 	for(var validationRule in validations) {
 		fnValidate = validators[validationRule];
 		data = validations[validationRule];
 		res = fnValidate(request_params, data);
-		Ti.API.info('Validation ' + validationRule + ' = ' + res)
+		if(!res == "") {
+			finalresponse = prepareMessage(res, validationRule);
+			return finalresponse;
+		}
 	}
+	return finalresponse;
+}
+
+prepareMessage = function(response, validationRule) {
+	var msg = "";
+	var msg = '<?xml version=\"1.0\"?><Response><Errors><Error><Code>' + L(validationRule) + '</Code><Message>' + response + '</Message></Error></Errors></Response>';
+	return msg;
 }
