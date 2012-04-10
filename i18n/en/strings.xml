@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<string name="required">Missing Parameter</string>
+	<string name="rangeValidator">Invalid Parameter</string>
+	<string name="lengthValidation">Either the length is too big or too small.</string>
+	<string name="symbolValidation">Special Symbols Not Allowed.</string>
+	<string name="patternExistsValidator">PatternExistsValidator</string>
+	
+</resources>
