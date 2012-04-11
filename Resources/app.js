@@ -9,6 +9,24 @@
  * That's it! Enjoy.
  */
 
+
+if ( true )
+{
+	var APP = {
+		appName: 'App Name',
+		platform : Ti.Platform.osname,
+		height : Ti.Platform.displayCaps.platformHeight,
+		width : Ti.Platform.displayCaps.platformWidth
+	}//end APP
+	
+	APP.AppTabGroup = require('/samples/highscores/UIAppTabGroup');APP.AppTabGroup.APP = APP;
+	APP.AppTabGroup.init({});
+	
+	//start the APP
+	APP.AppTabGroup.open();
+}//end if	
+else
+{
 Ti.App.AWS = require('ti.aws'); //Make the AWS Module publically available across the App
 
 // Define our window store.
@@ -128,3 +146,4 @@ function finishLaunching(){
 	win.add(table);
 	win.open();
 }
+}//end else
