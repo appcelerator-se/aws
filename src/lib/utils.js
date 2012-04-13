@@ -9,7 +9,7 @@
  * @param version - Version of the Service to be invoked
  */
 
-Ti.include("/module/awssigner.js");
+Ti.include("/lib/awssigner.js");
 
 /**
  * Routine that contructs querystring as payload without an URl with it. This payload will be passed to HttpClient as parameter in send
