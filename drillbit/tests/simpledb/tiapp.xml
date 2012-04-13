@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ti:app xmlns:android="http://schemas.android.com/apk/res/android" xmlns:ti="http://ti.appcelerator.org">
-    <sdk-version>1.8.1</sdk-version>
+    <sdk-version>1.8.3</sdk-version>
     <id>org.appcelerator.titanium.testharness</id>
     <name>test_harness</name>
     <version>1.0</version>
@@ -30,6 +30,6 @@
     <property name="acs-oauth-secret" type="string">YOUR OAUTH SECRET HERE</property>
     <property name="acs-base-url" type="string">api.cloud.appcelerator.com</property>
     <modules>
-        <modules platform="commonjs">ti.cloud</modules>
+        <modules platform="commonjs">ti.aws</modules>
     </modules>
 </ti:app>
