@@ -29,6 +29,6 @@
     <property name="aws-access-key-id" type="string">YOUR AWS ACCESS KEY ID HERE</property>
     <property name="aws-secret-access-key" type="string">YOUR AWS SECRET ACCESS KEY HERE</property>
     <modules>
-        <modules platform="commonjs">ti.aws</modules>
+        <modules platform="commonjs" version="1.0.0">ti.aws</modules>
     </modules>
 </ti:app>
