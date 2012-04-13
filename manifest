@@ -14,4 +14,4 @@ name: ti.aws
 moduleid: ti.aws
 guid: d2b00e93-43a2-4422-9c70-e0db7c1185d8
 platform: commonjs
-minsdk: 1.8.3
+minsdk: 1.8.2
