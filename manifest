@@ -1,8 +1,17 @@
-#appname:aws
-#publisher:sumeetsaxena
-#url:http://
-#image:appicon.png
-#appid:com.gl.aws
-#desc:not specified
-#type:ipad
-#guid:ea92be91-fb5a-44c3-a2a2-9908df723450
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 1.0.0
+description: AWS Services
+author: Sumeet Saxena
+license: 
+copyright: Copyright (c) 2011-2012 by Appcelerator,  Inc.
+
+
+# these should not be edited
+name: ti.aws
+moduleid: ti.aws
+guid: d2b00e93-43a2-4422-9c70-e0db7c1185d8
+platform: commonjs
+minsdk: 1.8.3

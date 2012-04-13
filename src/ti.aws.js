@@ -16,12 +16,12 @@
 	//Session variables used across all methods
 
 	var _sessionOBJ = {
-		utility : require('/module/utils'), //Common to all namespaces
-		bedFrame : require('/module/bedframe'), //Common to all namespaces
-		x2j : require('/module/xml2json'), //Common to all namespaces
-		utf8 : require('/module/utf8').load(), //Used for s3
-		sha : require('/module/hmacsha1').load(),
-		md5 : require('/module/md5'),
+		utility : require('/lib/utils'), //Common to all namespaces
+		bedFrame : require('/lib/bedframe'), //Common to all namespaces
+		x2j : require('/lib/xml2json'), //Common to all namespaces
+		utf8 : require('/lib/utf8').load(), //Used for s3
+		sha : require('/lib/hmacsha1').load(),
+		md5 : require('/lib/md5'),
 		accessKeyId : null, //To be initalized via the authorize method
 		secretKey : null	//To be initalized via the authorize method
 	};
@@ -730,7 +730,7 @@
 			subResource : '?',
 			validations : {
 				required : {
-					params : ['bucketName', 'objectName', 'uploadId', 'partNumber',]
+					params : ['bucketName', 'objectName', 'uploadId', 'partNumber']
 				}
 			}
 		}
@@ -760,11 +760,11 @@
 				}				
 			}
 		}, {
-			method : 'getSendQuota',
+			method : 'getSendQuota'
 		}, {
-			method : 'getSendStatistics',
+			method : 'getSendStatistics'
 		}, {
-			method : 'listVerifiedEmailAddresses',
+			method : 'listVerifiedEmailAddresses'
 		}, {
 			method : 'sendEmail',
 			validations : {
@@ -810,7 +810,7 @@
 	        validations : {required : {params : ['QueueName']}}
 		},
 		{
-			method : 'addPermission',
+			method : 'addPermission'
 		},
 		{
 			method : 'setQueueAttributes',
@@ -833,7 +833,7 @@
 		},
 		{
 			method : 'receiveMessage',
-			validations : {required : {params : ['AWSAccountId','QueueName']}},
+			validations : {required : {params : ['AWSAccountId','QueueName']}}
 		},
 		{
 			method : 'deleteMessage',
@@ -847,7 +847,7 @@
 		},
 		{
 			method : 'deleteQueue',
-			validations : {required : {params : ['AWSAccountId','QueueName']}},
+			validations : {required : {params : ['AWSAccountId','QueueName']}}
 		},
 		{
 			method : 'changeMessageVisibility',
@@ -862,7 +862,7 @@
 		{
 			method : 'removePermission',
 			validations : {required : {params : ['AWSAccountId','QueueName','Lable']}}
-		},								 
+		}				 
 		]
 	},
 		{
@@ -918,7 +918,7 @@
 				}
             } 
 		}, {
-			method : 'listSubscriptions',
+			method : 'listSubscriptions'
 		}, {
 			method : 'listSubscriptionsByTopic',
 			validations : {
@@ -927,7 +927,7 @@
 				}
             } 
 		}, {
-			method : 'listTopics',
+			method : 'listTopics'
 		}, {
 			method : 'publish',
 			validations : {
