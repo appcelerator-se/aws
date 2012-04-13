@@ -26,9 +26,8 @@
             </instrumentation>
         </manifest>
     </android>
-    <property name="acs-oauth-key" type="string">YOUR OAUTH KEY HERE</property>
-    <property name="acs-oauth-secret" type="string">YOUR OAUTH SECRET HERE</property>
-    <property name="acs-base-url" type="string">api.cloud.appcelerator.com</property>
+    <property name="aws-access-key-id" type="string">YOUR AWS ACCESS KEY ID HERE</property>
+    <property name="aws-secret-access-key" type="string">YOUR AWS SECRET ACCESS KEY HERE</property>
     <modules>
         <modules platform="commonjs">ti.aws</modules>
     </modules>
