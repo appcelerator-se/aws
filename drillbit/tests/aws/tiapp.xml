@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ti:app xmlns:android="http://schemas.android.com/apk/res/android" xmlns:ti="http://ti.appcelerator.org">
-    <sdk-version>1.8.3</sdk-version>
+    <sdk-version>1.8.2</sdk-version>
     <id>org.appcelerator.titanium.testharness</id>
     <name>test_harness</name>
     <version>1.0</version>
