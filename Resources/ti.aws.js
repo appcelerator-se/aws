@@ -18,7 +18,7 @@
 	var _sessionOBJ = {
 		utility : require('/module/utils'), //Common to all namespaces
 		bedFrame : require('/module/bedframe'), //Common to all namespaces
-		x2j : require('/module/xml2json'), //Common to all namespaces
+		xmlToJSON : require('/module/xmlToJson'),//Common to all namespaces
 		utf8 : require('/module/utf8').load(), //Used for s3
 		sha : require('/module/hmacsha1').load(),
 		md5 : require('/module/md5'),
@@ -26,14 +26,16 @@
 		secretKey : null	//To be initalized via the authorize method
 	};
 
-	/**
-	 * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
-	 * returns the response returned by the Service, and raises an Error callback in case of a failure.
-	 * @param params - Parameters to be sent
-	 * @param cbOnData - CallBack to be invoked for Response
-	 * @param cbOnError - Callback to be invoked for Error
-	 */
-	var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
+	
+
+/**
+ * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
+ * returns the response returned by the Service, and raises an Error callback in case of a failure.
+ * @param params - Parameters to be sent
+ * @param cbOnData - CallBack to be invoked for Response
+ * @param cbOnError - Callback to be invoked for Error
+ */
+var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 		if(this.preparer && !this.prepared) {
 			this.preparer();
 			this.prepared = true;
@@ -45,29 +47,31 @@
 		if(errorResponse != "") {//means validations failed
 			Titanium.API.info(errorResponse);
 			if(cbOnError) {
-				var error = _sessionOBJ.x2j.parser(errorResponse);
+				var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, true);
 				cbOnError(error);
 				return;
 			}
 		}
 	}
-
-
-		sUrl = _sessionOBJ.utility.generateSignedURL(this.action, params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint, this.version)
+		//Calling generateSQSURL function for SQS and generateSignedURL for others
+		if(this.property === 'SQS') {
+			sUrl = _sessionOBJ.utility.generateSQSURL(this.action, params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint, this.version);
+		} else {
+			sUrl = _sessionOBJ.utility.generateSignedURL(this.action, params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint, this.version);
+		}
 		httpClient = Ti.Network.createHTTPClient({
 			onload : function(ev) {
 				Ti.API.info(this.responseText);
 				//Print the XML Retrieved from the Service
-				jsResp = _sessionOBJ.x2j.parser(this.responseText);
+				jsResp = _sessionOBJ.xmlToJSON.toJSON(this.responseText, true);
 				//Build a JavaScript Object from the XML
-
 				//Check if this is a proper response, or an Error Response, and call the necessary callback Method
 				if(cbOnData)
 					cbOnData(jsResp);
 			},
 			onerror : function(e) {
 				if(cbOnError) {
-					var error = _sessionOBJ.x2j.parser(this.responseText);
+					var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, true);
 					error.summary = this.responseText;
 					cbOnError(error);
 				}
@@ -102,12 +106,12 @@
 		xhr.open(this.verb, this.endpoint);
 		xhr.setRequestHeader('Host', 'sns.us-east-1.amazonaws.com');
 		xhr.onload = function(response) {
-			jsResp = _sessionOBJ.x2j.parser(this.responseText);
+			jsResp  = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
 			cbOnData(jsResp);
 		};
 		xhr.onerror = function(e) {
 			if(cbOnError) {
-				var error = _sessionOBJ.x2j.parser(this.responseText);
+				var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
 				error.summary = this.responseText;
 				cbOnError(error);
 			}
@@ -195,7 +199,7 @@
 
 			if(this.connectionType == "GET" || this.connectionType == "POST") {
 				if(cbOnData) {
-					cbOnData(_sessionOBJ.x2j.parser(this.responseText));
+					cbOnData(_sessionOBJ.xmlToJSON.toJSON(this.responseText, true));
 				}
 			} else {// Api's other then GET and POST does not return any xml as part of response object so passing the complete obect back to client
 				if(cbOnData) {
@@ -211,7 +215,7 @@
 
 		xhr.onerror = function(e) {
 			if(cbOnError) {
-				var error = _sessionOBJ.x2j.parser(this.responseText);
+				var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, true);
 				error.summary = this.responseText;
 				cbOnError(error);
 			}
@@ -249,7 +253,7 @@
 		xhr.onload = function(response) {
 			Ti.API.info(this.responseText);
 			//Print the XML Retrieved from the Service
-			jsResp = _sessionOBJ.x2j.parser(this.responseText);
+			jsResp = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
 			//Build a JavaScript Object from the XML
 
 			//Check if this is a proper response, or an Error Response, and call the necessary callback Method
@@ -259,7 +263,7 @@
 
 		xhr.onerror = function(e) {
 			if(cbOnError) {
-				var error = _sessionOBJ.x2j.parser(this.responseText);
+				var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
 				error.summary = this.responseText;
 				cbOnError(this.responseText);
 			}
@@ -705,16 +709,16 @@
 				}
 			}
 		},{
-           method : 'completeMultipleUpload',
-           verb : 'POST',
-           subResource : '?',
-           contentType:'application/xml',
-           validations : {
-                required : {
-                      params : ['bucketName', 'objectName', 'uploadId', 'partNumber','xmlTemplate']
-                }
-           }
-         },{
+ method : 'completeMultipleUpload',
+ verb : 'POST',
+ subResource : '?',
+ contentType:'application/xml',
+ validations : {
+ required : {
+ params : ['bucketName', 'objectName', 'uploadId', 'partNumber','xmlTemplate']
+ }
+ }
+ },{
 			method : 'uploadPart',
 			verb : 'PUT',
 			uploadFile : true,
@@ -811,6 +815,7 @@
 		},
 		{
 			method : 'addPermission',
+			version:'2011-10-01'
 		},
 		{
 			method : 'setQueueAttributes',
