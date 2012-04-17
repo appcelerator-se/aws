@@ -277,7 +277,7 @@ validators = {
 				var iChars = '!@#$%^&*()+=-[]\\\';,./{}|\":<>?';
 				for( i = 0; i < iChars.length; i++) {
 					if(request_params[range_key[x]].indexOf(iChars[i]) != -1) {
-						return iChars +" "+ L('symbolValidation');
+						return L('symbolValidation');
 					}
 				}
 			}
