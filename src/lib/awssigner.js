@@ -110,6 +110,16 @@ function simpleComparator(a, b) {
 	return 0;
 }
 
+Date.prototype.toISODate =
+        new Function("with (this)\n    return " +
+           "getFullYear()+'-'+addZero(getMonth()+1)+'-'" +
+           "+addZero(getDate())+'T'+addZero(getHours())+':'" +
+           "+addZero(getMinutes())+':'+addZero(getSeconds())+'.000Z'");
+   
+function addZero(n) {
+    return ( n < 0 || n > 9 ? "" : "0" ) + n;
+}
+
 Date.prototype.toISO8601 = function() {
 	return this.getUTCFullYear() + "-" + pad(this.getUTCMonth() + 1) + "-" + pad(this.getUTCDate()) + "T" + pad(this.getUTCHours()) + ":" + pad(this.getUTCMinutes()) + ":" + pad(this.getUTCSeconds()) + ".000Z";
 }

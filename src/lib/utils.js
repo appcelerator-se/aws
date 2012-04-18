@@ -159,6 +159,65 @@ function generateMessageBody(messageBody) {
 	return messageBodyString;
 }
 
+
+
+
+/**
+ * Routine that contructs URL for SQS.
+ * @param - params- Its a javascript object that contains all elements required to create payload
+ * @param - accessKeyId - Used to sign the payload
+ * @param - secretKey - Used to sign the payload
+ * @param - endpoint - contains the url which need to be hit, is used to extract the host part from it
+ */
+
+exports.generateSQSURL = function(actionName, params, accessKeyId, secretKey, endpoint, version) {
+	if(params.hasOwnProperty('AWSAccountId') && params.hasOwnProperty('QueueName')) {
+		endpoint += params.AWSAccountId + "/" + params.QueueName + "/";
+		delete params.AWSAccountId;
+		delete params.QueueName;
+	}
+	var url = endpoint + "?SignatureVersion=1&Action=" + actionName + "&Version=" + encodeURIComponent(version) + "&";
+	for(var key in params) {
+		var elementName = key;
+		var elementValue = params[key];
+		if(elementValue) {
+			url += elementName + "=" + encodeURIComponent(elementValue) + "&";
+		}
+	}
+	var timestamp = (new Date((new Date).getTime() + ((new Date).getTimezoneOffset() * 60000))).toISODate();
+	url += "Timestamp=" + encodeURIComponent(timestamp) + "&SignatureMethod=HmacSHA1&AWSAccessKeyId=" + encodeURIComponent(accessKeyId);
+	var stringToSign = getStringToSignForSQS(url);
+	var signature= SHA.b64_hmac_sha1(secretKey, stringToSign);
+	url += "&Signature=" + encodeURIComponent(signature);
+	return url;
+}
+
+/**
+ * Routine that contructs StringToSign for SQS.
+ * @param - url- Its a URL containing various paramters 
+ */
+function getStringToSignForSQS(url) {
+    var stringToSign = "";
+    var query = url.split("?")[1];
+    var params = query.split("&");
+    params.sort(ignoreCaseSort);
+    for (var i = 0; i < params.length; i++) {
+        var param = params[i].split("=");
+        if (param[0] == 'Signature' || undefined  == param[1]) continue;
+            stringToSign += param[0] + decodeURIComponent(param[1]);
+         }
+    return stringToSign;
+}
+
+function ignoreCaseSort(a, b) {
+    var ret = 0;
+    a = a.toLowerCase();
+    b = b.toLowerCase();
+    if(a > b) ret = 1;
+    if(a < b) ret = -1;
+    return ret;
+}
+
 /**
  * Routine that generates the signed string based upn the params passed
  *
@@ -218,7 +277,7 @@ validators = {
 				var iChars = '!@#$%^&*()+=-[]\\\';,./{}|\":<>?';
 				for( i = 0; i < iChars.length; i++) {
 					if(request_params[range_key[x]].indexOf(iChars[i]) != -1) {
-						return iChars +" "+ L('symbolValidation');
+						return L('symbolValidation');
 					}
 				}
 			}
