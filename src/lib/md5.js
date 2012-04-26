@@ -7,6 +7,14 @@
  * See http://pajhome.org.uk/crypt/md5 for more info.
  */
 
+
+var md5;
+if( typeof exports !== 'undefined')
+	md5 = exports;
+else
+	md5 = {};
+
+
 /*
  * Configurable variables. You may need to tweak these to be compatible with
  * the server-side, but the defaults work in most cases.
@@ -19,7 +27,7 @@ var b64pad  = "=";  /* base-64 pad character. "=" for strict RFC compliance   */
  * They take string arguments and return either hex or base-64 encoded strings
  */
 hex_md5=function(s)    { return rstr2hex(rstr_md5(str2rstr_utf8(s))); }
-exports.b64_md5=function(s)    { return rstr2b64(rstr_md5(str2rstr_utf8(s))); }
+md5.b64_md5=function(s)    { return rstr2b64(rstr_md5(str2rstr_utf8(s))); }
 function any_md5(s, e) { return rstr2any(rstr_md5(str2rstr_utf8(s)), e); }
 function hex_hmac_md5(k, d)
   { return rstr2hex(rstr_hmac_md5(str2rstr_utf8(k), str2rstr_utf8(d))); }

@@ -19,7 +19,15 @@
  * This can be used as a module or as an included file. If you are including it (or inlining it) in to another module,
  * then you should replace the below with simply var BedFrame = {}, removing the exports ternary expression.
  */
-var BedFrame = exports ? exports : {};
+
+
+
+var BedFrame;
+if( typeof BedFrame !== 'undefined')
+	BedFrame = exports;
+else
+	BedFrame = {};
+//var BedFrame = exports ? exports : {};
 
 /**
  * Default property type that results in only the latest specified value being used (that is, the deepest child's value

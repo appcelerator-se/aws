@@ -14,19 +14,24 @@
 *
 */
 	//Session variables used across all methods
-
-	var _sessionOBJ = {
-		utility : require('/lib/utils'), //Common to all namespaces
-		bedFrame : require('/lib/bedframe'), //Common to all namespaces
-		xmlToJSON : require('/lib/xmlToJson'),//Common to all namespaces
-		utf8 : require('/lib/utf8').load(), //Used for s3
-		sha : require('/lib/hmacsha1').load(),
-		md5 : require('/lib/md5'),
-		accessKeyId : null, //To be initalized via the authorize method
-		secretKey : null	//To be initalized via the authorize method
-	};
+Ti.include('/module/hmacsha1.js');
+Ti.include('/module/md5.js');
+Ti.include('/module/utf8.js');
+Ti.include('/module/bedframe.js');
+Ti.include('/module/xmlToJson.js');
+Ti.include('/module/utils.js');
 
 	
+var _sessionOBJ = {
+	utility : utility, // variable declared in utils.js
+	bedFrame : BedFrame, // variable declared in bedframe.js
+	xmlToJSON : xmlToJS,// variable declared in xmlToJson.js
+	utf8 : utf8, //Used for S3 only
+	sha : sha,
+	md5 : md5,
+	accessKeyId : null, //To be initalized via the authorize method
+	secretKey : null	//To be initalized via the authorize method
+}; 
 
 /**
  * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
@@ -45,9 +50,9 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 	if(this.validations) {
 		var errorResponse = _sessionOBJ.utility.validateParams(params, this.validations);
 		if(errorResponse != "") {//means validations failed
-			Titanium.API.info(errorResponse);
+			//Titanium.API.info(errorResponse);
 			if(cbOnError) {
-				var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, true);
+				var error = _sessionOBJ.xmlToJSON.toJSON(errorResponse, true);
 				cbOnError(error);
 				return;
 			}
@@ -675,6 +680,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 			}
 		}, {
 			method : 'putObjectAcl',
+			contentType : 'application/xml',
 			verb : 'PUT',
 			subResource : '?acl',
 			validations : {
@@ -734,7 +740,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 			subResource : '?',
 			validations : {
 				required : {
-					params : ['bucketName', 'objectName', 'uploadId', 'partNumber']
+					params : ['bucketName', 'objectName', 'uploadId', 'partNumber',]
 				}
 			}
 		}
@@ -764,11 +770,11 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 				}				
 			}
 		}, {
-			method : 'getSendQuota'
+			method : 'getSendQuota',
 		}, {
-			method : 'getSendStatistics'
+			method : 'getSendStatistics',
 		}, {
-			method : 'listVerifiedEmailAddresses'
+			method : 'listVerifiedEmailAddresses',
 		}, {
 			method : 'sendEmail',
 			validations : {
@@ -828,6 +834,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 		},
 		{
 			method : 'sendMessage',
+			version:'2011-10-01',
 			validations : {required : {params : ['AWSAccountId','QueueName','MessageBody']}}
 		},
 		{
@@ -838,7 +845,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 		},
 		{
 			method : 'receiveMessage',
-			validations : {required : {params : ['AWSAccountId','QueueName']}}
+			validations : {required : {params : ['AWSAccountId','QueueName']}},
 		},
 		{
 			method : 'deleteMessage',
@@ -852,7 +859,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 		},
 		{
 			method : 'deleteQueue',
-			validations : {required : {params : ['AWSAccountId','QueueName']}}
+			validations : {required : {params : ['AWSAccountId','QueueName']}},
 		},
 		{
 			method : 'changeMessageVisibility',
@@ -867,7 +874,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 		{
 			method : 'removePermission',
 			validations : {required : {params : ['AWSAccountId','QueueName','Lable']}}
-		}				 
+		},								 
 		]
 	},
 		{
@@ -923,7 +930,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 				}
             } 
 		}, {
-			method : 'listSubscriptions'
+			method : 'listSubscriptions',
 		}, {
 			method : 'listSubscriptionsByTopic',
 			validations : {
@@ -932,7 +939,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 				}
             } 
 		}, {
-			method : 'listTopics'
+			method : 'listTopics',
 		}, {
 			method : 'publish',
 			validations : {

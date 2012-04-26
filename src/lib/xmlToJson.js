@@ -1,9 +1,9 @@
 /**
- * XMLToJS Module 0.1
+ * xmlToJS Module 0.1
  *
  * To use:
- * var XMLToJS = require('xmlToJS');
- * var jsObject = XMLToJS.convert(xml);
+ * var xmlToJS = require('xmlToJS');
+ * var jsObject = xmlToJS.convert(xml);
  *
  * This will take XMl like the following:
  *
@@ -36,11 +36,18 @@
  *
  * Note that nodes always result in arrays, even if there is only a single value inside of them.
  */
-var XMLToJS = exports || {};
+
+var xmlToJS;
+if(typeof exports !== 'undefined')
+	xmlToJS = exports;
+else
+	xmlToJS = {}
+
+
 /**
  * Recursively converts a Titanium XML document or node in to a JSON representation of it.
  */
-XMLToJS.convert = function convert(xml) {
+xmlToJS.convert = function convert(xml) {
 	var retVal = {};
 	function cleanName(name) {
 		return name.split(':').join('_');
@@ -82,11 +89,11 @@ XMLToJS.convert = function convert(xml) {
  * @param response - the XML response returned from the service.
  * @param isClean - Boolean variable indicating the structure of the response XML.
  */
-XMLToJS.toJSON = function toJSON(response, isClean) {
+xmlToJS.toJSON = function toJSON(response, isClean) {
 	//For a clean xml string
 	if(isClean) {
 		//Returning the JSON response after calling the convert function with Titanium XML document of service response
-		return XMLToJS.convert(Ti.XML.parseString(response).documentElement);
+		return xmlToJS.convert(Ti.XML.parseString(response).documentElement);
 	} else {//For an unclean XML
 		var xml = "";
 		//Iterating through the xml by slicing tags
@@ -101,6 +108,6 @@ XMLToJS.toJSON = function toJSON(response, isClean) {
 			response = response.substring(response.indexOf('>') + 1);
 		}
 		//Returning the JSON response after calling the convert function with Titanium XML document of service response
-		return XMLToJS.convert(Ti.XML.parseString(xml).documentElement);
+		return xmlToJS.convert(Ti.XML.parseString(xml).documentElement);
 	}
 }

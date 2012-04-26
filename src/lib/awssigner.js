@@ -3,7 +3,8 @@
  * Module is used to generate signature that needs to be passed to api calls
  *
  */
-var SHA = require('module/hmacsha1').load();
+Ti.include('hmacsha1.js');
+//var sha = require('module/hmacsha1');
 function AWSSigner(accessKeyId, secretKey) {
 	this.accessKeyId = accessKeyId;
 	this.secretKey = secretKey;
@@ -29,7 +30,7 @@ AWSSigner.prototype.addFields = function(params, time) {
 }
 
 AWSSigner.prototype.generateSignature = function(str) {
-	return SHA.b64_hmac_sha1(this.secretKey, str);
+	return sha.b64_hmac_sha1(this.secretKey, str);
 }
 
 AWSV2Signer.prototype = new AWSSigner();

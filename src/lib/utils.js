@@ -9,7 +9,14 @@
  * @param version - Version of the Service to be invoked
  */
 
-Ti.include("/lib/awssigner.js");
+Ti.include("/module/awssigner.js");
+
+
+var utility;
+if(typeof exports !== 'undefined')
+	utility = exports;
+else
+	utility = {}
 
 /**
  * Routine that contructs querystring as payload without an URl with it. This payload will be passed to HttpClient as parameter in send
@@ -18,7 +25,7 @@ Ti.include("/lib/awssigner.js");
  * @param - secretKey - Used to sign the payload
  * @param - endpoint - contains the url which need to be hit, is used to extract the host part from it
  */
-exports.generatePayload = function(params, accessKeyId, secretKey, endpoint) {
+utility.generatePayload = function(params, accessKeyId, secretKey, endpoint) {
 	var host = endpoint.replace(/.*:\/\//, "");
 	var payload = null;
 
@@ -41,7 +48,7 @@ exports.generatePayload = function(params, accessKeyId, secretKey, endpoint) {
 	return payload;
 }
 
-exports.generateSignedURL = function(actionName, params, accessKeyId, secretKey, endpoint, version) {
+utility.generateSignedURL = function(actionName, params, accessKeyId, secretKey, endpoint, version) {
 	var host = endpoint.replace(/.*:\/\//, "");
 	var payload = null;
 	var displayUri = endpoint;
@@ -79,7 +86,7 @@ exports.generateSignedURL = function(actionName, params, accessKeyId, secretKey,
  * @param - Its a javascript object contains all elements required for creating signed string and url endpoint.
  * For More info Pls refer to : http://docs.amazonwebservices.com/ses/latest/APIReference
  */
-exports.generateSESParams = function(params) {
+utility.generateSESParams = function(params) {
 	if(params.hasOwnProperty('emailAddress')) {
 		params.paramString += '&EmailAddress=' + params.emailAddress;
 	} else if(params.hasOwnProperty('destination')) {
@@ -170,9 +177,9 @@ function generateMessageBody(messageBody) {
  * @param - endpoint - contains the url which need to be hit, is used to extract the host part from it
  */
 
-exports.generateSQSURL = function(actionName, params, accessKeyId, secretKey, endpoint, version) {
+utility.generateSQSURL = function(actionName, params, accessKeyId, secretKey, endpoint, version) {
 	if(params.hasOwnProperty('AWSAccountId') && params.hasOwnProperty('QueueName')) {
-		endpoint += params.AWSAccountId + "/" + params.QueueName + "/";
+		endpoint += "/" + params.AWSAccountId + "/" + params.QueueName + "/";
 		delete params.AWSAccountId;
 		delete params.QueueName;
 	}
@@ -187,7 +194,7 @@ exports.generateSQSURL = function(actionName, params, accessKeyId, secretKey, en
 	var timestamp = (new Date((new Date).getTime() + ((new Date).getTimezoneOffset() * 60000))).toISODate();
 	url += "Timestamp=" + encodeURIComponent(timestamp) + "&SignatureMethod=HmacSHA1&AWSAccessKeyId=" + encodeURIComponent(accessKeyId);
 	var stringToSign = getStringToSignForSQS(url);
-	var signature= SHA.b64_hmac_sha1(secretKey, stringToSign);
+	var signature= sha.b64_hmac_sha1(secretKey, stringToSign);
 	url += "&Signature=" + encodeURIComponent(signature);
 	return url;
 }
@@ -224,7 +231,7 @@ function ignoreCaseSort(a, b) {
  * @param - Its a javascript object that contains all elements required for creating signed string
  * more on the signing string here --http://docs.amazonwebservices.com/AmazonS3/2006-03-01/dev/RESTAuthentication.html
  */
-exports.generateS3Params = function(params) {
+utility.generateS3Params = function(params) {
 	//check if the bucket name is passed by the user. If its passed then include it as part of stringtosign data
 	if(params.hasOwnProperty('bucketName')) {
 		//check if objectName is passed by user if yes then include it as part of stringtosign data
@@ -298,7 +305,7 @@ validators = {
  * @param params - Parameters to be serialized into the URL
  * @param validations - List of Validation rules to apply, along with their inherent parameters
  */
-exports.validateParams = function(request_params, validations,min,max) {
+utility.validateParams = function(request_params, validations,min,max) {
 	var finalresponse = "";
 	for(var validationRule in validations) {
 		fnValidate = validators[validationRule];
