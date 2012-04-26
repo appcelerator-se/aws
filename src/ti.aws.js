@@ -740,7 +740,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 			subResource : '?',
 			validations : {
 				required : {
-					params : ['bucketName', 'objectName', 'uploadId', 'partNumber',]
+					params : ['bucketName', 'objectName', 'uploadId', 'partNumber']
 				}
 			}
 		}
@@ -769,20 +769,19 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 					params : ['emailAddress']
 				}				
 			}
-		}, {
-			method : 'getSendQuota',
-		}, {
-			method : 'getSendStatistics',
-		}, {
-			method : 'listVerifiedEmailAddresses',
-		}, {
+		}, 
+        {method : 'getSendQuota'}, 
+        {method : 'getSendStatistics'}, 
+        {method : 'listVerifiedEmailAddresses'}, 
+        {
 			method : 'sendEmail',
 			validations : {
 				required : {
 					params : ['source','destination','message']
 				}				
 			}
-		}, {
+		}, 
+        {
 			method : 'sendRawEmail',
 			isRawMessage: true,
 			validations : {
@@ -790,7 +789,8 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 					params : ['rawMessage']
 				}				
 			}
-		}, {
+		}, 
+        {
 			method : 'verifyEmailAddress',
 			validations : {
 				required : {
@@ -845,7 +845,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 		},
 		{
 			method : 'receiveMessage',
-			validations : {required : {params : ['AWSAccountId','QueueName']}},
+			validations : {required : {params : ['AWSAccountId','QueueName']}}
 		},
 		{
 			method : 'deleteMessage',
@@ -859,7 +859,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 		},
 		{
 			method : 'deleteQueue',
-			validations : {required : {params : ['AWSAccountId','QueueName']}},
+			validations : {required : {params : ['AWSAccountId','QueueName']}}
 		},
 		{
 			method : 'changeMessageVisibility',
@@ -874,7 +874,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 		{
 			method : 'removePermission',
 			validations : {required : {params : ['AWSAccountId','QueueName','Lable']}}
-		},								 
+		}
 		]
 	},
 		{
@@ -929,9 +929,10 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 					params : ['TopicArn']
 				}
             } 
-		}, {
-			method : 'listSubscriptions',
-		}, {
+		}, 
+        { method : 'listSubscriptions'
+		}, 
+        {
 			method : 'listSubscriptionsByTopic',
 			validations : {
 				required : {
@@ -939,7 +940,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 				}
             } 
 		}, {
-			method : 'listTopics',
+			method : 'listTopics'
 		}, {
 			method : 'publish',
 			validations : {
