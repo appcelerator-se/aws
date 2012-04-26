@@ -15,6 +15,7 @@
 */
 	//Session variables used across all methods
 Ti.include('./lib/hmacsha1.js');
+Ti.include('./lib/awssigner.js');
 Ti.include('./lib/md5.js');
 Ti.include('./lib/utf8.js');
 Ti.include('./lib/bedframe.js');

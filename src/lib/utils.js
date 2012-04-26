@@ -9,7 +9,7 @@
  * @param version - Version of the Service to be invoked
  */
 
-Ti.include("/lib/awssigner.js");
+//Ti.include("/lib/awssigner.js");
 
 
 var utility;

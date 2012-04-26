@@ -3,7 +3,7 @@
  * Module is used to generate signature that needs to be passed to api calls
  *
  */
-Ti.include('hmacsha1.js');
+//Ti.include('hmacsha1.js');
 //var sha = require('module/hmacsha1');
 function AWSSigner(accessKeyId, secretKey) {
 	this.accessKeyId = accessKeyId;
