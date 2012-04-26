@@ -14,12 +14,12 @@
 *
 */
 	//Session variables used across all methods
-Ti.include('/module/hmacsha1.js');
-Ti.include('/module/md5.js');
-Ti.include('/module/utf8.js');
-Ti.include('/module/bedframe.js');
-Ti.include('/module/xmlToJson.js');
-Ti.include('/module/utils.js');
+Ti.include('./lib/hmacsha1.js');
+Ti.include('./lib/md5.js');
+Ti.include('./lib/utf8.js');
+Ti.include('./lib/bedframe.js');
+Ti.include('./lib/xmlToJson.js');
+Ti.include('./lib/utils.js');
 
 	
 var _sessionOBJ = {
