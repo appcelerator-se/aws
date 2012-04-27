@@ -10,7 +10,7 @@
  */
 
 
-if ( true )
+/*if ( true )
 {
 	var APP = {
 		appName: 'App Name',
@@ -26,7 +26,7 @@ if ( true )
 	APP.AppTabGroup.open();
 }//end if	
 else
-{
+{*/
 Ti.App.AWS = require('ti.aws'); //Make the AWS Module publically available across the App
 
 // Define our window store.
@@ -146,4 +146,4 @@ function finishLaunching(){
 	win.add(table);
 	win.open();
 }
-}//end else
+//}//end else
