@@ -65,9 +65,10 @@ class Compiler(object):
 		self.modules_map = {}
 		self.require_cache = {}
 		self.parse_module(self.main, None)
-		
+				
 		self.modules_to_cache = []
 		for module in self.require_cache:
+			print module
 			if module != self.main and os.path.exists(os.path.join(self.build_path, module + '.js')):
 				self.modules_to_cache.append(module)
 		if 'precache' in self.timodule and 'requires' in self.timodule['precache'] and len(self.timodule['precache']['requires']):
@@ -87,6 +88,7 @@ class Compiler(object):
 			pass
 		
 		self.copy(self.src_path, self.build_path)
+		self.process_includes()
 		self.build_js()
 		self.minify_js()
 		self.package()
@@ -203,14 +205,14 @@ class Compiler(object):
 	def parse_module(self, module, ref):
 		if module in self.require_cache or module == 'require':
 			return
-		
 		parts = module.split('!')
+		print parts
 		
 		if len(parts) == 1:
 			if module.startswith('.') and ref is not None:
 				module = self.compact_path(ref + module)
 			self.require_cache[module] = 1
-		
+
 		dep = self.resolve(module, ref)
 		if not len(dep):
 			return
@@ -293,7 +295,35 @@ class Compiler(object):
 				if not os.path.exists(dest_dir):
 					os.makedirs(dest_dir)
 				shutil.copy(source, dest)
-	
+
+#Processes Include statements embedded in the Main JS file
+	def process_includes(self):
+		main_file = os.path.join(self.build_path, self.main + '.js')
+		tmp = main_file + '.all.js'
+		all_js = codecs.open(tmp, 'w', encoding='utf-8')
+		print 'Creating include JS file called ', tmp 
+		for line in open(main_file).readlines():
+			strip_line = line.strip()
+			if strip_line.startswith('//#include:'):
+				include_filename= os.path.join(self.build_path, strip_line[11:])
+				print 'loading include file ', include_filename
+				include_file=open(include_filename,'r')
+				include_script=include_file.read();
+				include_file.close();
+				os.remove(include_filename)
+				all_js.write('\n\n//***** begin include: %s\n' % include_filename)
+				all_js.write(include_script.encode("utf-8"))
+				all_js.write('\n//***** end include: %s\n' % include_filename)
+			else:
+				all_js.write(line)
+		all_js.close()
+		main_file = os.path.join(self.build_path, self.main + '.js')
+		tmp = main_file + '.all.js'
+		os.remove(main_file)
+		os.rename(tmp,main_file)
+		print 'Assembled main-file with includes'
+
+
 	def build_js(self):
 		main_file = os.path.join(self.build_path, self.main + '.js')
 		tmp = main_file + '.tmp'

@@ -13,14 +13,15 @@
 *  https://github.com/appcelerator-se/aws
 *
 */
-	//Session variables used across all methods
-Ti.include('./lib/hmacsha1.js');
-Ti.include('./lib/awssigner.js');
-Ti.include('./lib/md5.js');
-Ti.include('./lib/utf8.js');
-Ti.include('./lib/bedframe.js');
-Ti.include('./lib/xmlToJson.js');
-Ti.include('./lib/utils.js');
+//Session variables used across all methods
+
+//#include:lib/hmacsha1.js
+//#include:lib/awssigner.js
+//#include:lib/md5.js
+//#include:lib/utf8.js
+//#include:lib/bedframe.js
+//#include:lib/xmlToJson.js
+//#include:lib/utils.js
 
 	
 var _sessionOBJ = {
@@ -988,4 +989,4 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 	}]
 });
 
-module.exports = AWS
+module.exports = AWS;
