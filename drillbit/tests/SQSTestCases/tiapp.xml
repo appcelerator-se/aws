@@ -26,8 +26,8 @@
             </instrumentation>
         </manifest>
     </android>
-    <property name="aws-access-key-id" type="string">AKIAJYNIDSR5LBZ65FRA</property>
-    <property name="aws-secret-access-key" type="string">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</property>    <modules>
+    <property name="aws-access-key-id" type="string"></property>
+    <property name="aws-secret-access-key" type="string"></property>    <modules>
         <modules platform="commonjs" version="1.0.0">ti.aws</modules>
     </modules>
 </ti:app>
