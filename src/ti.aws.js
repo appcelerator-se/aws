@@ -23,17 +23,16 @@
 //#include:lib/xmlToJson.js
 //#include:lib/utils.js
 
-	
 var _sessionOBJ = {
 	utility : utility, // variable declared in utils.js
 	bedFrame : BedFrame, // variable declared in bedframe.js
-	xmlToJSON : xmlToJS,// variable declared in xmlToJson.js
+	xmlToJSON : xmlToJS, // variable declared in xmlToJson.js
 	utf8 : utf8, //Used for S3 only
 	sha : sha,
 	md5 : md5,
 	accessKeyId : null, //To be initalized via the authorize method
 	secretKey : null	//To be initalized via the authorize method
-}; 
+};
 
 /**
  * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
@@ -43,12 +42,11 @@ var _sessionOBJ = {
  * @param cbOnError - Callback to be invoked for Error
  */
 var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
-		if(this.preparer && !this.prepared) {
-			this.preparer();
-			this.prepared = true;
-		}
+	if(this.preparer && !this.prepared) {
+		this.preparer();
+		this.prepared = true;
+	}
 
-	
 	if(this.validations) {
 		var errorResponse = _sessionOBJ.utility.validateParams(params, this.validations);
 		if(errorResponse != "") {//means validations failed
@@ -60,244 +58,236 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 			}
 		}
 	}
-		//Calling generateSQSURL function for SQS and generateSignedURL for others
-		if(this.property === 'SQS') {
-			sUrl = _sessionOBJ.utility.generateSQSURL(this.action, params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint, this.version);
-		} else {
-			sUrl = _sessionOBJ.utility.generateSignedURL(this.action, params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint, this.version);
-		}
-		httpClient = Ti.Network.createHTTPClient({
-			onload : function(ev) {
-				Ti.API.info(this.responseText);
-				//Print the XML Retrieved from the Service
-				jsResp = _sessionOBJ.xmlToJSON.toJSON(this.responseText, true);
-				//Build a JavaScript Object from the XML
-				//Check if this is a proper response, or an Error Response, and call the necessary callback Method
-				if(cbOnData)
-					cbOnData(jsResp);
-			},
-			onerror : function(e) {
-				if(cbOnError) {
-					var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, true);
-					error.summary = this.responseText;
-					cbOnError(error);
-				}
-			},
-			timeout : 5000 // milliseconds
-		});
-		httpClient.open(this.verb, sUrl);
-		httpClient.send();
+	//Calling generateSQSURL function for SQS and generateSignedURL for others
+	if(this.property === 'SQS') {
+		sUrl = _sessionOBJ.utility.generateSQSURL(this.action, params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint, this.version);
+	} else {
+		sUrl = _sessionOBJ.utility.generateSignedURL(this.action, params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint, this.version);
 	}
-
-
-	/**
-	 * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
-	 * returns the response returned by the Service, and raises an Error callback in case of a failure.
-	 * @param params - Parameters to be sent
-	 * @param cbOnData - CallBack to be invoked for Response
-	 * @param cbOnError - Callback to be invoked for Error
-	 */
-	var snsExecutor = function(params, cbOnData, cbOnError) {
-		if(this.preparer && !this.prepared) {
-			this.preparer();
-			this.prepared = true;
-		}
-		if(this.validations)
-			_sessionOBJ.utility.validateParams(params, this.validations);
-
-		var xhr = Ti.Network.createHTTPClient();
-		//generates complete querystring without url
-		params.Action = this.action;
-		params.Version = this.version;
-		payload = _sessionOBJ.utility.generatePayload(params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint)
-		xhr.open(this.verb, this.endpoint);
-		xhr.setRequestHeader('Host', 'sns.us-east-1.amazonaws.com');
-		xhr.onload = function(response) {
-			jsResp  = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
-			cbOnData(jsResp);
-		};
-		xhr.onerror = function(e) {
-			if(cbOnError) {
-				var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
-				error.summary = this.responseText;
-				cbOnError(error);
-			}
-		}
-		xhr.send(payload);
-	}
-
-
-	/**
-	 * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
-	 * returns the response returned by the Service, and raises an Error callback in case of a failure.
-	 * @param params - Parameters to be sent
-	 * @param cbOnData - CallBack to be invoked for Response
-	 * @param cbOnError - Callback to be invoked for Error
-	 */
-	var s3Executor = function(params, cbOnData, cbOnError) {
-		if(this.preparer && !this.prepared) {
-			this.preparer();
-			this.prepared = true;
-		}
-
-		if(this.validations)
-			_sessionOBJ.utility.validateParams(params, this.validations);
-
-		var xhr = Ti.Network.createHTTPClient();
-		params.contentType = '';
-		if(this.contentType) {
-			params.contentType = this.contentType;
-		}
-
-		if(this.method === 'putBucketLifecycle' || this.method === 'deleteMultipleObjects') {
-			params.contentMD5 = _sessionOBJ.md5.b64_md5(params.xmlTemplate);
-		} else {
-			params.contentMD5 = '';
-		}
-
-		if(!params.hasOwnProperty('subResource')) {
-			params.subResource = this.subResource;
-		}
-		var curDate = (new Date()).toUTCString();
-		params.verb = this.verb;
-		params.curDate = curDate;
-		params.url = this.endpoint;
-		params.stringToSign = '';
-		params.verb = this.verb;
-
-		//get the file mime type and size from the file object passed by client
-		if(this.uploadFile) {
-			var fileContents = params.file.read();
-			params.contentType = fileContents.mimeType;
-			params.contentLength = params.file.size;
-		}
-
-		_sessionOBJ.utility.generateS3Params(params);
-		//generates stringTosign string and passes it back as part of 'params' parameter
-		var signature = _sessionOBJ.sha.b64_hmac_sha1(_sessionOBJ.utf8.encode(_sessionOBJ.secretKey), _sessionOBJ.utf8.encode(params.stringToSign));
-		var awsAuthHeader = "AWS " + _sessionOBJ.accessKeyId + ":" + signature;
-
-		xhr.open(this.verb, params.url);
-		xhr.setRequestHeader('Authorization', awsAuthHeader);
-		xhr.setRequestHeader('Date', curDate);
-		xhr.setRequestHeader('Host', 's3.amazonaws.com');
-		//set the content type if its required by the api.
-		if(this.contentType) {
-			xhr.setRequestHeader('Content-Type', params.contentType);
-		}
-		// For api's that upload files we need to pass content type and content length
-		if(this.uploadFile) {
-
-			xhr.setRequestHeader('Content-Type', params.contentType);
-			if(!Ti.Platform.osname === 'android') {// with android content length is already present
-				xhr.setRequestHeader('Content-Length', params.contentLength);
-			}
-		}
-		if(this.method === 'putBucketLifecycle' || this.method === 'deleteMultipleObjects') {
-			xhr.setRequestHeader('Content-MD5', params.contentMD5)
-		}
-		//used for apis like Put object copy and upload part-copy
-		if(params.hasOwnProperty('copySource')) {
-			xhr.setRequestHeader('x-amz-copy-source', params.copySource);
-			// will be passed by client
-		}
-		xhr.onload = function(response) {
-			//For Get and POST xml is returned as response hence converting it to javascript object and passing back to user
-
-			if(this.connectionType == "GET" || this.connectionType == "POST") {
-				if(cbOnData) {
-					cbOnData(_sessionOBJ.xmlToJSON.toJSON(this.responseText, true));
-				}
-			} else {// Api's other then GET and POST does not return any xml as part of response object so passing the complete obect back to client
-				if(cbOnData) {
-					//ETag is returned as part of response header for uploadpart. Its a unique identifier used with completemultipartupload api 
-					if(xhr.getResponseHeader("ETag")) {
-						Titanium.API.info('ETag:' + xhr.getResponseHeader("ETag"));
-					}
-
-					cbOnData(this.responseText);
-				}
-			}
-		};
-
-		xhr.onerror = function(e) {
+	httpClient = Ti.Network.createHTTPClient({
+		onload : function(ev) {
+			Ti.API.info(this.responseText);
+			//Print the XML Retrieved from the Service
+			jsResp = _sessionOBJ.xmlToJSON.toJSON(this.responseText, true);
+			//Build a JavaScript Object from the XML
+			//Check if this is a proper response, or an Error Response, and call the necessary callback Method
+			if(cbOnData)
+				cbOnData(jsResp);
+		},
+		onerror : function(e) {
 			if(cbOnError) {
 				var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, true);
 				error.summary = this.responseText;
 				cbOnError(error);
 			}
-		}
-		if(params.hasOwnProperty('xmlTemplate')) {//for sending xml in request object
-			xhr.send(params.xmlTemplate);
-		} else if(this.uploadFile) {// for sending file in request object
-			xhr.send(fileContents);
-		} else {
-			xhr.send();
+		},
+		timeout : 5000 // milliseconds
+	});
+	httpClient.open(this.verb, sUrl);
+	httpClient.send();
+}
+/**
+ * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
+ * returns the response returned by the Service, and raises an Error callback in case of a failure.
+ * @param params - Parameters to be sent
+ * @param cbOnData - CallBack to be invoked for Response
+ * @param cbOnError - Callback to be invoked for Error
+ */
+var snsExecutor = function(params, cbOnData, cbOnError) {
+	if(this.preparer && !this.prepared) {
+		this.preparer();
+		this.prepared = true;
+	}
+	if(this.validations)
+		_sessionOBJ.utility.validateParams(params, this.validations);
+
+	var xhr = Ti.Network.createHTTPClient();
+	//generates complete querystring without url
+	params.Action = this.action;
+	params.Version = this.version;
+	payload = _sessionOBJ.utility.generatePayload(params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint)
+	xhr.open(this.verb, this.endpoint);
+	xhr.setRequestHeader('Host', 'sns.us-east-1.amazonaws.com');
+	xhr.onload = function(response) {
+		jsResp = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
+		cbOnData(jsResp);
+	};
+	xhr.onerror = function(e) {
+		if(cbOnError) {
+			var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
+			error.summary = this.responseText;
+			cbOnError(error);
 		}
 	}
+	xhr.send(payload);
+}
+/**
+ * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
+ * returns the response returned by the Service, and raises an Error callback in case of a failure.
+ * @param params - Parameters to be sent
+ * @param cbOnData - CallBack to be invoked for Response
+ * @param cbOnError - Callback to be invoked for Error
+ */
+var s3Executor = function(params, cbOnData, cbOnError) {
+	if(this.preparer && !this.prepared) {
+		this.preparer();
+		this.prepared = true;
+	}
 
+	if(this.validations)
+		_sessionOBJ.utility.validateParams(params, this.validations);
 
-	/**
-	 * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
-	 * returns the response returned by the Service, and raises an Error callback in case of a failure.
-	 * @param params - Parameters to be sent
-	 * @param cbOnData - CallBack to be invoked for Response
-	 * @param cbOnError - Callback to be invoked for Error
-	 */
-	var sesExecutor = function(params, cbOnData, cbOnError) {
-		if(this.preparer && !this.prepared) {
-			this.preparer();
-			this.prepared = true;
+	var xhr = Ti.Network.createHTTPClient();
+	params.contentType = '';
+	if(this.contentType) {
+		params.contentType = this.contentType;
+	}
+
+	if(this.method === 'putBucketLifecycle' || this.method === 'deleteMultipleObjects') {
+		params.contentMD5 = _sessionOBJ.md5.b64_md5(params.xmlTemplate);
+	} else {
+		params.contentMD5 = '';
+	}
+
+	if(!params.hasOwnProperty('subResource')) {
+		params.subResource = this.subResource;
+	}
+	var curDate = (new Date()).toUTCString();
+	params.verb = this.verb;
+	params.curDate = curDate;
+	params.url = this.endpoint;
+	params.stringToSign = '';
+	params.verb = this.verb;
+
+	//get the file mime type and size from the file object passed by client
+	if(this.uploadFile) {
+		var fileContents = params.file.read();
+		params.contentType = fileContents.mimeType;
+		params.contentLength = params.file.size;
+	}
+
+	_sessionOBJ.utility.generateS3Params(params);
+	//generates stringTosign string and passes it back as part of 'params' parameter
+	var signature = _sessionOBJ.sha.b64_hmac_sha1(_sessionOBJ.utf8.encode(_sessionOBJ.secretKey), _sessionOBJ.utf8.encode(params.stringToSign));
+	var awsAuthHeader = "AWS " + _sessionOBJ.accessKeyId + ":" + signature;
+
+	xhr.open(this.verb, params.url);
+	xhr.setRequestHeader('Authorization', awsAuthHeader);
+	xhr.setRequestHeader('Date', curDate);
+	xhr.setRequestHeader('Host', 's3.amazonaws.com');
+	//set the content type if its required by the api.
+	if(this.contentType) {
+		xhr.setRequestHeader('Content-Type', params.contentType);
+	}
+	// For api's that upload files we need to pass content type and content length
+	if(this.uploadFile) {
+
+		xhr.setRequestHeader('Content-Type', params.contentType);
+		if(!Ti.Platform.osname === 'android') {// with android content length is already present
+			xhr.setRequestHeader('Content-Length', params.contentLength);
 		}
-		params.paramString = '';
-		params.isRawMessage = this.isRawMessage;
-		_sessionOBJ.utility.generateSESParams(params);
-		var curDate = (new Date()).toUTCString();
-		var requestBody = _sessionOBJ.utf8.encode('AWSAccessKeyId=' + _sessionOBJ.accessKeyId + '&Action=' + this.action + params.paramString + '&Timestamp=' + curDate);
+	}
+	if(this.method === 'putBucketLifecycle' || this.method === 'deleteMultipleObjects') {
+		xhr.setRequestHeader('Content-MD5', params.contentMD5)
+	}
+	//used for apis like Put object copy and upload part-copy
+	if(params.hasOwnProperty('copySource')) {
+		xhr.setRequestHeader('x-amz-copy-source', params.copySource);
+		// will be passed by client
+	}
+	xhr.onload = function(response) {
+		//For Get and POST xml is returned as response hence converting it to javascript object and passing back to user
 
-		var authorization = 'AWS3-HTTPS AWSAccessKeyId=' + _sessionOBJ.accessKeyId + ',Algorithm=' + this.algorithm + ',Signature=' + _sessionOBJ.sha.b64_hmac_sha1(_sessionOBJ.secretKey, curDate);
-		var xhr = Titanium.Network.createHTTPClient();
-		xhr.onload = function(response) {
-			Ti.API.info(this.responseText);
-			//Print the XML Retrieved from the Service
-			jsResp = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
-			//Build a JavaScript Object from the XML
+		if(this.connectionType == "GET" || this.connectionType == "POST") {
+			if(cbOnData) {
+				cbOnData(_sessionOBJ.xmlToJSON.toJSON(this.responseText, true));
+			}
+		} else {// Api's other then GET and POST does not return any xml as part of response object so passing the complete obect back to client
+			if(cbOnData) {
+				//ETag is returned as part of response header for uploadpart. Its a unique identifier used with completemultipartupload api
+				if(xhr.getResponseHeader("ETag")) {
+					Titanium.API.info('ETag:' + xhr.getResponseHeader("ETag"));
+				}
 
-			//Check if this is a proper response, or an Error Response, and call the necessary callback Method
-			if(cbOnData)
-				cbOnData(jsResp);
-		};
-
-		xhr.onerror = function(e) {
-			if(cbOnError) {
-				var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
-				error.summary = this.responseText;
-				cbOnError(this.responseText);
+				cbOnData(this.responseText);
 			}
 		}
-		xhr.open(this.verb, this.endpoint);
-		xhr.setRequestHeader('Content-Type', this.contentType);
-		xhr.setRequestHeader('Host', this.host);
-		xhr.setRequestHeader('Date', curDate);
-		xhr.setRequestHeader('X-Amzn-Authorization', authorization);
-		xhr.send(requestBody);
+	};
+
+	xhr.onerror = function(e) {
+		if(cbOnError) {
+			var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, true);
+			error.summary = this.responseText;
+			cbOnError(error);
+		}
 	}
-
-	var AWS = {};
-
-	/**
-	 * Stores the security credentials in the Module Session scope
-	 *
-	 * @param accessKeyId - AccessKey provided by the user
-	 * @param secretKey - SecretKey provided by the user
-	 */
-	AWS.authorize = function(accessKeyId, secretKey) {
-		_sessionOBJ.accessKeyId = accessKeyId;
-		_sessionOBJ.secretKey = secretKey;
+	if(params.hasOwnProperty('xmlTemplate')) {//for sending xml in request object
+		xhr.send(params.xmlTemplate);
+	} else if(this.uploadFile) {// for sending file in request object
+		xhr.send(fileContents);
+	} else {
+		xhr.send();
 	}
+}
+/**
+ * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
+ * returns the response returned by the Service, and raises an Error callback in case of a failure.
+ * @param params - Parameters to be sent
+ * @param cbOnData - CallBack to be invoked for Response
+ * @param cbOnError - Callback to be invoked for Error
+ */
+var sesExecutor = function(params, cbOnData, cbOnError) {
+	if(this.preparer && !this.prepared) {
+		this.preparer();
+		this.prepared = true;
+	}
+	params.paramString = '';
+	params.isRawMessage = this.isRawMessage;
+	_sessionOBJ.utility.generateSESParams(params);
+	var curDate = (new Date()).toUTCString();
+	var requestBody = _sessionOBJ.utf8.encode('AWSAccessKeyId=' + _sessionOBJ.accessKeyId + '&Action=' + this.action + params.paramString + '&Timestamp=' + curDate);
 
+	var authorization = 'AWS3-HTTPS AWSAccessKeyId=' + _sessionOBJ.accessKeyId + ',Algorithm=' + this.algorithm + ',Signature=' + _sessionOBJ.sha.b64_hmac_sha1(_sessionOBJ.secretKey, curDate);
+	var xhr = Titanium.Network.createHTTPClient();
+	xhr.onload = function(response) {
+		Ti.API.info(this.responseText);
+		//Print the XML Retrieved from the Service
+		jsResp = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
+		//Build a JavaScript Object from the XML
 
-	_sessionOBJ.bedFrame.build(AWS, {
+		//Check if this is a proper response, or an Error Response, and call the necessary callback Method
+		if(cbOnData)
+			cbOnData(jsResp);
+	};
+
+	xhr.onerror = function(e) {
+		if(cbOnError) {
+			var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
+			error.summary = this.responseText;
+			cbOnError(this.responseText);
+		}
+	}
+	xhr.open(this.verb, this.endpoint);
+	xhr.setRequestHeader('Content-Type', this.contentType);
+	xhr.setRequestHeader('Host', this.host);
+	xhr.setRequestHeader('Date', curDate);
+	xhr.setRequestHeader('X-Amzn-Authorization', authorization);
+	xhr.send(requestBody);
+}
+var AWS = {};
+
+/**
+ * Stores the security credentials in the Module Session scope
+ *
+ * @param accessKeyId - AccessKey provided by the user
+ * @param secretKey - SecretKey provided by the user
+ */
+AWS.authorize = function(accessKeyId, secretKey) {
+	_sessionOBJ.accessKeyId = accessKeyId;
+	_sessionOBJ.secretKey = secretKey;
+}
+
+_sessionOBJ.bedFrame.build(AWS, {
 	verb : 'GET',
 	version : "2009-04-15",
 	executor : defaultQueryExecutor,
@@ -328,7 +318,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 					params : ['DomainName', 'ItemName']
 				},
 				patternExistsValidator : {
-					params : ['Attribute.*.Name','Attribute.*.Value']
+					params : ['Attribute.*.Name', 'Attribute.*.Value']
 				}
 			}
 		}, {
@@ -340,7 +330,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 				patternExistsValidator : {
 					params : ['Item.*.ItemName']
 				}
-				
+
 			}
 		}, {
 			method : 'listDomains',
@@ -351,11 +341,11 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 				required : {
 					params : ['DomainName']
 				},
-				rangeValidator :{
-					min:3,
-					max:255,
-					params:['DomainName']
-			    }
+				rangeValidator : {
+					min : 3,
+					max : 255,
+					params : ['DomainName']
+				}
 			}
 		}, {
 			method : 'deleteDomain',
@@ -560,7 +550,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 					params : ['bucketName', 'xmlTemplate']
 				}
 			}
-		},{
+		}, {
 			method : 'putBucketLifecycle',
 			verb : 'PUT',
 			subResource : '?lifecycle',
@@ -570,7 +560,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 					params : ['bucketName', 'xmlTemplate']
 				}
 			}
-		},  {
+		}, {
 			method : 'putBucketPolicy',
 			verb : 'PUT',
 			subResource : '?policy',
@@ -639,7 +629,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 				}
 			}
 		}, {
-			method : 'deleteMultipleObjects', 
+			method : 'deleteMultipleObjects',
 			verb : 'POST',
 			subResource : '?delete',
 			contentType : 'application/xml',
@@ -716,27 +706,27 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 					params : ['bucketName', 'objectName', 'uploadId', 'partNumber']
 				}
 			}
-		},{
- method : 'completeMultipleUpload',
- verb : 'POST',
- subResource : '?',
- contentType:'application/xml',
- validations : {
- required : {
- params : ['bucketName', 'objectName', 'uploadId', 'partNumber','xmlTemplate']
- }
- }
- },{
+		}, {
+			method : 'completeMultipartUpload',
+			verb : 'POST',
+			subResource : '?',
+			contentType : 'application/xml',
+			validations : {
+				required : {
+					params : ['bucketName', 'objectName', 'uploadId', 'partNumber', 'xmlTemplate']
+				}
+			}
+		}, {
 			method : 'uploadPart',
 			verb : 'PUT',
 			uploadFile : true,
 			subResource : '?',
 			validations : {
 				required : {
-					params : ['bucketName', 'objectName', 'uploadId', 'partNumber','file']
+					params : ['bucketName', 'objectName', 'uploadId', 'partNumber', 'file']
 				}
 			}
-		},{
+		}, {
 			method : 'uploadPartCopy',
 			verb : 'PUT',
 			subResource : '?',
@@ -745,8 +735,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 					params : ['bucketName', 'objectName', 'uploadId', 'partNumber']
 				}
 			}
-		}
-		, {
+		}, {
 			method : 'listParts',
 			subResource : '?',
 			validations : {
@@ -759,130 +748,173 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 		property : 'SES',
 		endpoint : "https://email.us-east-1.amazonaws.com",
 		verb : 'POST',
-		host: 'email.us-east-1.amazonaws.com',
+		host : 'email.us-east-1.amazonaws.com',
 		algorithm : 'HmacSHA1',
-		contentType: 'application/x-www-form-urlencoded',
+		contentType : 'application/x-www-form-urlencoded',
 		executor : sesExecutor,
-		isRawMessage: false,
+		isRawMessage : false,
 		children : [{
 			method : 'deleteVerifiedEmailAddress',
 			validations : {
 				required : {
 					params : ['emailAddress']
-				}				
+				}
 			}
-		}, 
-        {method : 'getSendQuota'}, 
-        {method : 'getSendStatistics'}, 
-        {method : 'listVerifiedEmailAddresses'}, 
-        {
+		}, {
+			method : 'getSendQuota'
+		}, {
+			method : 'getSendStatistics'
+		}, {
+			method : 'listVerifiedEmailAddresses'
+		}, {
 			method : 'sendEmail',
 			validations : {
 				required : {
-					params : ['source','destination','message']
-				}				
+					params : ['source', 'destination', 'message']
+				}
 			}
-		}, 
-        {
+		}, {
 			method : 'sendRawEmail',
-			isRawMessage: true,
+			isRawMessage : true,
 			validations : {
 				required : {
 					params : ['rawMessage']
-				}				
+				}
 			}
-		}, 
-        {
+		}, {
 			method : 'verifyEmailAddress',
 			validations : {
 				required : {
 					params : ['emailAddress']
-				}				
+				}
 			}
 		}]
-	},
-	{
+	}, {
 		property : 'SQS',
 		endpoint : "http://sqs.us-east-1.amazonaws.com",
-		version:'2009-02-01',		
-		children : [
-		{
+		version : '2009-02-01',
+		children : [{
 			method : 'createQueue',
-			version:'2011-10-01',
-			validations : {required : {params : ['QueueName']}}
-				
+			version : '2011-10-01',
+			validations : {
+				required : {
+					params : ['QueueName']
+				}
+			}
+
 		}, {
 			method : 'listQueues',
-			version:'2011-10-01',
-	        arrayOverride : ['/ListQueuesResponse/ListQueuesResult/QueueUrl']
-		},
-		{
+			version : '2011-10-01',
+			arrayOverride : ['/ListQueuesResponse/ListQueuesResult/QueueUrl']
+		}, {
 			method : 'getQueueUrl',
-			version:'2011-10-01',
-	        validations : {required : {params : ['QueueName']}}
-		},
-		{
+			version : '2011-10-01',
+			validations : {
+				required : {
+					params : ['QueueName']
+				}
+			}
+		}, {
 			method : 'addPermission',
-			version:'2011-10-01'
-		},
-		{
+			version : '2011-10-01'
+		}, {
 			method : 'setQueueAttributes',
-			validations : {required : {params : ['AWSAccountId','QueueName','Attribute.Name','Attribute.Value']}}
-		},
-			{
+			validations : {
+				required : {
+					params : ['AWSAccountId', 'QueueName', 'Attribute.Name', 'Attribute.Value']
+				}
+			}
+		}, {
 			method : 'getQueueAttributes',
-			validations : {required : {params : ['AWSAccountId','QueueName']}},
-			patternExistsValidator : {params : ['AttributeName.*']}
-		},
-		{
+			validations : {
+				required : {
+					params : ['AWSAccountId', 'QueueName']
+				}
+			},
+			patternExistsValidator : {
+				params : ['AttributeName.*']
+			}
+		}, {
 			method : 'sendMessage',
-			version:'2011-10-01',
-			validations : {required : {params : ['AWSAccountId','QueueName','MessageBody']}}
-		},
-		{
+			version : '2011-10-01',
+			validations : {
+				required : {
+					params : ['AWSAccountId', 'QueueName', 'MessageBody']
+				}
+			}
+		}, {
 			method : 'sendMessageBatch',
-			version:'2011-10-01',
-			validations : {required : {params : ['AWSAccountId','QueueName']}},
-			patternExistsValidator : {params : ['SendMessageBatchRequestEntry.*.Id','SendMessageBatchRequestEntry.*.MessageBody']}
-		},
-		{
+			version : '2011-10-01',
+			validations : {
+				required : {
+					params : ['AWSAccountId', 'QueueName']
+				}
+			},
+			patternExistsValidator : {
+				params : ['SendMessageBatchRequestEntry.*.Id', 'SendMessageBatchRequestEntry.*.MessageBody']
+			}
+		}, {
 			method : 'receiveMessage',
-			validations : {required : {params : ['AWSAccountId','QueueName']}}
-		},
-		{
+			validations : {
+				required : {
+					params : ['AWSAccountId', 'QueueName']
+				}
+			}
+		}, {
 			method : 'deleteMessage',
-			validations : {required : {params : ['ReceiptHandle','AWSAccountId','QueueName']}}
-		},
-		{
+			validations : {
+				required : {
+					params : ['ReceiptHandle', 'AWSAccountId', 'QueueName']
+				}
+			}
+		}, {
 			method : 'deleteMessageBatch',
-			version:'2011-10-01',
-			validations : {required : {params : ['AWSAccountId','QueueName']}},
-			patternExistsValidator : {params : ['DeleteMessageBatchRequestEntry.*.Id','DeleteMessageBatchRequestEntry.*.ReceiptHandle']}
-		},
-		{
+			version : '2011-10-01',
+			validations : {
+				required : {
+					params : ['AWSAccountId', 'QueueName']
+				}
+			},
+			patternExistsValidator : {
+				params : ['DeleteMessageBatchRequestEntry.*.Id', 'DeleteMessageBatchRequestEntry.*.ReceiptHandle']
+			}
+		}, {
 			method : 'deleteQueue',
-			validations : {required : {params : ['AWSAccountId','QueueName']}}
-		},
-		{
+			validations : {
+				required : {
+					params : ['AWSAccountId', 'QueueName']
+				}
+			}
+		}, {
 			method : 'changeMessageVisibility',
-			validations : {required : {params : ['AWSAccountId','QueueName','ReceiptHandle','VisibilityTimeout']}}
-		},
-		{
+			validations : {
+				required : {
+					params : ['AWSAccountId', 'QueueName', 'ReceiptHandle', 'VisibilityTimeout']
+				}
+			}
+		}, {
 			method : 'changeMessageVisibilityBatch',
-			version:'2011-10-01',
-			validations : {required : {params : ['AWSAccountId','QueueName']}},
-			patternExistsValidator : {params : ['ChangeMessageVisibilityBatchRequestEntry.*.Id','ChangeMessageVisibilityBatchRequestEntry.*.ReceiptHandle','ChangeMessageVisibilityBatchRequestEntry.*.VisibilityTimeout']}
-		},
-		{
+			version : '2011-10-01',
+			validations : {
+				required : {
+					params : ['AWSAccountId', 'QueueName']
+				}
+			},
+			patternExistsValidator : {
+				params : ['ChangeMessageVisibilityBatchRequestEntry.*.Id', 'ChangeMessageVisibilityBatchRequestEntry.*.ReceiptHandle', 'ChangeMessageVisibilityBatchRequestEntry.*.VisibilityTimeout']
+			}
+		}, {
 			method : 'removePermission',
-			validations : {required : {params : ['AWSAccountId','QueueName','Lable']}}
-		}
-		]
-	},
-		{
+			validations : {
+				required : {
+					params : ['AWSAccountId', 'QueueName', 'Label']
+				}
+			}
+		}]
+	}, {
 		property : 'SNS',
 		endpoint : "http://sns.us-east-1.amazonaws.com",
-		verb : 'POST',						
+		verb : 'POST',
 		executor : snsExecutor,
 		version : '2010-03-31',
 		children : [{
@@ -901,90 +933,89 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 				required : {
 					params : ['Token', 'TopicArn']
 				}
-			
-			} 
+
+			}
 		}, {
 			method : 'createTopic',
 			validations : {
 				required : {
 					params : ['Name']
 				}
-            } 
+			}
 		}, {
 			method : 'deleteTopic',
 			validations : {
 				required : {
 					params : ['TopicArn']
 				}
-            } 
+			}
 		}, {
 			method : 'getSubscriptionAttributes',
 			validations : {
 				required : {
 					params : ['SubscriptionArn']
 				}
-            } 
+			}
 		}, {
 			method : 'getTopicAttributes',
 			validations : {
 				required : {
 					params : ['TopicArn']
 				}
-            } 
-		}, 
-        { method : 'listSubscriptions'
-		}, 
-        {
+			}
+		}, {
+			method : 'listSubscriptions'
+		}, {
 			method : 'listSubscriptionsByTopic',
 			validations : {
 				required : {
 					params : ['TopicArn']
 				}
-            } 
+			}
 		}, {
 			method : 'listTopics'
 		}, {
 			method : 'publish',
 			validations : {
 				required : {
-					params : ['TopicArn','Message']
+					params : ['TopicArn', 'Message']
 				}
-            } 
+			}
 		}, {
 			method : 'removePermission',
 			validations : {
 				required : {
-					params : ['Label','TopicArn']
+					params : ['Label', 'TopicArn']
 				}
-            }
+			}
 		}, {
 			method : 'setSubscriptionAttributes',
 			validations : {
 				required : {
-					params : ['AttributeName','AttributeValue','SubscriptionArn']
+					params : ['AttributeName', 'AttributeValue', 'SubscriptionArn']
 				}
-            }
+			}
 		}, {
 			method : 'setTopicAttributes',
 			validations : {
 				required : {
-					params : ['AttributeName','AttributeValue','TopicArn']
+					params : ['AttributeName', 'AttributeValue', 'TopicArn']
 				}
-            }
+			}
 		}, {
 			method : 'subscribe',
 			validations : {
 				required : {
-					params : ['TopicArn','Endpoint','Protocol']
+					params : ['TopicArn', 'Endpoint', 'Protocol']
 				}
-            }
+			}
 		}, {
 			method : 'unsubscribe',
 			validations : {
 				required : {
 					params : ['SubscriptionArn']
 				}
-            }
+			}
 		}]
 	}]
 });
