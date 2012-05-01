@@ -626,7 +626,7 @@ describe("AWS SimpleDB Tests!", {
 			'Attribute.1.Name' : 'testAttributeName',
 			'Attribute.1.Value' : 'testAttributeValue',
 			'ItemName' : 'testItemName',
-			'DomainName' : 'testDomainName'
+			'DomainName' : 'Domain1'
 		}, function(data) {
 			callback.passed();
 		}, function(error) {
@@ -706,16 +706,16 @@ describe("AWS SimpleDB Tests!", {
 			'ItemName' : 'testItemName',
 			'DomainName' : 'Domain1'
 		}, function(data) {
-			callback.failed('Some error occured');
-		}, function(error) {
 			callback.passed();
+		}, function(error) {
+			callback.failed('Some error occured');
 		});
 	},
 
 	putAttributesWithEmptyItemName_as_async : function(callback) {
 		AWS.SimpleDB.putAttributes({
-			'Attribute.1.Name' : 'testAttributeName',
-			'Attribute.1.Value' : '',
+			'Attribute.1.Name' : '',
+			'Attribute.1.Value' : 'test',
 			'ItemName' : 'testItemName',
 			'DomainName' : 'Domain1'
 		}, function(data) {
