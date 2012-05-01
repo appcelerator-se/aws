@@ -111,12 +111,10 @@ function simpleComparator(a, b) {
 	return 0;
 }
 
-Date.prototype.toISODate =
-        new Function("with (this)\n    return " +
-           "getFullYear()+'-'+addZero(getMonth()+1)+'-'" +
-           "+addZero(getDate())+'T'+addZero(getHours())+':'" +
-           "+addZero(getMinutes())+':'+addZero(getSeconds())+'.000Z'");
-   
+Date.prototype.toISODate= function()
+{
+	return this.getFullYear() +'-'+addZero(this.getMonth()+1)+ '-' +addZero(this.getDate())+'T'+addZero(this.getHours())+':' +addZero(this.getMinutes())+':'+addZero(this.getSeconds())+'.000Z';	
+}   
 function addZero(n) {
     return ( n < 0 || n > 9 ? "" : "0" ) + n;
 }
