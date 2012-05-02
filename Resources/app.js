@@ -10,7 +10,7 @@
  */
 
 
-/*if ( true )
+if ( false )
 {
 	var APP = {
 		appName: 'App Name',
@@ -26,7 +26,7 @@
 	APP.AppTabGroup.open();
 }//end if	
 else
-{*/
+{
 Ti.App.AWS = require('ti.aws'); //Make the AWS Module publically available across the App
 
 // Define our window store.
@@ -102,11 +102,8 @@ function error(e) {
 
 // Include the window hierarchy.
 Ti.include(
-    'windows/simpledb/table.js',
-    'windows/s3/table.js',
-    'windows/ses/table.js',
-    'windows/sqs/table.js',
-    'windows/sns/table.js'
+    'windows/simpledb/table.js'
+   
 );
 
 var AccessCredentialsWindow = require('/windows/common/AccessCredentialsWindow');
@@ -135,15 +132,11 @@ function finishLaunching(){
 	var table = Ti.UI.createTableView({
     	backgroundColor: '#fff',
     	data: createRows([
-        	'SimpleDb',
-        	'S3',
-        	'SES',
-        	'SQS',
-        	'SNS'
+        	'SimpleDb'
     	])
 	});
 	table.addEventListener('click', handleOpenWindow);
 	win.add(table);
 	win.open();
 }
-//}//end else
+}//end else
