@@ -98,9 +98,7 @@ var snsExecutor = function(params, cbOnData, cbOnError) {
 		this.preparer();
 		this.prepared = true;
 	}
-	if(this.validations)
-		_sessionOBJ.utility.validateParams(params, this.validations);
-
+	
 	var xhr = Ti.Network.createHTTPClient();
 	//generates complete querystring without url
 	params.Action = this.action;
@@ -147,8 +145,6 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 		this.prepared = true;
 	}
 
-	if(this.validations)
-		_sessionOBJ.utility.validateParams(params, this.validations);
 
 	var xhr = Ti.Network.createHTTPClient();
 	params.contentType = '';
@@ -208,7 +204,8 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 		xhr.setRequestHeader('x-amz-copy-source', params.copySource);
 		// will be passed by client
 	}
-	var method= this.method;
+	
+	var method = this.method;
 	xhr.onload = function(response) {
 		//For Get and POST xml is returned as response hence converting it to javascript object and passing back to user
 
@@ -255,6 +252,8 @@ var sesExecutor = function(params, cbOnData, cbOnError) {
 		this.preparer();
 		this.prepared = true;
 	}
+	
+	
 	params.paramString = '';
 	params.isRawMessage = this.isRawMessage;
 	_sessionOBJ.utility.generateSESParams(params);
