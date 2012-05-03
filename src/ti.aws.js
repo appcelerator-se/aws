@@ -106,7 +106,14 @@ var snsExecutor = function(params, cbOnData, cbOnError) {
 	params.Action = this.action;
 	params.Version = this.version;
 	payload = _sessionOBJ.utility.generatePayload(params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint)
-	xhr.open(this.verb, this.endpoint);
+	
+	
+	if(Ti.Platform.osname === 'iphone') {
+		xhr.open(this.verb, this.endpoint + '?' + payload);
+	} else {
+		xhr.open(this.verb, this.endpoint);
+	}	
+	
 	xhr.setRequestHeader('Host', 'sns.us-east-1.amazonaws.com');
 	xhr.onload = function(response) {
 		jsResp = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
@@ -119,7 +126,13 @@ var snsExecutor = function(params, cbOnData, cbOnError) {
 			cbOnError(error);
 		}
 	}
-	xhr.send(payload);
+	
+	if(Ti.Platform.osname === 'iphone') {
+		xhr.send();
+	} else {
+		xhr.send(payload);
+	}
+
 }
 /**
  * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
