@@ -11,7 +11,7 @@ describe("AWS SES Tests!", {
 	 */
 	sesDeleteVerifiedEmailAddressWithoutEmailAddress : function(callback) {
 		var params = {
-			'EmailAddress' : ''//empty EmailAddress
+			'emailAddress' : ''//empty EmailAddress
 		};
 		AWS.SES.deleteVerifiedEmailAddress(params, function(data) {
 			callback.failed('Some error occured');
@@ -25,7 +25,7 @@ describe("AWS SES Tests!", {
 	 */
 	sesDeleteVerifiedEmailAddress : function(callback) {
 		var params = {
-			'EmailAddress' : 'abc@gmail.com'//Required
+			'emailAddress' : 'abc@gmail.com'//Required
 		};
 		AWS.SES.deleteVerifiedEmailAddress(params, function(data) {
 			callback.passed();
@@ -39,7 +39,7 @@ describe("AWS SES Tests!", {
 	 */
 	sesDeleteVerifiedEmailAddressWithInvalidEmailAddress : function(callback) {
 		var params = {
-			'EmailAddress' : 'caxvcx'//invalid EmailAddress
+			'emailAddress' : 'caxvcx'//invalid EmailAddress
 		};
 		AWS.SES.deleteVerifiedEmailAddress(params, function(data) {
 			callback.failed('Some error occured');
@@ -107,7 +107,7 @@ describe("AWS SES Tests!", {
 
 	sesVerifyEmailAddressWithoutEmailAddress : function(callback) {
 		var params = {
-			'EmailAddress' : ''//empty EmailAddress
+			'emailAddress' : ''//empty EmailAddress
 		};
 		AWS.SES.verifyEmailAddress(params, function(data) {
 			callback.failed('Some error occured');
@@ -121,7 +121,7 @@ describe("AWS SES Tests!", {
 	 */
 	sesVerifyEmailAddress : function(callback) {
 		var params = {
-			'EmailAddress' : 'test@test.com'//Required
+			'emailAddress' : 'test@test.com'//Required
 		};
 		AWS.SES.verifyEmailAddress(params, function(data) {
 			callback.passed();
@@ -134,7 +134,7 @@ describe("AWS SES Tests!", {
 	 */
 	sesVerifyEmailAddressWithInvalidEmailAddress : function(callback) {
 		var params = {
-			'EmailAddress' : 'bdvjhdbdgv'//invalid EmailAddress
+			'emailAddress' : 'bdvjhdbdgv'//invalid EmailAddress
 		};
 		AWS.SES.verifyEmailAddress(params, function(data) {
 			callback.failed('Some error occured');
@@ -150,9 +150,9 @@ describe("AWS SES Tests!", {
 	 */
 	sesSendEmailWithoutDestination : function(callback) {
 		var params = {
-			'Destination' : '', //empty EmailAddress
-			'Message' : 'Hi',
-			'Source' : 'test@gmail.com'
+			'destination' : '', //empty EmailAddress
+			'message' : 'Hi',
+			'source' : 'test@gmail.com'
 		};
 		AWS.SES.sendEmail(params, function(data) {
 			callback.failed('Some error occured');
@@ -165,9 +165,9 @@ describe("AWS SES Tests!", {
 	 */
 	sesSendEmailWithoutMessage : function(callback) {
 		var params = {
-			'Destination' : 'test@gmail.com',
-			'Message' : '', //Empty
-			'Source' : 'test@gmail.com'
+			'destination' : 'test@gmail.com',
+			'message' : '', //Empty
+			'source' : 'test@gmail.com'
 		};
 		AWS.SES.sendEmail(params, function(data) {
 			callback.failed('Some error occured');
@@ -180,9 +180,9 @@ describe("AWS SES Tests!", {
 	 */
 	sesSendEmailWithoutSource : function(callback) {
 		var params = {
-			'Destination' : 'test@test.com', //Required
-			'Message' : 'Hi', //Required
-			'Source' : ''//Empty
+			'destination' : 'test@test.com', //Required
+			'message' : 'Hi', //Required
+			'source' : ''//Empty
 		};
 		AWS.SES.sendEmail(params, function(data) {
 			callback.failed('Some error occured');
@@ -195,9 +195,9 @@ describe("AWS SES Tests!", {
 	 */
 	sesSendEmail : function(callback) {
 		var params = {
-			'Destination' : 'test@gmail.com', //Required
-			'Message' : 'hi', //Required
-			'Source' : 'test@gmail.com'//Required
+			'destination' : 'test@gmail.com', //Required
+			'message' : 'hi', //Required
+			'source' : 'test@gmail.com'//Required
 		};
 		AWS.SES.sendEmail(params, function(data) {
 			callback.passed();
@@ -211,9 +211,9 @@ describe("AWS SES Tests!", {
 	 */
 	sesSendEmailWithInvalidDestination : function(callback) {
 		var params = {
-			'Destination' : 'hbegjhrg', //Invalid EmailAddress
-			'Message' : 'hi', //Required
-			'Source' : 'rahul0789@gmail.com'//Required
+			'destination' : 'hbegjhrg', //Invalid EmailAddress
+			'message' : 'hi', //Required
+			'source' : 'rahul0789@gmail.com'//Required
 		};
 		AWS.SES.sendEmail(params, function(data) {
 			callback.failed('Some error occured');
@@ -226,9 +226,9 @@ describe("AWS SES Tests!", {
 	 */
 	sesSendEmailWithInvalidSource : function(callback) {
 		var params = {
-			'Destination' : 'test@test.com', //Required
-			'Message' : 'hi', //Required
-			'Source' : 'bndjvnd'//Invalid
+			'destination' : 'test@test.com', //Required
+			'message' : 'hi', //Required
+			'source' : 'bndjvnd'//Invalid
 		};
 		AWS.SES.sendEmail(params, function(data) {
 			callback.failed('Some error occured');
@@ -244,7 +244,7 @@ describe("AWS SES Tests!", {
 	 */
 	sesSendRawEmailWithoutRawMessage : function(callback) {
 		var params = {
-			'RawMessage' : ''//empty RawMessage
+			'rawMessage' : ''//empty RawMessage
 		};
 		AWS.SES.sendRawEmail(params, function(data) {
 			callback.failed('Some error occured');
