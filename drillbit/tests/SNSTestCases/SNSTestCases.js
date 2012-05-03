@@ -3,12 +3,10 @@ describe("AWS SNS Tests!", {
 	before_all : function() {
 		AWS = require('ti.aws');
 		AWS.authorize(Titanium.App.Properties.getString('aws-access-key-id'), Titanium.App.Properties.getString('aws-secret-access-key'));
-		failedCases='';
+		arn = '';
 	},
-	after_all :function()
-	{
-		alert(failedCases);
-		
+	after_all : function() {
+
 	},
 	timeout : 5000,
 
@@ -21,7 +19,6 @@ describe("AWS SNS Tests!", {
 		};
 		AWS.SNS.createTopic(params, function(data) {
 			callback.failed('Some error occured');
-			failedCases = failedCases + "createEmptyTopic_as_async, ";
 		}, function(error) {
 			callback.passed();
 		});
@@ -35,7 +32,6 @@ describe("AWS SNS Tests!", {
 		};
 		AWS.SNS.createTopic(params, function(data) {
 			callback.failed('Some error occured');
-			failedCases = failedCases + "createInvalidTopic_as_async, ";
 		}, function(error) {
 			callback.passed();
 		});
@@ -45,16 +41,17 @@ describe("AWS SNS Tests!", {
 	 */
 	createValidTopic_as_async : function(callback) {
 		var params = {
-			'Name' : 'TestTopic1'//Required
+			'Name' : 'DrillBitTestTopic'//Required
 		};
 		AWS.SNS.createTopic(params, function(data) {
+			arn= data.CreateTopicResult[0].TopicArn[0];
 			callback.passed();
 		}, function(error) {
-			callback.failed('Some error occured');
-			failedCases = failedCases + "createValidTopic_as_async, ";
+			callback.failed('Some error occured')
 		});
 	},
 	//*************Create Topic test cases ends**************
+
 	//****************List Topic test cases starts.***************
 
 	/**
@@ -66,8 +63,7 @@ describe("AWS SNS Tests!", {
 		AWS.SNS.listTopics(params, function(data) {
 			callback.passed();
 		}, function(error) {
-			callback.failed('Some error occured');
-			failedCases = failedCases + "listTopic_as_async, ";
+			callback.failed('Some error occured')
 		});
 	},
 	//*************List Topic test cases ends**************
@@ -78,11 +74,10 @@ describe("AWS SNS Tests!", {
 	confirmSubscriptionWithEmptyToken_as_async : function(callback) {
 		var params = {
 			'Token' : '', //Token is empty
-			'TopicArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting'
+			'TopicArn' : arn
 		};
 		AWS.SNS.confirmSubscription(params, function(data) {
 			callback.failed('Some error occured');
-			failedCases = failedCases + "confirmSubscriptionWithEmptyToken_as_async, ";
 		}, function(error) {
 			callback.passed();
 		});
@@ -93,11 +88,10 @@ describe("AWS SNS Tests!", {
 	confirmSubscriptionWithInvalidToken_as_async : function(callback) {
 		var params = {
 			'Token' : '2336412f37fb687f5d51e6e241d09c805a5ajhhjkagjkaskluagaudy8789689689asdgt76627sghd6895be8b31efbc4483c32d', //Invalid token
-			'TopicArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting'
+			'TopicArn' : arn
 		};
 		AWS.SNS.confirmSubscription(params, function(data) {
 			callback.failed('Some error occured');
-			failedCases = failedCases + "confirmSubscriptionWithInvalidToken_as_async, ";
 		}, function(error) {
 			callback.passed();
 		});
@@ -107,12 +101,11 @@ describe("AWS SNS Tests!", {
 	 */
 	confirmSubscriptionWithEmptyTopicArn_as_async : function(callback) {
 		var params = {
-			'Token' : '2336412f37fb687f5d51e6e241d09c805a5a57b0cf345c7a71d42b5d9294cd2c8bbb33aec57d98fa2aea0d541f648059b26f2afcc5b86a60f8a1023c84d836ff3090e96509cd4172eab9e7c82346a0cecc1bbbccc4bf85ab490c999084ca1560bb8c899a7aa295be8b31efbc4483c32d',
+			'Token' : '2336412f37fb687f5d51e6e241d09c805bfad098d77ccb5b355099356f979ecf6c8f579df806b3f9ec20aabea6f9a023f58bcd0bc07ba237c5dd0b70c46d4404b422cf07c1bc1bb415c125276db91e9e55c447cc3be68cec13165ed9462fb84c458137fdb3d257a0fd25cb65257cc249',
 			'TopicArn' : ''//TopicArn is empty
 		};
 		AWS.SNS.confirmSubscription(params, function(data) {
 			callback.failed('Some error occured');
-			failedCases = failedCases + "confirmSubscriptionWithEmptyTopicArn_as_async, ";
 		}, function(error) {
 			callback.passed();
 		});
@@ -122,12 +115,11 @@ describe("AWS SNS Tests!", {
 	 */
 	confirmSubscriptionWithInvalidTopicArn_as_async : function(callback) {
 		var params = {
-			'Token' : '2336412f37fb687f5d51e6e241d09c805a5a57b0cf345c7a71d42b5d9294cd2c8bbb33aec57d98fa2aea0d541f648059b26f2afcc5b86a60f8a1023c84d836ff3090e96509cd4172eab9e7c82346a0cecc1bbbccc4bf85ab490c999084ca1560bb8c899a7aa295be8b31efbc4483c32d',
-			'TopicArn' : 'arn:aws:sns:us-east-1:704687501311'//Invalid TopicArn
+			'Token' : '2336412f37fb687f5d51e6e241d09c805bfad098d77ccb5b355099356f979ecf6c8f579df806b3f9ec20aabea6f9a023f58bcd0bc07ba237c5dd0b70c46d4404b422cf07c1bc1bb415c125276db91e9e55c447cc3be68cec13165ed9462fb84c458137fdb3d257a0fd25cb65257cc249',
+			'TopicArn' : 'arn:aws:sns:us-east-'//Invalid TopicArn
 		};
 		AWS.SNS.confirmSubscription(params, function(data) {
 			callback.failed('Some error occured');
-			failedCases = failedCases + "confirmSubscriptionWithInvalidTopicArn_as_async, ";
 		}, function(error) {
 			callback.passed();
 		});
@@ -137,14 +129,13 @@ describe("AWS SNS Tests!", {
 	 */
 	confirmSubscription_as_async : function(callback) {
 		var params = {
-			'Token' : '2336412f37fb687f5d51e6e241d09c805a5a57b0cf345c7a71d42b5d9294cd2c8bbb33aec57d98fa2aea0d541f648059b26f2afcc5b86a60f8a1023c84d836ff3090e96509cd4172eab9e7c82346a0cecc1bbbccc4bf85ab490c999084ca1560bb8c899a7aa295be8b31efbc4483c32d',
-			'TopicArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting'
+			'Token' : '2336412f37fb687f5d51e6e241d09c805bfad098d77ccb5b355099356f979ecf6c8f579df806b3f9ec20aabea6f9a023f58bcd0bc07ba237c5dd0b70c46d4404b422cf07c1bc1bb415c125276db91e9e55c447cc3be68cec13165ed9462fb84c458137fdb3d257a0fd25cb65257cc249',
+			'TopicArn' : arn
 		};
 		AWS.SNS.confirmSubscription(params, function(data) {
 			callback.passed();
 		}, function(error) {
-			callback.failed('Some error occured');
-			failedCases = failedCases + "confirmSubscription_as_async, ";
+			callback.failed('Some error occured')
 		});
 	},
 	//*************Confirm Subscription test cases ends**************
@@ -160,7 +151,6 @@ describe("AWS SNS Tests!", {
 		};
 		AWS.SNS.deleteTopic(params, function(data) {
 			callback.failed('Some error occured');
-			failedCases = failedCases + "deleteTopicWithEmptyTopicArn_as_async, ";
 		}, function(error) {
 			callback.passed();
 		});
@@ -174,7 +164,6 @@ describe("AWS SNS Tests!", {
 		};
 		AWS.SNS.deleteTopic(params, function(data) {
 			callback.failed('Some error occured');
-			failedCases = failedCases + "deleteTopicWithInvalidTopicArn_as_async, ";
 		}, function(error) {
 			callback.passed();
 		});
@@ -184,13 +173,12 @@ describe("AWS SNS Tests!", {
 	 */
 	deleteTopic_as_async : function(callback) {
 		var params = {
-			'TopicArn' : 'arn:aws:sns:us-east-1:7046875'//Required
+			'TopicArn' : arn
 		};
 		AWS.SNS.deleteTopic(params, function(data) {
 			callback.passed();
 		}, function(error) {
-			callback.failed('Some error occured');
-			failedCases = failedCases + "deleteTopic_as_async, ";
+			callback.failed('Some error occured')
 		});
 	},
 	//*************Delete Topic test cases ends**************
@@ -206,7 +194,6 @@ describe("AWS SNS Tests!", {
 		};
 		AWS.SNS.getSubscriptionAttributes(params, function(data) {
 			callback.failed('Some error occured');
-			failedCases = failedCases + "getSubscriptionAttributesWithEmptySubscriptionArn_as_async, ";
 		}, function(error) {
 			callback.passed();
 		});
@@ -224,12 +211,13 @@ describe("AWS SNS Tests!", {
 			callback.passed();
 		});
 	},
+	
 	/**
 	 *Test case for getting SubscriptionAttributes.
 	 */
 	getSubscriptionAttributes_as_async : function(callback) {
 		var params = {
-			'SubscriptionArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting:2eaabe64-8c72-4926-856d-8cf7e3c63640'//Required
+			'SubscriptionArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting:87c2a867-ef7a-4940-86bf-c9d0d3d381b0'//Required
 		};
 		AWS.SNS.getSubscriptionAttributes(params, function(data) {
 			callback.passed();
@@ -402,21 +390,6 @@ describe("AWS SNS Tests!", {
 	//*************Publish test cases ends**************
 
 	//*************Remove Permission test cases starts****************
-
-	/**
-	 *Test case for removing permission WithEmpty TopicArn.
-	 */
-	removePermissionWithEmptyLabel_as_async : function(callback) {
-		var params = {
-			'Label' : '', //Label is empty
-			'TopicArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting'
-		};
-		AWS.SNS.removePermission(params, function(data) {
-			callback.failed('Some error occured');
-		}, function(error) {
-			callback.passed();
-		});
-	},
 	/**
 	 *Test case for removing permission WithEmpty TopicArn.
 	 */
@@ -470,7 +443,7 @@ describe("AWS SNS Tests!", {
 		var params = {
 			'AttributeName' : '', //AttributeName is empty
 			'AttributeValue' : '',
-			'SubscriptionArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting:2eaabe64-8c72-4926-856d-8cf7e3c63640'
+			'SubscriptionArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting:87c2a867-ef7a-4940-86bf-c9d0d3d381b0'
 		};
 		AWS.SNS.setSubscriptionAttributes(params, function(data) {
 			callback.failed('Some error occured');
@@ -485,7 +458,7 @@ describe("AWS SNS Tests!", {
 		var params = {
 			'AttributeName' : 'DeliveryPolicySNS', //AttributeName is invalid
 			'AttributeValue' : '',
-			'SubscriptionArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting:2eaabe64-8c72-4926-856d-8cf7e3c63640'
+			'SubscriptionArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting:87c2a867-ef7a-4940-86bf-c9d0d3d381b0'
 		};
 		AWS.SNS.setSubscriptionAttributes(params, function(data) {
 			callback.failed('Some error occured');
@@ -500,7 +473,7 @@ describe("AWS SNS Tests!", {
 		var params = {
 			'AttributeName' : 'DeliveryPolicy',
 			'AttributeValue' : '{}', //AttributeValue is empty
-			'SubscriptionArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting:2eaabe64-8c72-4926-856d-8cf7e3c63640'
+			'SubscriptionArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting:87c2a867-ef7a-4940-86bf-c9d0d3d381b0'
 		};
 		AWS.SNS.setSubscriptionAttributes(params, function(data) {
 			callback.failed('Some error occured');
@@ -515,7 +488,7 @@ describe("AWS SNS Tests!", {
 		var params = {
 			'AttributeName' : 'DeliveryPolicy',
 			'AttributeValue' : '{value: \'hdfks\'}', //AttributeValue is invalid
-			'SubscriptionArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting:2eaabe64-8c72-4926-856d-8cf7e3c63640'
+			'SubscriptionArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting:87c2a867-ef7a-4940-86bf-c9d0d3d381b0'
 		};
 		AWS.SNS.setSubscriptionAttributes(params, function(data) {
 			callback.failed('Some error occured');
@@ -560,7 +533,7 @@ describe("AWS SNS Tests!", {
 		var params = {
 			'AttributeName' : 'DeliveryPolicy', //Required
 			'AttributeValue' : '', //Required
-			'SubscriptionArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting:2eaabe64-8c72-4926-856d-8cf7e3c63640'//Required
+			'SubscriptionArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting:87c2a867-ef7a-4940-86bf-c9d0d3d381b0'//Required
 		};
 		AWS.SNS.setSubscriptionAttributes(params, function(data) {
 			callback.passed();
@@ -612,9 +585,9 @@ describe("AWS SNS Tests!", {
 			'TopicArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting'
 		};
 		AWS.SNS.setTopicAttributes(params, function(data) {
-			callback.failed('Some error occured');
-		}, function(error) {
 			callback.passed();
+		}, function(error) {
+			callback.failed('Some error occured');
 		});
 	},
 	/**
@@ -805,7 +778,7 @@ describe("AWS SNS Tests!", {
 	 */
 	unsubscribe_as_async : function(callback) {
 		var params = {
-			'SubscriptionArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting:2eaabe64-8c72-4926-856d-8cf7e3c63640'//Required
+			'SubscriptionArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting:87c2a867-ef7a-4940-86bf-c9d0d3d381b0'//Required
 		};
 		AWS.SNS.unsubscribe(params, function(data) {
 			callback.passed();
@@ -814,4 +787,5 @@ describe("AWS SNS Tests!", {
 		});
 	}
 	//*************Unsubscribe test cases ends**************
+
 });
