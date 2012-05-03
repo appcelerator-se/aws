@@ -771,8 +771,8 @@ describe("AWS SimpleDB Tests!", {
 	SQSremovePermission_as_async : function(callback) {
 		var params = {
 			'AWSAccountId' : '704687501311',
-			'QueueName' : 'TestQueue676767',
-			'Label' : 'addPermissiontest'
+			'QueueName' : 'TestQueue55555',
+			'Label' : 'addPermissiontest',
 		};
 		AWS.SQS.removePermission(params, function(data) {
 			callback.passed();
