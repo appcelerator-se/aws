@@ -195,10 +195,11 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 		xhr.setRequestHeader('x-amz-copy-source', params.copySource);
 		// will be passed by client
 	}
+	var method= this.method;
 	xhr.onload = function(response) {
 		//For Get and POST xml is returned as response hence converting it to javascript object and passing back to user
 
-		if(this.connectionType == "GET" || this.connectionType == "POST") {
+		if(this.connectionType == "GET" || this.connectionType == "POST" || method == "uploadPartCopy") {
 			if(cbOnData) {
 				cbOnData(_sessionOBJ.xmlToJSON.toJSON(this.responseText, true));
 			}
