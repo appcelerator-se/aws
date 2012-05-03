@@ -11,7 +11,7 @@ describe("AWS SimpleDB Tests!", {
 	//Test case with valid domain
 	createDomain_as_async : function(callback) {
 		AWS.SimpleDB.createDomain({
-			DomainName : 'DrillBitDomain12'
+			DomainName : 'DrillBitDomain123'
 		}, function(data) {
 			callback.passed();
 		}, function(error) {
@@ -101,7 +101,7 @@ describe("AWS SimpleDB Tests!", {
 	// Start Test Cases for Delete Domain.
 	deleteDomain_as_async : function(callback) {
 		AWS.SimpleDB.deleteDomain({
-			'DomainName' : 'DrillBitDomain'
+			'DomainName' : 'DrillBitDomain123'
 		}, function(data) {
 			callback.passed();
 		}, function(error) {
