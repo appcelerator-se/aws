@@ -89,25 +89,31 @@ xmlToJS.convert = function convert(xml) {
  * @param response - the XML response returned from the service.
  * @param isClean - Boolean variable indicating the structure of the response XML.
  */
+
 xmlToJS.toJSON = function toJSON(response, isClean) {
-	//For a clean xml string
-	if(isClean) {
-		//Returning the JSON response after calling the convert function with Titanium XML document of service response
-		return xmlToJS.convert(Ti.XML.parseString(response).documentElement);
-	} else {//For an unclean XML
-		var xml = "";
-		//Iterating through the xml by slicing tags
-		while(response.indexOf('<') > -1) {
-			//Adding a trim function in String prototype for removing the whitespaces
-			String.prototype.trim = function() {
-				return this.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+	if(( typeof response === 'string') && (response !== null || response !== '')) {
+		//For a clean xml string
+		if(isClean) {
+			//Returning the JSON response after calling the convert function with Titanium XML document of service response
+			return xmlToJS.convert(Ti.XML.parseString(response).documentElement);
+		} else {//For an unclean XML
+			var xml = "";
+			//Iterating through the xml by slicing tags
+			while(response.indexOf('<') > -1) {
+				//Adding a trim function in String prototype for removing the whitespaces
+				String.prototype.trim = function() {
+					return this.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+				}
+				//Removing the whitespaces between the tags and concatenating the XML for traversing
+				xml = xml + response.slice(response.indexOf('<'), response.indexOf('>') + 1);
+				xml = xml + response.slice(response.indexOf('>') + 1, response.indexOf('<', response.indexOf('>'))).trim();
+				response = response.substring(response.indexOf('>') + 1);
 			}
-			//Removing the whitespaces between the tags and concatenating the XML for traversing
-			xml = xml + response.slice(response.indexOf('<'), response.indexOf('>') + 1);
-			xml = xml + response.slice(response.indexOf('>') + 1, response.indexOf('<', response.indexOf('>'))).trim();
-			response = response.substring(response.indexOf('>') + 1);
+			//Returning the JSON response after calling the convert function with Titanium XML document of service response
+			return xmlToJS.convert(Ti.XML.parseString(xml).documentElement);
 		}
-		//Returning the JSON response after calling the convert function with Titanium XML document of service response
-		return xmlToJS.convert(Ti.XML.parseString(xml).documentElement);
+	} else {
+		return {};
 	}
+
 }

@@ -11,7 +11,7 @@ describe("AWS SimpleDB Tests!", {
 	//Test case with valid domain
 	createDomain_as_async : function(callback) {
 		AWS.SimpleDB.createDomain({
-			DomainName : 'DrillBitDomain123'
+			DomainName : 'DrillBit123'
 		}, function(data) {
 			callback.passed();
 		}, function(error) {
