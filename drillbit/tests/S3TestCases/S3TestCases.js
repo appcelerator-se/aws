@@ -1,11 +1,13 @@
-describe("AWS SimpleDB Tests!", {
+describe("AWS S3 Tests!", {
 
-before_all : function() {
-AWS = require('ti.aws');
-AWS.authorize(Titanium.App.Properties.getString('aws-access-key-id'), Titanium.App.Properties.getString('aws-secret-access-key'));
-uploadId='';
-ETag='';
-},
+
+	before_all : function() {
+		AWS = require('ti.aws');
+		AWS.authorize(Titanium.App.Properties.getString('aws-access-key-id'), Titanium.App.Properties.getString('aws-secret-access-key'));
+		uploadId = '';
+		ETag = '';
+	}
+,
 timeout : 5000,
 
 
@@ -19,7 +21,9 @@ headObject_as_async: function (callback) {
 	}, function(error) {
 		callback.failed('Some error occured');
 	});
-}, headObjectWithEmptybucketName_as_async: function (callback) {
+},
+
+headObjectWithEmptybucketName_as_async: function (callback) {
 	AWS.S3.headObject({
 		'bucketName' : '',
 		'objectName' : 'image.part.63'
@@ -39,12 +43,12 @@ headObject_as_async: function (callback) {
 	});
 }, headObjectWithEmptyobjectName_as_async: function (callback) {
 	AWS.S3.headObject({
-		'bucketName' : 'velocity-gl',
+		'bucketName' : 'test12398',
 		'objectName' : ''
 	}, function(data) {
-		callback.failed('Some error occured');
-	}, function(error) {
 		callback.passed();
+	}, function(error) {
+		callback.failed('Some error occured');
 	});
 }, headObjectWithInvalidobjectName_as_async: function (callback) {
 	AWS.S3.headObject({
@@ -59,7 +63,7 @@ headObject_as_async: function (callback) {
 
 
 
-	headBucket_as_async : function(callback) {
+headBucket_as_async : function(callback) {
 		AWS.S3.headBucket({
 			'bucketName' : 'pankaj2344'
 		}, function(data) {
@@ -67,7 +71,8 @@ headObject_as_async: function (callback) {
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
-	}, headBucketWithEmptybucketName_as_async : function(callback) {
+	}, 
+	headBucketWithEmptybucketName_as_async : function(callback) {
 		AWS.S3.headBucket({
 			'bucketName' : ''
 		}, function(data) {
@@ -157,9 +162,9 @@ getObjectTorrentWithInvalidBucketName_as_async: function (callback){
   
   getObjectTorrentWithEmptyObjectName_as_async: function (callback){
     AWS.S3.getObjectTorrent({'bucketName':'pankaj2344','objectName':''},function(data){
-     callback.failed('Some error occured');
+     callback.passed();
     }, function (error){
-        callback.passed();   
+        callback.failed('Some error occured');   
     });
   },
   
@@ -178,6 +183,7 @@ getObjectTorrentWithInvalidObjectName_as_async: function (callback){
 	uploadId= data.UploadId;
 	    callback.passed();    
 	   }, function (error){
+		alert(error);
 	       callback.failed('Some error occured');
 	   });
 	 },
@@ -192,8 +198,8 @@ uploadPartCopy_as_async: function (callback){
        callback.failed('Some error occured');
    });
  },
-completeMultipleUpload_as_async: function (callback){
-   AWS.S3.completeMultipleUpload({'bucketName':'test12398','objectName':'struts2.pdf','uploadId': uploadId,'xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>' + ETag +'</ETag></Part></CompleteMultipartUpload>'},function(data){
+completeMultipartUpload_as_async: function (callback){
+   AWS.S3.completeMultipartUpload({'bucketName':'test12398','objectName':'struts2.pdf','uploadId': uploadId,'xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>' + ETag +'</ETag></Part></CompleteMultipartUpload>'},function(data){
    callback.passed();    
    }, function (error){
        callback.failed('Some error occured');
@@ -234,9 +240,9 @@ listMultipartUploads_as_async : function(callback) {
 		callback.failed('Some error occured');
 	});
 },
- getBucketPolicy_as_async : function(callback) {
+getBucketPolicy_as_async : function(callback) {
 	AWS.S3.getBucketPolicy({
-		'bucketName' : 'Test12398'
+		'bucketName' : 'test12398'
 	}, function(data) {
 		callback.passed();
 	}, function(error) {
@@ -1229,8 +1235,8 @@ putBucketACL_as_async : function(callback) {
 	});
 }, getObject_as_async: function (callback) {
 	AWS.S3.getObject({
-		'bucketName' : 'pankaj123456',
-		'objectName' : 'KS_nav_ui.png'
+		'bucketName' : 'test12398',
+		'objectName' : 'Rahul.png'
 	}, function(data) {
 		callback.passed();
 	}, function(error) {
@@ -1580,8 +1586,8 @@ uploadPartCopyWithInvalidCopySource_as_async: function (callback){
  },
  
  
-completeMultipleUploadWithEmptybucketName_as_async: function (callback){
-   AWS.S3.completeMultipleUpload({'bucketName':'','objectName':'struts2.pdf','uploadId':uploadId,'xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>"&quot;038969b6c419420d05e62ead4a9dd88e&quot;"</ETag></CompleteMultipartUpload>'},function(data){
+completeMultipartUploadWithEmptybucketName_as_async: function (callback){
+   AWS.S3.completeMultipartUpload({'bucketName':'','objectName':'struts2.pdf','uploadId':uploadId,'xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>"&quot;038969b6c419420d05e62ead4a9dd88e&quot;"</ETag></CompleteMultipartUpload>'},function(data){
     callback.failed('Some error occured');
    }, function (error){
        callback.passed();  
@@ -1589,32 +1595,16 @@ completeMultipleUploadWithEmptybucketName_as_async: function (callback){
  },
  
  
-completeMultipleUploadWithInvalidbucketName_as_async: function (callback){
-   AWS.S3.completeMultipleUpload({'bucketName':'xyzw','objectName':'struts2.pdf','uploadId':uploadId,'xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>"'+ETag+'""</ETag></Part></CompleteMultipartUpload>'},function(data){
+completeMultipartUploadWithInvalidbucketName_as_async: function (callback){
+   AWS.S3.completeMultipartUpload({'bucketName':'xyzw','objectName':'struts2.pdf','uploadId':uploadId,'xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>"'+ETag+'""</ETag></Part></CompleteMultipartUpload>'},function(data){
     callback.failed('Some error occured');
    }, function (error){
        callback.passed();  
    });
  },
  
-completeMultipleUploadWithEmptyobjectName_as_async: function (callback){
-   AWS.S3.completeMultipleUpload({'bucketName':'test12398','objectName':'','uploadId':uploadId,'xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>"'+ETag+'"</ETag></Part></CompleteMultipartUpload>'},function(data){
-    callback.failed('Some error occured');
-   }, function (error){
-       callback.passed();  
-   });
- },
- 
- 
-completeMultipleUploadWithInvalidobjectName_as_async: function (callback){
-   AWS.S3.completeMultipleUpload({'bucketName':'test12398','objectName':'image.63','uploadId':uploadId,'xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>"'+ETag+'"</ETag></Part></CompleteMultipartUpload>'},function(data){
-    callback.failed('Some error occured');
-   }, function (error){
-       callback.passed();  
-   });
- },
- completeMultipleUploadWithEmptyuploadId_as_async: function (callback){
-   AWS.S3.completeMultipleUpload({'bucketName':'test12398','objectName':'struts2.pdf','uploadId':'','xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>"'+ETag+'"</ETag></Part></CompleteMultipartUpload>'},function(data){
+completeMultipartUploadWithEmptyobjectName_as_async: function (callback){
+   AWS.S3.completeMultipartUpload({'bucketName':'test12398','objectName':'','uploadId':uploadId,'xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>"'+ETag+'"</ETag></Part></CompleteMultipartUpload>'},function(data){
     callback.failed('Some error occured');
    }, function (error){
        callback.passed();  
@@ -1622,16 +1612,32 @@ completeMultipleUploadWithInvalidobjectName_as_async: function (callback){
  },
  
  
-completeMultipleUploadWithInvaliduploadId_as_async: function (callback){
-   AWS.S3.completeMultipleUpload({'bucketName':'test12398','objectName':'struts2.pdf','uploadId':'bQZXGLyBw6hwwp9P9pk_Rk17Y5escQ_E949jTPySaJEvcrUfEAPE7Ng--','xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>"'+ETag+'"</ETag></Part></CompleteMultipartUpload>'},function(data){
+completeMultipartUploadWithInvalidobjectName_as_async: function (callback){
+   AWS.S3.completeMultipartUpload({'bucketName':'test12398','objectName':'image.63','uploadId':uploadId,'xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>"'+ETag+'"</ETag></Part></CompleteMultipartUpload>'},function(data){
+    callback.failed('Some error occured');
+   }, function (error){
+       callback.passed();  
+   });
+ },
+ completeMultipartUploadWithEmptyuploadId_as_async: function (callback){
+   AWS.S3.completeMultipartUpload({'bucketName':'test12398','objectName':'struts2.pdf','uploadId':'','xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>"'+ETag+'"</ETag></Part></CompleteMultipartUpload>'},function(data){
     callback.failed('Some error occured');
    }, function (error){
        callback.passed();  
    });
  },
  
- completeMultipleUploadWithEmptyXmlTemplate_as_async: function (callback){
-   AWS.S3.completeMultipleUpload({'bucketName':'test12398','objectName':'struts2.pdf','uploadId':uploadId,'xmlTemplate':''},function(data){
+ 
+completeMultipartUploadWithInvaliduploadId_as_async: function (callback){
+   AWS.S3.completeMultipartUpload({'bucketName':'test12398','objectName':'struts2.pdf','uploadId':'bQZXGLyBw6hwwp9P9pk_Rk17Y5escQ_E949jTPySaJEvcrUfEAPE7Ng--','xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>"'+ETag+'"</ETag></Part></CompleteMultipartUpload>'},function(data){
+    callback.failed('Some error occured');
+   }, function (error){
+       callback.passed();  
+   });
+ },
+ 
+ completeMultipartUploadWithEmptyXmlTemplate_as_async: function (callback){
+   AWS.S3.completeMultipartUpload({'bucketName':'test12398','objectName':'struts2.pdf','uploadId':uploadId,'xmlTemplate':''},function(data){
     callback.failed('Some error occured');
    }, function (error){
        callback.passed();  
@@ -1639,8 +1645,8 @@ completeMultipleUploadWithInvaliduploadId_as_async: function (callback){
  },
  
  
-completeMultipleUploadWithInvalidXmlTemplate_as_async: function (callback){
-   AWS.S3.completeMultipleUpload({'bucketName':'test12398','objectName':'struts2.pdf','uploadId':uploadId,'xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>1</PartNumber><ETag>"a54357aff0632cce46d942af68356b38"</ETag></Part><Part><ETag>"0c78aef83f66abc1fa1e8477f296d394"</ETag></Part><Part><PartNumber>3</PartNumber><ETag>"acbd18db4cc2f85cedef654fccc4a4d8"</ETag></Part></CompleteMultipartUpload>'},function(data){    callback.failed('Some error occured');
+completeMultipartUploadWithInvalidXmlTemplate_as_async: function (callback){
+   AWS.S3.completeMultipartUpload({'bucketName':'test12398','objectName':'struts2.pdf','uploadId':uploadId,'xmlTemplate':'<CompleteMultipartUpload><Part><PartNumber>1</PartNumber><ETag>"a54357aff0632cce46d942af68356b38"</ETag></Part><Part><ETag>"0c78aef83f66abc1fa1e8477f296d394"</ETag></Part><Part><PartNumber>3</PartNumber><ETag>"acbd18db4cc2f85cedef654fccc4a4d8"</ETag></Part></CompleteMultipartUpload>'},function(data){    callback.failed('Some error occured');
    }, function (error){
        callback.passed();  
    });

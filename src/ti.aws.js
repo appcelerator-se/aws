@@ -98,20 +98,19 @@ var snsExecutor = function(params, cbOnData, cbOnError) {
 		this.preparer();
 		this.prepared = true;
 	}
-	
+
 	var xhr = Ti.Network.createHTTPClient();
 	//generates complete querystring without url
 	params.Action = this.action;
 	params.Version = this.version;
 	payload = _sessionOBJ.utility.generatePayload(params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint)
-	
-	
+
 	if(Ti.Platform.osname === 'iphone') {
 		xhr.open(this.verb, this.endpoint + '?' + payload);
 	} else {
 		xhr.open(this.verb, this.endpoint);
-	}	
-	
+	}
+
 	xhr.setRequestHeader('Host', 'sns.us-east-1.amazonaws.com');
 	xhr.onload = function(response) {
 		jsResp = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
@@ -124,7 +123,6 @@ var snsExecutor = function(params, cbOnData, cbOnError) {
 			cbOnError(error);
 		}
 	}
-	
 	if(Ti.Platform.osname === 'iphone') {
 		xhr.send();
 	} else {
@@ -144,7 +142,6 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 		this.preparer();
 		this.prepared = true;
 	}
-
 
 	var xhr = Ti.Network.createHTTPClient();
 	params.contentType = '';
@@ -204,15 +201,28 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 		xhr.setRequestHeader('x-amz-copy-source', params.copySource);
 		// will be passed by client
 	}
-	
+
 	var method = this.method;
+
 	xhr.onload = function(response) {
 		//For Get and POST xml is returned as response hence converting it to javascript object and passing back to user
 
-		if(this.connectionType == "GET" || this.connectionType == "POST" || method == "uploadPartCopy") {
-			if(cbOnData) {
-				cbOnData(_sessionOBJ.xmlToJSON.toJSON(this.responseText, true));
+		if(this.connectionType == "GET" || this.connectionType == "POST" || method == "uploadPartCopy") {// Api's other then GET and POST does not return any xml as part of response object so passing the complete obect back to client
+			if(method === "getObjectTorrent" || method === "getObject" || method === "getBucketPolicy") {
+				if(cbOnData) {
+					//ETag is returned as part of response header for uploadpart. Its a unique identifier used with completemultipartupload api
+					if(xhr.getResponseHeader("ETag")) {
+						Titanium.API.info('ETag:' + xhr.getResponseHeader("ETag"));
+					}
+
+					cbOnData(this.responseText);
+				}
+			} else {
+				if(cbOnData) {
+					cbOnData(_sessionOBJ.xmlToJSON.toJSON(this.responseText, true));
+				}
 			}
+
 		} else {// Api's other then GET and POST does not return any xml as part of response object so passing the complete obect back to client
 			if(cbOnData) {
 				//ETag is returned as part of response header for uploadpart. Its a unique identifier used with completemultipartupload api
@@ -252,8 +262,7 @@ var sesExecutor = function(params, cbOnData, cbOnError) {
 		this.preparer();
 		this.prepared = true;
 	}
-	
-	
+
 	params.paramString = '';
 	params.isRawMessage = this.isRawMessage;
 	_sessionOBJ.utility.generateSESParams(params);
@@ -653,6 +662,13 @@ _sessionOBJ.bedFrame.build(AWS, {
 			}
 		}, {
 			method : 'getObject', // Returning Blob Data.
+			validations : {
+				required : {
+					params : ['bucketName', 'objectName']
+				}
+			}
+		}, {
+			method : 'getObjectTorrent', // Returning Blob Data.
 			validations : {
 				required : {
 					params : ['bucketName', 'objectName']
