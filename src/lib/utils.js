@@ -1,84 +1,44 @@
-/**
- * Routine that generates a SignedURL based upon the paramters provided making use of the AWSSigner
- *
- * @param actionName - Action to be invoked by AWS
- * @param params - Parameters to be serialized into the URL
- * @param accessKeyId - AccessKey provided by the user
- * @param secretKey - SecretKey provided by the user
- * @param endpoint - Service Endpoint
- * @param version - Version of the Service to be invoked
+/*!
+ * Utlity file 
  */
 
-//Ti.include("/lib/awssigner.js");
-
-
 var utility;
-if(typeof exports !== 'undefined')
+if( typeof exports !== 'undefined')
 	utility = exports;
 else
 	utility = {}
 
 /**
- * Routine that contructs querystring as payload without an URl with it. This payload will be passed to HttpClient as parameter in send
+ * Routine that contructs querystring as payload without an URl with it.
  * @param - params- Its a javascript object that contains all elements required to create payload
  * @param - accessKeyId - Used to sign the payload
  * @param - secretKey - Used to sign the payload
  * @param - endpoint - contains the url which need to be hit, is used to extract the host part from it
  */
 utility.generatePayload = function(params, accessKeyId, secretKey, endpoint) {
-	var host = endpoint.replace(/.*:\/\//, "");
-	var payload = null;
-
-	var signer = new AWSV2Signer(accessKeyId, secretKey);
-	params = signer.sign(params, new Date(), {
-		"verb" : "POST",
-		"host" : host,
-		"uriPath" : "/"
-	});
-
-	var encodedParams = [];
-	for(var key in params) {
-		if(params[key] !== null) {
-			encodedParams.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]));
-		} else {
-			encodedParams.push(encodeURIComponent(key));
-		}
-	}
-	payload = encodedParams.join("&");
-	return payload;
+	return SignAndEncodeParams(params, accessKeyId, secretKey, endpoint.replace(/.*:\/\//, ""), "POST", "/");
 }
-
+/**
+ * Routine that contructs querystring as payload with an URl with it.
+ * @param - params- Its a javascript object that contains all elements required to create payload
+ * @param - accessKeyId - Used to sign the payload
+ * @param - secretKey - Used to sign the payload
+ * @param - endpoint - contains the url which need to be hit, is used to extract the host part from it
+ */
 utility.generateSignedURL = function(actionName, params, accessKeyId, secretKey, endpoint, version) {
-	var host = endpoint.replace(/.*:\/\//, "");
-	var payload = null;
 	var displayUri = endpoint;
 	var uriPath = "/";
-
 	params.Action = actionName;
 	params.Version = version;
-	var signer = new AWSV2Signer(accessKeyId, secretKey);
 
 	//This is to append AWSAccountId along with QueueName in Endpoint for SQS
 	if(params.hasOwnProperty('AWSAccountId') && params.hasOwnProperty('QueueName')) {
-		uriPath += params.AWSAccountId + "/" + params.QueueName + "/";
-		displayUri += "/" + params.AWSAccountId + "/" + params.QueueName + "/";
+		var path = params.AWSAccountId + "/" + params.QueueName + "/";
+		uriPath += path;
+		displayUri += "/" + path;
 	}
-	params = signer.sign(params, new Date(), {
-		"verb" : "GET",
-		"host" : host,
-		"uriPath" : uriPath
-	});
 
-	var encodedParams = [];
-	for(var key in params) {
-		if(params[key] !== null) {
-			encodedParams.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]));
-		} else {
-			encodedParams.push(encodeURIComponent(key));
-		}
-	}
-	payload = encodedParams.join("&");
-	displayUri += "?" + payload;
+	displayUri += "?" + SignAndEncodeParams(params, accessKeyId, secretKey, endpoint.replace(/.*:\/\//, ""), "GET", uriPath);
 	return displayUri;
 }
 /**
@@ -115,61 +75,6 @@ utility.generateSESParams = function(params) {
 	return;
 }
 /**
- *  Loops through all the email address given by the user and adds it to destination
- *  For Ex "To" can have more then 1 email address this function loops on that value.
- * * For more info pls refer to : http://docs.amazonwebservices.com/ses/latest/APIReference/API_SendEmail.html
- */
-
-function generateDestination(destination, isRawMessage) {
-	var destinationString = '';
-	if(isRawMessage) {
-		for( i = 1; i <= destination.length; i++) {
-			destinationString += '&Destinations.member.' + i + '=' + destination[i - 1];
-		}
-	} else {
-		for(key in destination) {
-		//The value for "key" could be "to", "cc", "bcc", so we need to make the first letter as caps
-		//we can also get rid of the below line of code but in that case user will have to pass "To" instead "to", which is not a 
-		//good coding practice while making javascript objects 
-			var type = key.substr(0, 1).toUpperCase() + key.substr(1);
-			for( i = 1; i <= destination[key].length; i++) {
-				destinationString += '&Destination.' + type + 'Addresses.member.' + i + '=' + destination[key][i - 1];
-			}
-		}
-	}
-	return destinationString;
-}
-
-/**
- * The reply-to email address(es) for the message. If the recipient replies to the message, each reply-to address will receive the reply
- * For more info pls refer to : http://docs.amazonwebservices.com/ses/latest/APIReference/API_SendEmail.html
- */
-
-function generateReplyTo(replyTo) {
-	var replyToString = '';
-	for( i = 1; i <= replyTo.length; i++) {
-		replyToString += '&ReplyToAddresses.member.' + i + '=' + replyTo[i - 1];
-	}
-	return replyToString;
-}
-
-/**
- * The message to be sent.
- * For more info pls refer to : http://docs.amazonwebservices.com/ses/latest/APIReference/API_SendEmail.html
- */
-function generateMessageBody(messageBody) {
-	var messageBodyString = '';
-	for(key in messageBody) {
-		var type = key.substr(0, 1).toUpperCase() + key.substr(1);
-		messageBodyString += '&Message.Body.' + type + '.Data=' + messageBody[key];
-	}
-	return messageBodyString;
-}
-
-
-
-
-/**
  * Routine that contructs URL for SQS.
  * @param - params- Its a javascript object that contains all elements required to create payload
  * @param - accessKeyId - Used to sign the payload
@@ -194,36 +99,25 @@ utility.generateSQSURL = function(actionName, params, accessKeyId, secretKey, en
 	var timestamp = (new Date((new Date).getTime() + ((new Date).getTimezoneOffset() * 60000))).toISODate();
 	url += "Timestamp=" + encodeURIComponent(timestamp) + "&SignatureMethod=HmacSHA1&AWSAccessKeyId=" + encodeURIComponent(accessKeyId);
 	var stringToSign = getStringToSignForSQS(url);
-	var signature= sha.b64_hmac_sha1(secretKey, stringToSign);
+	var signature = sha.b64_hmac_sha1(secretKey, stringToSign);
 	url += "&Signature=" + encodeURIComponent(signature);
 	return url;
 }
 
 /**
- * Routine that contructs StringToSign for SQS.
- * @param - url- Its a URL containing various paramters 
+ * Routine that compares two time values.
+ *
+ * @param t1 - Time one
+ * @param t2 - Time two
  */
-function getStringToSignForSQS(url) {
-    var stringToSign = "";
-    var query = url.split("?")[1];
-    var params = query.split("&");
-    params.sort(ignoreCaseSort);
-    for (var i = 0; i < params.length; i++) {
-        var param = params[i].split("=");
-        if (param[0] == 'Signature' || undefined  == param[1]) continue;
-            stringToSign += param[0] + decodeURIComponent(param[1]);
-         }
-    return stringToSign;
+exports.compareTime = function(t1, t2, td) {//t1 is expected greater time, t2 is the older time, td the difference between time in seconds
+	if((new Date(t1)).getTime() + td*1000 >= (new Date(t2)).getTime()) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
-function ignoreCaseSort(a, b) {
-    var ret = 0;
-    a = a.toLowerCase();
-    b = b.toLowerCase();
-    if(a > b) ret = 1;
-    if(a < b) ret = -1;
-    return ret;
-}
 
 /**
  * Routine that generates the signed string based upn the params passed
@@ -263,27 +157,159 @@ utility.generateS3Params = function(params) {
 	}
 	return;
 }
+/**
+ * Routine that validates the Parameters provided by the User based upon the Rules associated with the method.
+ *
+ * NOTE: This is work in progress
+ *
+ * @param params - Parameters to be serialized into the URL
+ * @param validations - List of Validation rules to apply, along with their inherent parameters
+ */
+utility.validateParams = function(reqParams, validations, min, max) {
+	var finalresponse = "";
+	for(var validationRule in validations) {
+		fnValidate = validators[validationRule];
+		data = validations[validationRule];
+		res = fnValidate(reqParams, data);
+		if(!res == "") {
+			finalresponse = prepareMessage(res, validationRule);
+			return finalresponse;
+		}
+	}
+	return finalresponse;
+}
+/**
+ *  Function creates signature and payload
+ *  @param - params --  An array containing values to be signed and be part of payload
+ *  @param - accessKeyId - Used to sign the payload
+ *  @param - secretKey - Used to sign the payload
+ *  @param - host - host uri
+ *  @param - verb - http verb
+ *  @param - uriPath - http endpoint
+ */
+function SignAndEncodeParams(params, accessKeyId, secretKey, host, verb, uriPath) {
+	var signer = new AWSV2Signer(accessKeyId, secretKey);
+	params = signer.sign(params, new Date(), {
+		"verb" : verb,
+		"host" : host,
+		"uriPath" : uriPath
+	});
+	var encodedParams = [];
+	for(var key in params) {
+		if(params[key] !== null) {
+			encodedParams.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]));
+		} else {
+			encodedParams.push(encodeURIComponent(key));
+		}
+	}
+	return payload = encodedParams.join("&");
+}
+
+/**
+ *  Loops through all the email address given by the user and adds it to destination
+ *  For Ex "To" can have more then 1 email address this function loops on that value.
+ * * For more info pls refer to : http://docs.amazonwebservices.com/ses/latest/APIReference/API_SendEmail.html
+ */
+
+function generateDestination(destination, isRawMessage) {
+	var destinationString = '';
+	if(isRawMessage) {
+		for( i = 1; i <= destination.length; i++) {
+			destinationString += '&Destinations.member.' + i + '=' + destination[i - 1];
+		}
+	} else {
+		for(key in destination) {
+			//The value for "key" could be "to", "cc", "bcc", so we need to make the first letter as caps
+			//we can also get rid of the below line of code but in that case user will have to pass "To" instead "to", which is not a
+			//good coding practice while making javascript objects
+			var type = key.substr(0, 1).toUpperCase() + key.substr(1);
+			for( i = 1; i <= destination[key].length; i++) {
+				destinationString += '&Destination.' + type + 'Addresses.member.' + i + '=' + destination[key][i - 1];
+			}
+		}
+	}
+	return destinationString;
+}
+
+/**
+ * The reply-to email address(es) for the message. If the recipient replies to the message, each reply-to address will receive the reply
+ * For more info pls refer to : http://docs.amazonwebservices.com/ses/latest/APIReference/API_SendEmail.html
+ */
+
+function generateReplyTo(replyTo) {
+	var replyToString = '';
+	for( i = 1; i <= replyTo.length; i++) {
+		replyToString += '&ReplyToAddresses.member.' + i + '=' + replyTo[i - 1];
+	}
+	return replyToString;
+}
+
+/**
+ * The message to be sent.
+ * For more info pls refer to : http://docs.amazonwebservices.com/ses/latest/APIReference/API_SendEmail.html
+ */
+function generateMessageBody(messageBody) {
+	var messageBodyString = '';
+	for(key in messageBody) {
+		var type = key.substr(0, 1).toUpperCase() + key.substr(1);
+		messageBodyString += '&Message.Body.' + type + '.Data=' + messageBody[key];
+	}
+	return messageBodyString;
+}
+
+/**
+ * Routine that contructs StringToSign for SQS.
+ * @param - url- Its a URL containing various paramters
+ */
+function getStringToSignForSQS(url) {
+	var stringToSign = "";
+	var query = url.split("?")[1];
+	var params = query.split("&");
+	params.sort(ignoreCaseSort);
+	for(var i = 0; i < params.length; i++) {
+		var param = params[i].split("=");
+		if(param[0] == 'Signature' || undefined == param[1])
+			continue;
+		stringToSign += param[0] + decodeURIComponent(param[1]);
+	}
+	return stringToSign;
+}
+
+/**
+ * Function is used for sorting
+ * */
+function ignoreCaseSort(firstString, secondString) {
+	var ret = 0;
+	firstString = firstString.toLowerCase();
+	secondString = secondString.toLowerCase();
+	if(firstString > secondString)
+		ret = 1;
+	if(firstString < secondString)
+		ret = -1;
+	return ret;
+}
+
 /* Standard validators supported by the AWS API */
 validators = {
 	//Checks if all the mandatory parameters specified under data.params, have some value in them
-	required : function(request_params, data) {
+	required : function(reqParams, data) {
 		var req_key = data.params;
 		for( x = 0; x < req_key.length; x++) {
-			if((request_params[req_key[x]] == undefined ) || (request_params[req_key[x]] == null) || (request_params[req_key[x]] == "")) {
+			if((reqParams[req_key[x]] == undefined ) || (reqParams[req_key[x]] == null) || (reqParams[req_key[x]] == "")) {
 				return req_key[x];
-			} 
+			}
 		}
 		return "";
 	},
-	rangeValidator : function(request_params, data) {
+	rangeValidator : function(reqParams, data) {
 		var range_key = data.params;
 		for( x = 0; x < range_key.length; x++) {
-			if(request_params[range_key[x]].length < data.min || request_params[range_key[x]].length > data.max) {
-				return   L('lengthValidation');
+			if(reqParams[range_key[x]].length < data.min || reqParams[range_key[x]].length > data.max) {
+				return L('lengthValidation');
 			} else {
 				var iChars = '!@#$%^&*()+=-[]\\\';,./{}|\":<>?';
 				for( i = 0; i < iChars.length; i++) {
-					if(request_params[range_key[x]].indexOf(iChars[i]) != -1) {
+					if(reqParams[range_key[x]].indexOf(iChars[i]) != -1) {
 						return L('symbolValidation');
 					}
 				}
@@ -293,32 +319,13 @@ validators = {
 	},
 	//Checks to see if there are any matching regualar expressions within the Parameters
 	//Useful for validating collection of input parameters.
-	patternExistsValidator : function(request_params, data) {
+	patternExistsValidator : function(reqParams, data) {
 	}
 }
 
 /**
- * Routine that validates the Parameters provided by the User based upon the Rules associated with the method.
- *
- * NOTE: This is work in progress
- *
- * @param params - Parameters to be serialized into the URL
- * @param validations - List of Validation rules to apply, along with their inherent parameters
+ * function returns validation error message
  */
-utility.validateParams = function(request_params, validations,min,max) {
-	var finalresponse = "";
-	for(var validationRule in validations) {
-		fnValidate = validators[validationRule];
-		data = validations[validationRule];
-		res = fnValidate(request_params, data);
-		if(!res == "") {
-			finalresponse = prepareMessage(res, validationRule);
-			return finalresponse;
-		}
-	}
-	return finalresponse;
-}
-
 prepareMessage = function(response, validationRule) {
 	var msg = "";
 	var msg = '<?xml version=\"1.0\"?><Response><Errors><Error><Code>' + L(validationRule) + '</Code><Message>' + response + '</Message></Error></Errors></Response>';
