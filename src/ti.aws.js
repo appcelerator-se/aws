@@ -787,7 +787,7 @@ sessionOBJ.bedFrame.build(AWS, {
 			contentType : 'application/xml',
 			validations : {
 				required : {
-					params : ['bucketName', 'objectName', 'uploadId', 'partNumber', 'xmlTemplate']
+					params : ['bucketName', 'objectName', 'uploadId', 'xmlTemplate']
 				}
 			}
 		}, {
