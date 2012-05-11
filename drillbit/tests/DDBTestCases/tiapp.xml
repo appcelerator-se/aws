@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ti:app xmlns:android="http://schemas.android.com/apk/res/android" xmlns:ti="http://ti.appcelerator.org">
+    <sdk-version>1.8.2</sdk-version>
+    <id>org.appcelerator.titanium.testharness</id>
+    <name>test_harness</name>
+    <version>1.0</version>
+    <publisher>not specified</publisher>
+    <url>not specified</url>
+    <description>not specified</description>
+    <copyright>not specified</copyright>
+    <icon>appicon.png</icon>
+    <persistent-wifi>false</persistent-wifi>
+    <prerendered-icon>false</prerendered-icon>
+    <statusbar-style>default</statusbar-style>
+    <statusbar-hidden>false</statusbar-hidden>
+    <fullscreen>false</fullscreen>
+    <navbar-hidden>false</navbar-hidden>
+    <analytics>false</analytics>
+    <guid></guid>
+    <android>
+        <screens anyDensity="false" large="true" normal="true" small="false"/>
+        <manifest>
+            <instrumentation
+                android:name="org.appcelerator.titanium.drillbit.TestHarnessRunner" android:targetPackage="org.appcelerator.titanium.testharness">
+                <meta-data android:name="class" android:value="org.appcelerator.titanium.testharness.Test_harnessActivity"/>
+            </instrumentation>
+        </manifest>
+    </android>
+ <property name="aws-access-key-id" type="string">AKIAJYNIDSR5LBZ65FRA</property>
+    <property name="aws-secret-access-key" type="string">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</property>    <modules>
+        <modules platform="commonjs" version="1.0.0">ti.aws</modules>
+    </modules>
+</ti:app>
