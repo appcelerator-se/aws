@@ -13,21 +13,23 @@
 *  https://github.com/appcelerator-se/aws
 *
 */
-//Session variables used across all methods
 
 //#include:lib/hmacsha1.js
 //#include:lib/awssigner.js
+//#include:lib/awshelper.js
 //#include:lib/md5.js
 //#include:lib/utf8.js
 //#include:lib/bedframe.js
 //#include:lib/xmlToJson.js
-//#include:lib/utils.js
+//#include:lib/util.js
 //#include:lib/hmacsha256.js
 
-var _sessionOBJ = {
+//Session variables used across all methods
+var sessionOBJ = {
 	utility : utility, // variable declared in utils.js
 	bedFrame : BedFrame, // variable declared in bedframe.js
 	xmlToJSON : xmlToJS, // variable declared in xmlToJson.js
+	awsHelper : awsHelper,
 	utf8 : utf8, //Used for S3 only
 	sha256 : sha256,
 	sha : sha,
@@ -44,49 +46,20 @@ var _sessionOBJ = {
  * @param cbOnError - Callback to be invoked for Error
  */
 var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
-	if(this.preparer && !this.prepared) {
-		this.preparer();
-		this.prepared = true;
-	}
+	awsHelper.prepareExecutor(this);
 
-	if(this.validations) {
-		var errorResponse = _sessionOBJ.utility.validateParams(params, this.validations);
-		if(errorResponse != "") {//means validations failed
-			//Titanium.API.info(errorResponse);
-			if(cbOnError) {
-				var error = _sessionOBJ.xmlToJSON.toJSON(errorResponse, true);
-				cbOnError(error);
-				return;
-			}
-		}
-	}
+	if(awsHelper.validateApi(this, cbOnError, params) == false)
+		return false;
+
 	//Calling generateSQSURL function for SQS and generateSignedURL for others
 	if(this.property === 'SQS') {
-		sUrl = _sessionOBJ.utility.generateSQSURL(this.action, params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint, this.version);
+		sUrl = sessionOBJ.awsHelper.generateSQSURL(this.action, params, sessionOBJ.accessKeyId, sessionOBJ.secretKey, this.endpoint, this.version);
 	} else {
-		sUrl = _sessionOBJ.utility.generateSignedURL(this.action, params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint, this.version);
+		sUrl = sessionOBJ.awsHelper.generateSignedURL(this.action, params, sessionOBJ.accessKeyId, sessionOBJ.secretKey, this.endpoint, this.version);
 	}
-	httpClient = Ti.Network.createHTTPClient({
-		onload : function(ev) {
-			Ti.API.info(this.responseText);
-			//Print the XML Retrieved from the Service
-			jsResp = _sessionOBJ.xmlToJSON.toJSON(this.responseText, true);
-			//Build a JavaScript Object from the XML
-			//Check if this is a proper response, or an Error Response, and call the necessary callback Method
-			if(cbOnData)
-				cbOnData(jsResp);
-		},
-		onerror : function(e) {
-			if(cbOnError) {
-				var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, true);
-				error.summary = this.responseText;
-				cbOnError(error);
-			}
-		},
-		timeout : 5000 // milliseconds
-	});
-	httpClient.open(this.verb, sUrl);
-	httpClient.send();
+	var xhr = awsHelper.createHttpObject(cbOnData, cbOnError);
+	xhr.open(this.verb, sUrl);
+	xhr.send();
 }
 /**
  * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
@@ -96,16 +69,16 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
  * @param cbOnError - Callback to be invoked for Error
  */
 var snsExecutor = function(params, cbOnData, cbOnError) {
-	if(this.preparer && !this.prepared) {
-		this.preparer();
-		this.prepared = true;
-	}
+	awsHelper.prepareExecutor(this);
 
-	var xhr = Ti.Network.createHTTPClient();
+	if(awsHelper.validateApi(this, cbOnError, params) == false)
+		return false;
+
+	var xhr = awsHelper.createHttpObject(cbOnData, cbOnError);
 	//generates complete querystring without url
 	params.Action = this.action;
 	params.Version = this.version;
-	payload = _sessionOBJ.utility.generatePayload(params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint)
+	payload = sessionOBJ.awsHelper.generatePayload(params, sessionOBJ.accessKeyId, sessionOBJ.secretKey, this.endpoint)
 
 	if(Ti.Platform.osname === 'iphone') {
 		xhr.open(this.verb, this.endpoint + '?' + payload);
@@ -114,17 +87,7 @@ var snsExecutor = function(params, cbOnData, cbOnError) {
 	}
 
 	xhr.setRequestHeader('Host', 'sns.us-east-1.amazonaws.com');
-	xhr.onload = function(response) {
-		jsResp = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
-		cbOnData(jsResp);
-	};
-	xhr.onerror = function(e) {
-		if(cbOnError) {
-			var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
-			error.summary = this.responseText;
-			cbOnError(error);
-		}
-	}
+
 	if(Ti.Platform.osname === 'iphone') {
 		xhr.send();
 	} else {
@@ -140,10 +103,11 @@ var snsExecutor = function(params, cbOnData, cbOnError) {
  * @param cbOnError - Callback to be invoked for Error
  */
 var s3Executor = function(params, cbOnData, cbOnError) {
-	if(this.preparer && !this.prepared) {
-		this.preparer();
-		this.prepared = true;
-	}
+
+	awsHelper.prepareExecutor(this);
+
+	if(awsHelper.validateApi(this, cbOnError, params) == false)
+		return false;
 
 	var xhr = Ti.Network.createHTTPClient();
 	params.contentType = '';
@@ -152,7 +116,7 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	}
 
 	if(this.method === 'putBucketLifecycle' || this.method === 'deleteMultipleObjects') {
-		params.contentMD5 = _sessionOBJ.md5.b64_md5(params.xmlTemplate);
+		params.contentMD5 = sessionOBJ.md5.b64_md5(params.xmlTemplate);
 	} else {
 		params.contentMD5 = '';
 	}
@@ -174,10 +138,10 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 		params.contentLength = params.file.size;
 	}
 
-	_sessionOBJ.utility.generateS3Params(params);
+	sessionOBJ.awsHelper.generateS3Params(params);
 	//generates stringTosign string and passes it back as part of 'params' parameter
-	var signature = _sessionOBJ.sha.b64_hmac_sha1(_sessionOBJ.utf8.encode(_sessionOBJ.secretKey), _sessionOBJ.utf8.encode(params.stringToSign));
-	var awsAuthHeader = "AWS " + _sessionOBJ.accessKeyId + ":" + signature;
+	var signature = sessionOBJ.sha.b64_hmac_sha1(sessionOBJ.utf8.encode(sessionOBJ.secretKey), sessionOBJ.utf8.encode(params.stringToSign));
+	var awsAuthHeader = "AWS " + sessionOBJ.accessKeyId + ":" + signature;
 
 	xhr.open(this.verb, params.url);
 	xhr.setRequestHeader('Authorization', awsAuthHeader);
@@ -212,37 +176,23 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 		if(this.connectionType == "GET" || this.connectionType == "POST" || method == "uploadPartCopy") {// Api's other then GET and POST does not return any xml as part of response object so passing the complete obect back to client
 			if(method === "getObjectTorrent" || method === "getObject" || method === "getBucketPolicy") {
 				if(cbOnData) {
-					//ETag is returned as part of response header for uploadpart. Its a unique identifier used with completemultipartupload api
-					if(xhr.getResponseHeader("ETag")) {
-						Titanium.API.info('ETag:' + xhr.getResponseHeader("ETag"));
-					}
-
 					cbOnData(this.responseText);
 				}
 			} else {
 				if(cbOnData) {
-					cbOnData(_sessionOBJ.xmlToJSON.toJSON(this.responseText, true));
+					cbOnData(sessionOBJ.xmlToJSON.toJSON(this.responseText, true));
 				}
 			}
 
 		} else {// Api's other then GET and POST does not return any xml as part of response object so passing the complete obect back to client
 			if(cbOnData) {
-				//ETag is returned as part of response header for uploadpart. Its a unique identifier used with completemultipartupload api
-				if(xhr.getResponseHeader("ETag")) {
-					Titanium.API.info('ETag:' + xhr.getResponseHeader("ETag"));
-				}
-
 				cbOnData(this.responseText);
 			}
 		}
 	};
 
 	xhr.onerror = function(e) {
-		if(cbOnError) {
-			var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, true);
-			error.summary = this.responseText;
-			cbOnError(error);
-		}
+		awsHelper.httpError(this, cbOnError);
 	}
 	if(params.hasOwnProperty('xmlTemplate')) {//for sending xml in request object
 		xhr.send(params.xmlTemplate);
@@ -260,37 +210,19 @@ var s3Executor = function(params, cbOnData, cbOnError) {
  * @param cbOnError - Callback to be invoked for Error
  */
 var sesExecutor = function(params, cbOnData, cbOnError) {
-	if(this.preparer && !this.prepared) {
-		this.preparer();
-		this.prepared = true;
-	}
+	awsHelper.prepareExecutor(this);
+	if(awsHelper.validateApi(this, cbOnError, params) == false)
+		return false;
 
 	params.paramString = '';
 	params.isRawMessage = this.isRawMessage;
-	_sessionOBJ.utility.generateSESParams(params);
+	sessionOBJ.awsHelper.generateSESParams(params);
 	var curDate = (new Date()).toUTCString();
-	var requestBody = _sessionOBJ.utf8.encode('AWSAccessKeyId=' + _sessionOBJ.accessKeyId + '&Action=' + this.action + params.paramString + '&Timestamp=' + curDate);
+	var requestBody = sessionOBJ.utf8.encode('AWSAccessKeyId=' + sessionOBJ.accessKeyId + '&Action=' + this.action + params.paramString + '&Timestamp=' + curDate);
 
-	var authorization = 'AWS3-HTTPS AWSAccessKeyId=' + _sessionOBJ.accessKeyId + ',Algorithm=' + this.algorithm + ',Signature=' + _sessionOBJ.sha.b64_hmac_sha1(_sessionOBJ.secretKey, curDate);
-	var xhr = Titanium.Network.createHTTPClient();
-	xhr.onload = function(response) {
-		Ti.API.info(this.responseText);
-		//Print the XML Retrieved from the Service
-		jsResp = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
-		//Build a JavaScript Object from the XML
+	var authorization = 'AWS3-HTTPS AWSAccessKeyId=' + sessionOBJ.accessKeyId + ',Algorithm=' + this.algorithm + ',Signature=' + sessionOBJ.sha.b64_hmac_sha1(sessionOBJ.secretKey, curDate);
+	var xhr = awsHelper.createHttpObject(cbOnData, cbOnError);
 
-		//Check if this is a proper response, or an Error Response, and call the necessary callback Method
-		if(cbOnData)
-			cbOnData(jsResp);
-	};
-
-	xhr.onerror = function(e) {
-		if(cbOnError) {
-			var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
-			error.summary = this.responseText;
-			cbOnError(this.responseText);
-		}
-	}
 	xhr.open(this.verb, this.endpoint);
 	xhr.setRequestHeader('Content-Type', this.contentType);
 	xhr.setRequestHeader('Host', this.host);
@@ -304,15 +236,13 @@ var sesExecutor = function(params, cbOnData, cbOnError) {
  * @param cbOnData - CallBack to be invoked for Response
  * @param cbOnError - Callback to be invoked for Error
  * */
-function stsExecutor(params, cbOnData, cbOnError) {
-	if(this.preparer && !this.prepared) {
-		this.preparer();
-		this.prepared = true;
-	}
+var stsExecutor = function(params, cbOnData, cbOnError) {
+	awsHelper.prepareExecutor(this);
+
 	params.Action = this.action;
 	params.Version = this.version;
-	var xhr = Ti.Network.createHTTPClient();
-	sUrl = _sessionOBJ.utility.generatePayload(params, _sessionOBJ.accessKeyId, _sessionOBJ.secretKey, this.endpoint);
+	var xhr = awsHelper.createHttpObject(cbOnData, cbOnError);
+	sUrl = sessionOBJ.awsHelper.generatePayload(params, sessionOBJ.accessKeyId, sessionOBJ.secretKey, this.endpoint);
 
 	if(Ti.Platform.osname === 'iphone') {
 		xhr.open(this.verb, this.endpoint + '?' + payload);
@@ -321,25 +251,12 @@ function stsExecutor(params, cbOnData, cbOnError) {
 	}
 	xhr.setRequestHeader('Host', 'sts.amazonaws.com');
 
-	xhr.onload = function(response) {
-		jsResp = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
-		cbOnData(jsResp);
-	};
-
-	xhr.onerror = function(e) {
-		if(cbOnError) {
-			var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
-			error.summary = this.responseText;
-			cbOnError(error);
-		}
-	}
 	if(Ti.Platform.osname === 'iphone') {
 		xhr.send();
 	} else {
 		xhr.send(payload);
 	}
 }
-
 /**
  * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
  * returns the response returned by the Service, and raises an Error callback in case of a failure.
@@ -347,28 +264,18 @@ function stsExecutor(params, cbOnData, cbOnError) {
  * @param cbOnData - CallBack to be invoked for Response
  * @param cbOnError - Callback to be invoked for Error
  */
-function dynamoDbExecutor(params, cbOnData, cbOnError) {
+var dynamoDbExecutor = function(params, cbOnData, cbOnError) {
 
-	if(this.preparer && !this.prepared) {
-		this.preparer();
-		this.prepared = true;
-	}
-	if(this.validations) {
-		var errorResponse = _sessionOBJ.utility.validateParams(params, this.validations);
-		if(errorResponse != "") {//means validations failed
-			//Titanium.API.info(errorResponse);
-			if(cbOnError) {
-				var error = _sessionOBJ.xmlToJSON.toJSON(errorResponse, true);
-				cbOnError(error);
-				return;
-			}
-		}
-	}
+	awsHelper.prepareExecutor(this);
+
+	if(awsHelper.validateApi(this, cbOnError, params) == false)
+		return false;
+
 	var expirationTime = (new Date((new Date).getTime() + ((new Date).getTimezoneOffset() * 60000))).toISODate();
 
 	var thisRef = this;
 
-	if((Ti.App.Properties.getString('tempExpiration') == null) || ((Ti.App.Properties.getString('tempExpiration') != null) && _sessionOBJ.utility.compareTime(expirationTime, Ti.App.Properties.getString('tempExpiration'), 300))) {
+	if((Ti.App.Properties.getString('tempExpiration') == null) || ((Ti.App.Properties.getString('tempExpiration') != null) && sessionOBJ.utility.compareTime(expirationTime, Ti.App.Properties.getString('tempExpiration'), 300))) {
 		AWS.STS.getSessionToken({
 
 		}, function(response) {
@@ -378,17 +285,12 @@ function dynamoDbExecutor(params, cbOnData, cbOnError) {
 			Ti.App.Properties.setString('tempExpiration', response["GetSessionTokenResult"][0]["Credentials"][0]["Expiration"][0]);
 			dynamoDBCall(thisRef, params, cbOnData, cbOnError);
 		}, function(error) {
-			if(cbOnError) {
-				var error = _sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
-				error.summary = this.responseText;
-				cbOnError(error);
-			}
+			awsHelper.httpError(this, cbOnError);
 		});
 	} else {
 		dynamoDBCall(thisRef, params, cbOnData, cbOnError);
 	}
 }
-
 /**
  * Uses the AWS Query API to invoke an Action specified by the method, along with the parameters,
  * returns the response returned by the Service, and raises an Error callback in case of a failure.
@@ -396,7 +298,7 @@ function dynamoDbExecutor(params, cbOnData, cbOnError) {
  * @param cbOnData - CallBack to be invoked for Response
  * @param cbOnError - Callback to be invoked for Error
  */
-function dynamoDBCall(thisRef, params, cbOnData, cbOnError) {
+var dynamoDBCall= function(thisRef, params, cbOnData, cbOnError) {
 	var curDate = (new Date()).toUTCString();
 	// temperary access key
 	var tempAccessKeyId = Ti.App.Properties.getString('tempAccessKeyID');
@@ -411,12 +313,19 @@ function dynamoDBCall(thisRef, params, cbOnData, cbOnError) {
 	var signedHeaders = 'Host;X-Amz-Date;x-amz-security-token;X-Amz-Target';
 	var stringToSign = thisRef.verb + '\n' + '/' + '\n' + '' + '\n' + canonicalHeader + '\n' + JSON.stringify(params.requestJSON);
 
-	var signature = _sessionOBJ.sha256.b64_hmac_sha256_sha256(secretAccessKey, stringToSign);
+	var signature = sessionOBJ.sha256.b64_hmac_sha256_sha256(secretAccessKey, stringToSign);
 	if(signature.substring(signature.length - 1) !== "=") {
 		signature = signature + "=";
 	}
 
 	var xhr = Ti.Network.createHTTPClient();
+	xhr.onload = function(response) {
+		cbOnData(this.responseText);
+	};
+	xhr.onerror = function(e) {
+		cbOnError(this.responseText);
+	}
+
 	xhr.open(thisRef.verb, thisRef.endpoint);
 	var auth = ('AWS3 AWSAccessKeyId=' + tempAccessKeyId + ',Algorithm=' + thisRef.algorithm + ',SignedHeaders=' + signedHeaders + ',Signature=' + signature);
 
@@ -428,14 +337,9 @@ function dynamoDBCall(thisRef, params, cbOnData, cbOnError) {
 	xhr.setRequestHeader('Host', thisRef.host);
 	xhr.setRequestHeader('X-Amzn-Authorization', auth);
 
-	xhr.onload = function(response) {
-		cbOnData(this.responseText);
-	};
-	xhr.onerror = function(e) {
-		cbOnError(this.responseText);
-	}
 	xhr.send(JSON.stringify(params.requestJSON));
 }
+
 
 var AWS = {};
 
@@ -446,11 +350,11 @@ var AWS = {};
  * @param secretKey - SecretKey provided by the user
  */
 AWS.authorize = function(accessKeyId, secretKey) {
-	_sessionOBJ.accessKeyId = accessKeyId;
-	_sessionOBJ.secretKey = secretKey;
+	sessionOBJ.accessKeyId = accessKeyId;
+	sessionOBJ.secretKey = secretKey;
 }
 
-_sessionOBJ.bedFrame.build(AWS, {
+sessionOBJ.bedFrame.build(AWS, {
 	verb : 'GET',
 	version : "2009-04-15",
 	executor : defaultQueryExecutor,
