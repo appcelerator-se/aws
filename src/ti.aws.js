@@ -241,7 +241,17 @@ var stsExecutor = function(params, cbOnData, cbOnError) {
 
 	params.Action = this.action;
 	params.Version = this.version;
-	var xhr = awsHelper.createHttpObject(cbOnData, cbOnError);
+	var xhr = Ti.Network.createHTTPClient();
+	xhr.onload = function(response) {
+		Ti.App.Properties.setString('tempSessionToken', response["GetSessionTokenResult"][0]["Credentials"][0]["SessionToken"][0]);
+		Ti.App.Properties.setString('tempSecretAccessKey', response["GetSessionTokenResult"][0]["Credentials"][0]["SecretAccessKey"][0]);
+		Ti.App.Properties.setString('tempAccessKeyID', response["GetSessionTokenResult"][0]["Credentials"][0]["AccessKeyId"][0]);
+		Ti.App.Properties.setString('tempExpiration', response["GetSessionTokenResult"][0]["Credentials"][0]["Expiration"][0]);
+		cbOnData(response);
+	};
+	xhr.onerror = function(e) {
+		cbOnError(e);
+	}
 	sUrl = sessionOBJ.awsHelper.generatePayload(params, sessionOBJ.accessKeyId, sessionOBJ.secretKey, this.endpoint);
 
 	if(Ti.Platform.osname === 'iphone') {
@@ -279,13 +289,10 @@ var dynamoDbExecutor = function(params, cbOnData, cbOnError) {
 		AWS.STS.getSessionToken({
 
 		}, function(response) {
-			Ti.App.Properties.setString('tempSessionToken', response["GetSessionTokenResult"][0]["Credentials"][0]["SessionToken"][0]);
-			Ti.App.Properties.setString('tempSecretAccessKey', response["GetSessionTokenResult"][0]["Credentials"][0]["SecretAccessKey"][0]);
-			Ti.App.Properties.setString('tempAccessKeyID', response["GetSessionTokenResult"][0]["Credentials"][0]["AccessKeyId"][0]);
-			Ti.App.Properties.setString('tempExpiration', response["GetSessionTokenResult"][0]["Credentials"][0]["Expiration"][0]);
+
 			dynamoDBCall(thisRef, params, cbOnData, cbOnError);
 		}, function(error) {
-			awsHelper.httpError(this, cbOnError);
+			cbOnError(this.responseText);
 		});
 	} else {
 		dynamoDBCall(thisRef, params, cbOnData, cbOnError);
@@ -298,7 +305,7 @@ var dynamoDbExecutor = function(params, cbOnData, cbOnError) {
  * @param cbOnData - CallBack to be invoked for Response
  * @param cbOnError - Callback to be invoked for Error
  */
-var dynamoDBCall= function(thisRef, params, cbOnData, cbOnError) {
+var dynamoDBCall = function(thisRef, params, cbOnData, cbOnError) {
 	var curDate = (new Date()).toUTCString();
 	// temperary access key
 	var tempAccessKeyId = Ti.App.Properties.getString('tempAccessKeyID');
@@ -339,8 +346,6 @@ var dynamoDBCall= function(thisRef, params, cbOnData, cbOnError) {
 
 	xhr.send(JSON.stringify(params.requestJSON));
 }
-
-
 var AWS = {};
 
 /**
@@ -1119,27 +1124,27 @@ sessionOBJ.bedFrame.build(AWS, {
 		}, {
 			method : 'batchWriteItem'
 		}, {
-			method : 'describeTable',
+			method : 'describeTable'
 		}, {
-			method : 'updateTable',
+			method : 'updateTable'
 		}, {
-			method : 'updateItem',
+			method : 'updateItem'
 		}, {
-			method : 'deleteTable',
+			method : 'deleteTable'
 		}, {
-			method : 'getItem',
+			method : 'getItem'
 		}, {
-			method : 'putItem',
+			method : 'putItem'
 		}, {
-			method : 'scan',
+			method : 'scan'
 		}, {
-			method : 'query',
+			method : 'query'
 		}, {
-			method : 'deleteItem',
+			method : 'deleteItem'
 		}, {
-			method : 'batchGetItem',
+			method : 'batchGetItem'
 		}, {
-			method : 'createTable',
+			method : 'createTable'
 		}]
 	}]
 });

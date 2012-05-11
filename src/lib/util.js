@@ -102,3 +102,75 @@ prepareMessage = function(response, validationRule) {
 	var msg = '<?xml version=\"1.0\"?><Response><Errors><Error><Code>' + L(validationRule) + '</Code><Message>' + response + '</Message></Error></Errors></Response>';
 	return msg;
 }
+
+
+/***
+ * Date to ISO
+ *  */
+Date.prototype.toISODate= function()
+{
+	return this.getFullYear() +'-'+addZero(this.getMonth()+1)+ '-' +addZero(this.getDate())+'T'+addZero(this.getHours())+':' +addZero(this.getMinutes())+':'+addZero(this.getSeconds())+'.000Z';	
+}
+
+/***
+ *  Date to ISO8601
+ *  */
+Date.prototype.toISO8601 = function() {
+	return this.getUTCFullYear() + "-" + addZero(this.getUTCMonth() + 1) + "-" + addZero(this.getUTCDate()) + "T" + addZero(this.getUTCHours()) + ":" + addZero(this.getUTCMinutes()) + ":" + addZero(this.getUTCSeconds()) + ".000Z";
+}
+
+/***
+ * function does a case insensitive compare
+ *  */
+function caseInsensitiveComparator(a, b) {
+	return simpleComparator(a.toLowerCase(), b.toLowerCase());
+}
+
+/***
+ * function does a case senitive compare
+ *  */
+function caseSensitiveComparator(a, b) {
+	var length = a.length;
+	if(b.length < length) {
+		length = b.length;
+	}
+	for(var i = 0; i < length; i++) {
+		var comparison = simpleComparator(a.charCodeAt(i), b.charCodeAt(i));
+		if(comparison !== 0) {
+			return comparison;
+		}
+	}
+	if(a.length == b.length) {
+		return 0;
+	}
+	if(b.length > a.length) {
+		return 1;
+	}
+	return -1;
+}
+
+/***
+ * helper function to caseSensitiveComparator
+ *  */
+function simpleComparator(a, b) {
+	if(a < b) {
+		return -1;
+	} else if(a > b) {
+		return 1;
+	}
+	return 0;
+}
+
+/***
+ * function pads 0
+ *  */
+function addZero(n) {
+	return (n < 0 || n > 9 ? "" : "0" ) + n;
+}
+
+/***
+ * function is used to encode url
+ *  */
+function urlEncode(url) {
+	return encodeURIComponent(url).replace(/!/g, '%21').replace(/'/g, '%27').replace(/\(/g, '%28').replace(/\)/g, '%29').replace(/\*/g, '%2A');
+}

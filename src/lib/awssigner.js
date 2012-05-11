@@ -3,8 +3,7 @@
  * Module is used to generate signature that needs to be passed to api calls
  *
  */
-//Ti.include('hmacsha1.js');
-//var sha = require('module/hmacsha1');
+
 function AWSSigner(accessKeyId, secretKey) {
 	this.accessKeyId = accessKeyId;
 	this.secretKey = secretKey;
@@ -37,10 +36,6 @@ AWSV2Signer.prototype = new AWSSigner();
 function AWSV2Signer(accessKeyId, secretKey) {
 	AWSSigner.call(this, accessKeyId, secretKey);
 	this.version = 2;
-}
-
-function urlEncode(url) {
-	return encodeURIComponent(url).replace(/!/g, '%21').replace(/'/g, '%27').replace(/\(/g, '%28').replace(/\)/g, '%29').replace(/\*/g, '%2A');
 }
 
 AWSV2Signer.prototype.canonicalize = function(params, requestInfo) {
@@ -78,50 +73,3 @@ function signatureFilter(key, value) {
 	return key === "Signature" || value === null;
 }
 
-function caseInsensitiveComparator(a, b) {
-	return simpleComparator(a.toLowerCase(), b.toLowerCase());
-}
-
-function caseSensitiveComparator(a, b) {
-	var length = a.length;
-	if(b.length < length) {
-		length = b.length;
-	}
-	for(var i = 0; i < length; i++) {
-		var comparison = simpleComparator(a.charCodeAt(i), b.charCodeAt(i));
-		if(comparison !== 0) {
-			return comparison;
-		}
-	}
-	if(a.length == b.length) {
-		return 0;
-	}
-	if(b.length > a.length) {
-		return 1;
-	}
-	return -1;
-}
-
-function simpleComparator(a, b) {
-	if(a < b) {
-		return -1;
-	} else if(a > b) {
-		return 1;
-	}
-	return 0;
-}
-
-Date.prototype.toISODate= function()
-{
-	return this.getFullYear() +'-'+addZero(this.getMonth()+1)+ '-' +addZero(this.getDate())+'T'+addZero(this.getHours())+':' +addZero(this.getMinutes())+':'+addZero(this.getSeconds())+'.000Z';	
-}   
-function addZero(n) {
-    return ( n < 0 || n > 9 ? "" : "0" ) + n;
-}
-
-Date.prototype.toISO8601 = function() {
-	return this.getUTCFullYear() + "-" + pad(this.getUTCMonth() + 1) + "-" + pad(this.getUTCDate()) + "T" + pad(this.getUTCHours()) + ":" + pad(this.getUTCMinutes()) + ":" + pad(this.getUTCSeconds()) + ".000Z";
-}
-function pad(n) {
-	return (n < 0 || n > 9 ? "" : "0") + n;
-}
