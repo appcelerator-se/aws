@@ -6,6 +6,12 @@ describe("AWS S3 Tests!", {
 		uploadId = '';
 		ETag = '';
 	},
+	after_all : function()
+	{
+		AWS= null;
+		uploadId= null;
+		ETag= null;
+	},
 	timeout : 5000,
 
 	headObject_as_async : function(callback) {
@@ -44,9 +50,9 @@ describe("AWS S3 Tests!", {
 			'bucketName' : 'test12398',
 			'objectName' : ''
 		}, function(data) {
-			callback.passed();
-		}, function(error) {
 			callback.failed('Some error occured');
+		}, function(error) {
+			callback.passed();
 		});
 	},
 	headObjectWithInvalidobjectName_as_async : function(callback) {
@@ -194,9 +200,10 @@ describe("AWS S3 Tests!", {
 			'bucketName' : 'pankaj2344',
 			'objectName' : ''
 		}, function(data) {
-			callback.passed();
-		}, function(error) {
 			callback.failed('Some error occured');
+		}, function(error) {
+			callback.passed();
+			
 		});
 	},
 
@@ -216,6 +223,7 @@ describe("AWS S3 Tests!", {
 			'bucketName' : 'test12398',
 			'objectName' : 'struts2.pdf'
 		}, function(data) {
+			alert(data.UploadId);
 			uploadId = data.UploadId;
 			callback.passed();
 		}, function(error) {
@@ -854,9 +862,9 @@ describe("AWS S3 Tests!", {
 			'objectName' : '',
 			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>sood.is.in@gmail.com</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
 		}, function(data) {
-			callback.passed();
-		}, function(error) {
 			callback.failed('Some error occured');
+		}, function(error) {
+			callback.passed();
 		});
 	},
 	putObjectAclWithEmptyXmlTemplate_as_async : function(callback) {
@@ -1467,9 +1475,9 @@ describe("AWS S3 Tests!", {
 			'bucketName' : 'pankaj123456',
 			'objectName' : ''
 		}, function(data) {
-			callback.passed();
-		}, function(error) {
 			callback.failed('Some error occured');
+		}, function(error) {
+			callback.passed();
 		});
 	},
 	getObjectAclWithInvalidobjectName_as_async : function(callback) {
@@ -1620,8 +1628,8 @@ describe("AWS S3 Tests!", {
 	listParts_as_async : function(callback) {
 		AWS.S3.listParts({
 			'bucketName' : 'test12398',
-			'objectName' : 'Rahul.png',
-			'uploadId' : 'WDy5XnIR1AM6mo1yYTOCfNvkNxSCv4OW8vlMCbHAc2Se6XKkXFRlv_nKIY7IQ3PM0DSzWiSyodqcUC8V.lhufQ--'
+			'objectName' : 'struts2.pdf',
+			'uploadId' : uploadId
 		}, function(data) {
 			callback.passed();
 		}, function(error) {

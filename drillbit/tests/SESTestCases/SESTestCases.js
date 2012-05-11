@@ -4,6 +4,10 @@ describe("AWS SES Tests!", {
 		AWS = require('ti.aws');
 		AWS.authorize(Titanium.App.Properties.getString('aws-access-key-id'), Titanium.App.Properties.getString('aws-secret-access-key'));
 	},
+    after_all : function()
+	{
+		AWS= null;
+	},
 	timeout : 5000,
 
 	/**

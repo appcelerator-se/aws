@@ -5,8 +5,9 @@ describe("AWS SNS Tests!", {
 		AWS.authorize(Titanium.App.Properties.getString('aws-access-key-id'), Titanium.App.Properties.getString('aws-secret-access-key'));
 		arn = '';
 	},
-	after_all : function() {
-
+	after_all : function()
+	{
+		AWS= null;
 	},
 	timeout : 5000,
 
