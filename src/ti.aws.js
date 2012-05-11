@@ -814,7 +814,7 @@ sessionOBJ.bedFrame.build(AWS, {
 			subResource : '?',
 			validations : {
 				required : {
-					params : ['bucketName', 'objectName', 'uploadId', 'partNumber']
+					params : ['bucketName', 'objectName', 'uploadId']
 				}
 			}
 		}]
