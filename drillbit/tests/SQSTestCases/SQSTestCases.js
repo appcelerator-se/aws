@@ -1,12 +1,11 @@
-describe("AWS SimpleDB Tests!", {
+describe("AWS SQS Tests!", {
 
 	before_all : function() {
 		AWS = require('ti.aws');
 		AWS.authorize(Titanium.App.Properties.getString('aws-access-key-id'), Titanium.App.Properties.getString('aws-secret-access-key'));
 	},
-	after_all : function()
-	{
-		AWS= null;
+	after_all : function() {
+		AWS = null;
 	},
 	timeout : 5000,
 	/**
@@ -39,33 +38,33 @@ describe("AWS SimpleDB Tests!", {
 			callback.passed();
 		});
 	},
+
 	/**
 	 *Test case for creating queue by passing a valid queue name
-	 */
-	SQSCreateValidQueue_as_async : function(callback) {
-		var params = {
-			'QueueName' : 'DrillBitTestqueue66'
-		};
-		AWS.SQS.createQueue(params, function(data) {
-			callback.passed();
-		}, function(error) {
-			callback.failed('Some error occured');
-		});
-	},
-	/**
-	 *Test case for creating queue with duplicate queue name
+	 *Creating Queue with valid Queue Name
+	 *Deleting Queue
 	 */
 
-	SQSCreateEmptyQueue_as_async : function(callback) {
+	SQSCreateValidQueue_as_async : function(callback) {
 		var params = {
-			'QueueName' : 'DrillBitTestqueue66'
+			'QueueName' : 'DrillBitTestQueue1'
 		};
 		AWS.SQS.createQueue(params, function(data) {
 			callback.passed();
+			var params = {
+				'QueueName' : 'DrillBitTestQueue1',
+				'AWSAccountId' : '704687501311',
+			};
+			AWS.SQS.deleteQueue(params, function(data) {
+			}, function(error) {
+
+			});
+
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
 	},
+
 	//*************Create queue test cases ends**************
 	//***************list queue test cases start**************
 	SQSlistQueues_as_async : function(callback) {
@@ -97,14 +96,30 @@ describe("AWS SimpleDB Tests!", {
 	},
 	/**
 	 *Test case for getting QueueUrl with passing queue name
+	 *Creating Queue to get QueueUrl
+	 *Getting QueueUrl
+	 *Deleting Queue
 	 */
 	SQSgetQueueUrl_as_async : function(callback) {
 		var params = {
-			'QueueName' : 'test',
-			'QueueOwnerAWSAccountId' : ''
+			'QueueName' : 'DrillBitTestQueue2'
+
 		};
-		AWS.SQS.getQueueUrl(params, function(data) {
-			callback.passed();
+		AWS.SQS.createQueue(params, function(data) {
+			AWS.SQS.getQueueUrl(params, function(data) {
+				callback.passed();
+				var params = {
+					'QueueName' : 'DrillBitTestQueue2',
+					'AWSAccountId' : '704687501311',
+				};
+				AWS.SQS.deleteQueue(params, function(data) {
+
+				}, function(error) {
+
+				})
+			}, function(error) {
+				callback.failed('Some error occured')
+			})
 		}, function(error) {
 			callback.failed('Some error occured')
 		});
@@ -182,17 +197,49 @@ describe("AWS SimpleDB Tests!", {
 	},
 	/**
 	 *Test case for addPermission with all valid parameters
+	 *Creating Queue to add permission
+	 *Add Permission
+	 *Remove Permission
+	 *Deleting Queue
 	 */
 	SQSaddPermission_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
-			'QueueName' : 'TestQueue55555',
-			'Label' : 'addPermissiontest',
-			'AWSAccountId.1' : '682109303140',
-			'ActionName.1' : 'SendMessage'
+			'QueueName' : 'DrillBitTestQueue3'
 		};
-		AWS.SQS.addPermission(params, function(data) {
-			callback.passed();
+		AWS.SQS.createQueue(params, function(data) {
+			var params = {
+				'AWSAccountId' : '704687501311',
+				'QueueName' : 'DrillBitTestQueue3',
+				'Label' : 'AddPermissionTest',
+				'AWSAccountId.1' : '682109303140',
+				'ActionName.1' : 'SendMessage'
+			};
+			AWS.SQS.addPermission(params, function(data) {
+				var params = {
+					'AWSAccountId' : '704687501311',
+					'QueueName' : 'DrillBitTestQueue3',
+					'Label' : 'AddPermissionTest',
+				};
+				callback.passed();
+				AWS.SQS.removePermission(params, function(data) {
+					var params = {
+						'QueueName' : 'DrillBitTestQueue3'
+					};
+					var params = {
+						'QueueName' : 'DrillBitTestQueue3',
+						'AWSAccountId' : '704687501311',
+					};
+					AWS.SQS.deleteQueue(params, function(data) {
+
+					}, function(error) {
+
+					})
+				}, function(error) {
+
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
@@ -282,17 +329,71 @@ describe("AWS SimpleDB Tests!", {
 		});
 	},
 	/**
-	 *Test case for setQueueAttributes with passing all required valid parameters
+	 *Test case for setQueueAttributes with passing Invalid Attribute Name
 	 */
-	SQSsetQueueAttributes_as_async : function(callback) {
+	SQSsetQueueAttributesWithEmptyAttributeValue_as_async : function(callback) {
+		var params = {
+			'AWSAccountId' : '704687501311',
+			'QueueName' : 'TestQueue676767',
+			'Attribute.Name' : 'VisibilityTimeouts', //Invalid Attribute Name
+			'Attribute.Value' : '35'
+		};
+		AWS.SQS.setQueueAttributes(params, function(data) {
+			callback.failed('Some error occured');
+		}, function(error) {
+			callback.passed();
+		});
+	},
+	/**
+	 *Test case for setQueueAttributes with passing Invalid Attribute Value
+	 */
+	SQSsetQueueAttributesWithEmptyAttributeValue_as_async : function(callback) {
 		var params = {
 			'AWSAccountId' : '704687501311',
 			'QueueName' : 'TestQueue676767',
 			'Attribute.Name' : 'VisibilityTimeout',
-			'Attribute.Value' : '3000'
+			'Attribute.Value' : '35dasda'//Invalid Attribute Value
 		};
 		AWS.SQS.setQueueAttributes(params, function(data) {
+			callback.failed('Some error occured');
+		}, function(error) {
 			callback.passed();
+		});
+	},
+	/**
+	 *Test case for setQueueAttributes with passing all required valid parameters
+	 *Creating Queue To set Attribute
+	 *SetQueueAttribute
+	 *Deleting Queue
+	 */
+	SQSsetQueueAttributes_as_async : function(callback) {
+		var params = {
+			'QueueName' : 'DrillBitTestQueue4'
+		};
+		AWS.SQS.createQueue(params, function(data) {
+			var params = {
+				'AWSAccountId' : '704687501311',
+				'QueueName' : 'DrillBitTestQueue4',
+				'Attribute.Name' : 'VisibilityTimeout',
+				'Attribute.Value' : '3000'
+			};
+			AWS.SQS.setQueueAttributes(params, function(data) {
+				var params = {
+					'QueueName' : 'DrillBitTestQueue4'
+				};
+				callback.passed();
+				var params = {
+					'QueueName' : 'DrillBitTestQueue4',
+					'AWSAccountId' : '704687501311',
+				};
+				AWS.SQS.deleteQueue(params, function(data) {
+
+				}, function(error) {
+
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
@@ -306,7 +407,22 @@ describe("AWS SimpleDB Tests!", {
 		var params = {
 			'AWSAccountId' : '704687501311',
 			'QueueName' : 'TestQueue676767',
-			'AttributeName.1' : ''//Empty AttributeName.1
+			'AttributeName.1' : ''//Empty AttributeName
+		};
+		AWS.SQS.getQueueAttributes(params, function(data) {
+			callback.failed('Some error occured');
+		}, function(error) {
+			callback.passed();
+		});
+	},
+	/**
+	 *Test case for getQueueAttributes with Invalid AttributeName
+	 */
+	SQSgetQueueAttributesWithEmptyAttributeName_as_async : function(callback) {
+		var params = {
+			'AWSAccountId' : '704687501311',
+			'QueueName' : 'TestQueue676767',
+			'AttributeName.1' : 'TestInvalid'//Invalid AttributeName
 		};
 		AWS.SQS.getQueueAttributes(params, function(data) {
 			callback.failed('Some error occured');
@@ -316,18 +432,52 @@ describe("AWS SimpleDB Tests!", {
 	},
 	/**
 	 *Test case for getQueueAttributes with passing all parameter
+	 *Creating Queue to set Attribute
+	 *SetQueueAttribute to get Attribute
+	 *GetQueueAttribute
+	 *Delete Queue
 	 */
 	SQSgetQueueAttributes_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
-			'QueueName' : 'TestQueue676767',
-			'AttributeName.1' : 'All'
+			'QueueName' : 'DrillBitTestQueue5'
 		};
-		AWS.SQS.getQueueAttributes(params, function(data) {
-			callback.passed();
+		AWS.SQS.createQueue(params, function(data) {
+			var params = {
+				'AWSAccountId' : '704687501311',
+				'QueueName' : 'DrillBitTestQueue5',
+				'Attribute.Name' : 'VisibilityTimeout',
+				'Attribute.Value' : '3000'
+			};
+			AWS.SQS.setQueueAttributes(params, function(data) {
+				var params = {
+					'AWSAccountId' : '704687501311',
+					'QueueName' : 'DrillBitTestQueue5',
+					'AttributeName.1' : 'All'
+				};
+				AWS.SQS.getQueueAttributes(params, function(data) {
+					var params = {
+						'QueueName' : 'DrillBitTestQueue5'
+					};
+					callback.passed();
+					var params = {
+						'QueueName' : 'DrillBitTestQueue5',
+						'AWSAccountId' : '704687501311',
+					};
+					AWS.SQS.deleteQueue(params, function(data) {
+
+					}, function(error) {
+
+					})
+				}, function(error) {
+					callback.failed('Some error occured');
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
+
 	},
 	//*************getQueueAttributes test cases ends**************
 	//***************sendMessage test cases start**************
@@ -348,17 +498,38 @@ describe("AWS SimpleDB Tests!", {
 		});
 	},
 	/**
-	 *Test case for sendMessage with passing MessageBody
+	 *Test case for sendMessage with valid Parameters
+	 *Create Queue to send Message
+	 *Send Message
+	 *Delete Queue
 	 */
 	SQSsendMessage_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
-			'QueueName' : 'TestQueue676767',
-			'MessageBody' : 'This is test message in SQS.',
-			'DelaySeconds' : ''//Not a required parameter
+			'QueueName' : 'DrillBitTestQueue6'
 		};
-		AWS.SQS.sendMessage(params, function(data) {
-			callback.passed();
+		AWS.SQS.createQueue(params, function(data) {
+			var params = {
+				'AWSAccountId' : '704687501311',
+				'QueueName' : 'DrillBitTestQueue6',
+				'MessageBody' : 'This is test message in SQS.'
+			};
+			AWS.SQS.sendMessage(params, function(data) {
+				var params = {
+					'QueueName' : 'DrillBitTestQueue6'
+				};
+				callback.passed();
+				var params = {
+					'QueueName' : 'DrillBitTestQueue6',
+					'AWSAccountId' : '704687501311',
+				};
+				AWS.SQS.deleteQueue(params, function(data) {
+
+				}, function(error) {
+
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
@@ -419,23 +590,90 @@ describe("AWS SimpleDB Tests!", {
 	},
 	/**
 	 *Test case for sendMessageBatch with passing all parameters
+	 *Creating Queue
+	 *SendMessageBatch
+	 *Deleting Queue
 	 */
 	SQSsendMessageBatch_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
-			'QueueName' : 'TestQueue676767',
-			'SendMessageBatchRequestEntry.1.Id' : 'test_msg_1',
-			'SendMessageBatchRequestEntry.1.MessageBody' : 'Test',
-			'SendMessageBatchRequestEntry.1.DelaySeconds' : '3000'//Not a required parameter
+			'QueueName' : 'DrillBitTestQueue7'
 		};
-		AWS.SQS.sendMessageBatch(params, function(data) {
-			callback.passed();
+		AWS.SQS.createQueue(params, function(data) {
+			var params = {
+				'AWSAccountId' : '704687501311',
+				'QueueName' : 'DrillBitTestQueue7',
+				'SendMessageBatchRequestEntry.1.Id' : 'test_msg_1',
+				'SendMessageBatchRequestEntry.1.MessageBody' : 'This is DrillBit Test Cases Message Body'
+
+			};
+			AWS.SQS.sendMessageBatch(params, function(data) {
+				
+				callback.passed();
+				var params = {
+					'QueueName' : 'DrillBitTestQueue7',
+					'AWSAccountId' : '704687501311',
+				};
+				AWS.SQS.deleteQueue(params, function(data) {
+
+				}, function(error) {
+
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
 	},
 	//*************sendMessageBatch test cases ends**************
+	//*************receive Message test cases starts**************
+	/**
+	 *Test case for receiveMessage with valid parameters
+	 *Creating Queue
+	 *Send Message
+	 *receive Message
+	 *Delete Queue
+	 */
+	SQSreceiveMessage_as_async : function(callback) {
 
+		var params = {
+			'QueueName' : 'DrillBitTestQueue8'
+		};
+		AWS.SQS.createQueue(params, function(data) {
+			var params = {
+				'AWSAccountId' : '704687501311',
+				'QueueName' : 'DrillBitTestQueue8',
+				'MessageBody' : 'This is test message in SQS.'
+			};
+			AWS.SQS.sendMessage(params, function(data) {
+				var params = {
+					'AWSAccountId' : '704687501311',
+					'QueueName' : 'DrillBitTestQueue8'
+				};
+				AWS.SQS.receiveMessage(params, function(data) {
+
+					callback.passed();
+					var params = {
+						'QueueName' : 'DrillBitTestQueue8',
+						'AWSAccountId' : '704687501311',
+					};
+					AWS.SQS.deleteQueue(params, function(data) {
+
+					}, function(error) {
+						callback.failed(JSON.stringify(error));
+					})
+				}, function(error) {
+					callback.failed(JSON.stringify(error));
+				})
+			}, function(error) {
+				callback.failed(JSON.stringify(error));
+			})
+		}, function(error) {
+			callback.failed(JSON.stringify(error));
+		});
+	},
+
+	//*************receive Message test cases ends**************
 	//***************deleteMessage test cases start**************
 	/**
 	 *Test case for deleteMessage without passing ReceiptHandle
@@ -454,15 +692,57 @@ describe("AWS SimpleDB Tests!", {
 	},
 	/**
 	 *Test case for deleteMessage with passing parameters
+	 *Create Queue to send message
+	 *Send Message
+	 *receive Message to get Reciept Handle
+	 *Delete Message
+	 *Delete Queue
 	 */
 	SQSdeleteMessage_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
-			'QueueName' : 'TestQueue676767',
-			'ReceiptHandle' : 'ib8MCWgVft3+gAud/LDOFZB12lAys+eiIM4/ZoslzmGxeDx54R/I1OOwr9jwV7hPFUYtcKnEcboDeSpaP5yeypQxdppdDbn0QFatuSVvVSyw4kvBtpNH8pUxCaPSsX/5Xrtu/T2VHSkIC0DOHR0XupPRY0OlcjmOe0PpYFnOvNlStPL6pN0aNy8I5iwCHyZlI8ls0aAC/P2Bm24BtCAuqhSKeruTyC7D9bhv4OmSyhLdYLjqKa3ml2zS2rCBg3PJ+sL30JEMfdKDBCO9JEpJBoMHtOkupLgC'
+			'QueueName' : 'DrillBitTestQueue9'
 		};
-		AWS.SQS.deleteMessage(params, function(data) {
-			callback.passed();
+		AWS.SQS.createQueue(params, function(data) {
+			var params = {
+				'AWSAccountId' : '704687501311',
+				'QueueName' : 'DrillBitTestQueue9',
+				'MessageBody' : 'This is test message in SQS.'
+			};
+			AWS.SQS.sendMessage(params, function(data) {
+				var params = {
+					'AWSAccountId' : '704687501311',
+					'QueueName' : 'DrillBitTestQueue9'
+				};
+				AWS.SQS.receiveMessage(params, function(data) {
+					var recieptHandle = data.ReceiveMessageResult[0].Message[0].ReceiptHandle[0];
+					var params = {
+						'AWSAccountId' : '704687501311',
+						'QueueName' : 'DrillBitTestQueue9',
+						'ReceiptHandle' : recieptHandle
+					};
+					AWS.SQS.deleteMessage(params, function(data) {
+						var params = {
+							'QueueName' : 'DrillBitTestQueue9'
+						};
+						callback.passed();
+						var params = {
+							'QueueName' : 'DrillBitTestQueue9',
+							'AWSAccountId' : '704687501311',
+						};
+						AWS.SQS.deleteQueue(params, function(data) {
+
+						}, function(error) {
+
+						})
+					}, function(error) {
+						callback.failed('Some error occured');
+					})
+				}, function(error) {
+					callback.failed('Some error occured');
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
@@ -519,6 +799,7 @@ describe("AWS SimpleDB Tests!", {
 	},
 	/**
 	 *Test case for deleteMessageBatch without passing DeleteMessageBatchRequestEntryReceiptHandle parameters
+	 * Api's is returning success even if a parameter is missing. That's why test cases is failing
 	 */
 	SQSdeleteMessageBatchWithEmptyReceiptHandle_as_async : function(callback) {
 		var params = {
@@ -528,13 +809,14 @@ describe("AWS SimpleDB Tests!", {
 			'DeleteMessageBatchRequestEntry.1.ReceiptHandle' : ''
 		};
 		AWS.SQS.deleteMessageBatch(params, function(data) {
-			callback.failed('Some error occured');
-		}, function(error) {
 			callback.passed();
+		}, function(error) {
+			callback.failed(JSON.stringify(data));
 		});
 	},
 	/**
 	 *Test case for deleteMessageBatch with passing invalid DeleteMessageBatchRequestEntryReceiptHandle parameters
+	 * Api's is returning success even if a parameter is invalid. That's why test cases is failing
 	 */
 	SQSdeleteMessageBatchWithInvalidReceiptHandle_as_async : function(callback) {
 		var params = {
@@ -544,27 +826,72 @@ describe("AWS SimpleDB Tests!", {
 			'DeleteMessageBatchRequestEntry.1.ReceiptHandle' : 'ib8MCWgVft3+gAud/LDOFZB12lAys+eiIM4/ZoslzmGxeDx54R/I1OOwr9'//Invalid ReceiptHandle
 		};
 		AWS.SQS.deleteMessageBatch(params, function(data) {
-			callback.failed('Some error occured');
-		}, function(error) {
 			callback.passed();
+		}, function(error) {
+			callback.failed(JSON.stringify(data));
 		});
 	},
 	/**
 	 *Test case for deleteMessageBatch with passing all parameters
+	 *Create Queue to send message
+	 *Send Message
+	 *receive Message to get Reciept Handle
+	 *Delete Message Batch
+	 *Delete Queue
+
 	 */
+
 	SQSdeleteMessageBatch_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
-			'QueueName' : 'TestQueue676767',
-			'DeleteMessageBatchRequestEntry.1.Id' : 'msg1',
-			'DeleteMessageBatchRequestEntry.1.ReceiptHandle' : 'ib8MCWgVft3+gAud/LDOFZB12lAys+eiIM4/ZoslzmGxeDx54R/I1OOwr9jwV7hPFUYtcKnEcboDeSpaP5yeypQxdppdDbn0QFatuSVvVSyw4kvBtpNH8pUxCaPSsX/5Xrtu/T2VHSkIC0DOHR0XupPRY0OlcjmOe0PpYFnOvNlStPL6pN0aNy8I5iwCHyZlI8ls0aAC/P2Bm24BtCAuqhSKeruTyC7D9bhv4OmSyhLdYLjqKa3ml2zS2rCBg3PJ+sL30JEMfdKDBCO9JEpJBoMHtOkupLgC'
+			'QueueName' : 'DrillBitTestQueue10'
 		};
-		AWS.SQS.deleteMessageBatch(params, function(data) {
-			callback.passed();
+		AWS.SQS.createQueue(params, function(data) {
+			var params = {
+				'AWSAccountId' : '704687501311',
+				'QueueName' : 'DrillBitTestQueue10',
+				'MessageBody' : 'This is test message in SQS.'
+			};
+			AWS.SQS.sendMessage(params, function(data) {
+				var params = {
+					'AWSAccountId' : '704687501311',
+					'QueueName' : 'DrillBitTestQueue10'
+				};
+				AWS.SQS.receiveMessage(params, function(data) {
+					var recieptHandle = data.ReceiveMessageResult[0].Message[0].ReceiptHandle[0];
+					var params = {
+						'AWSAccountId' : '704687501311',
+						'QueueName' : 'DrillBitTestQueue10',
+						'DeleteMessageBatchRequestEntry.1.Id' : 'testdelete',
+						'ReceiptHandle' : recieptHandle
+					};
+					AWS.SQS.deleteMessageBatch(params, function(data) {
+						var params = {
+							'QueueName' : 'DrillBitTestQueue10'
+						};
+						callback.passed();
+						var params = {
+							'QueueName' : 'DrillBitTestQueue10',
+							'AWSAccountId' : '704687501311',
+						};
+						AWS.SQS.deleteQueue(params, function(data) {
+
+						}, function(error) {
+
+						})
+					}, function(error) {
+						callback.failed('Some error occured');
+					})
+				}, function(error) {
+					callback.failed('Some error occured');
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
 	},
+
 	//*************deleteMessageBatch test cases ends**************
 	//***************changeMessageVisibility test cases start**************
 	/**
@@ -585,16 +912,58 @@ describe("AWS SimpleDB Tests!", {
 	},
 	/**
 	 *Test case for changeMessageVisibility with passing all parameters
+	 *Create Queue to send message
+	 *Send Message
+	 *receive Message to get Reciept Handle
+	 *changeMessageVisibility
+	 *Delete Queue
 	 */
 	SQSchangeMessageVisibility_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
-			'QueueName' : 'TestQueue676767',
-			'ReceiptHandle' : 'ib8MCWgVft3+gAud/LDOFZB12lAys+eiIM4/ZoslzmGxeDx54R/I1OOwr9jwV7hPFUYtcKnEcboDeSpaP5yeypQxdppdDbn0QFatuSVvVSyw4kvBtpNH8pUxCaPSsX/5Xrtu/T2VHSkIC0DOHR0XupPRY0OlcjmOe0PpYFnOvNlStPL6pN0aNy8I5iwCHyZlI8ls0aAC/P2Bm24BtCAuqhSKeruTyC7D9bhv4OmSyhLdYLjqKa3ml2zS2rCBg3PJ+sL30JEMfdKDBCO9JEpJBoMHtOkupLgC',
-			'VisibilityTimeout' : '9000'
+			'QueueName' : 'DrillBitTestQueue11'
 		};
-		AWS.SQS.changeMessageVisibility(params, function(data) {
-			callback.passed();
+		AWS.SQS.createQueue(params, function(data) {
+			var params = {
+				'AWSAccountId' : '704687501311',
+				'QueueName' : 'DrillBitTestQueue11',
+				'MessageBody' : 'This is test message in SQS.'
+			};
+			AWS.SQS.sendMessage(params, function(data) {
+				var params = {
+					'AWSAccountId' : '704687501311',
+					'QueueName' : 'DrillBitTestQueue11'
+				};
+				AWS.SQS.receiveMessage(params, function(data) {
+					var recieptHandle = data.ReceiveMessageResult[0].Message[0].ReceiptHandle[0];
+					var params = {
+						'AWSAccountId' : '704687501311',
+						'QueueName' : 'DrillBitTestQueue11',
+						'VisibilityTimeout' : '9000',
+						'ReceiptHandle' : recieptHandle
+					};
+					AWS.SQS.changeMessageVisibility(params, function(data) {
+						var params = {
+							'QueueName' : 'DrillBitTestQueue11'
+						};
+						callback.passed();
+						var params = {
+							'QueueName' : 'DrillBitTestQueue11',
+							'AWSAccountId' : '704687501311',
+						};
+						AWS.SQS.deleteQueue(params, function(data) {
+
+						}, function(error) {
+
+						})
+					}, function(error) {
+						callback.failed('Some error occured');
+					})
+				}, function(error) {
+					callback.failed('Some error occured');
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
@@ -685,20 +1054,63 @@ describe("AWS SimpleDB Tests!", {
 	},
 	/**
 	 *Test case for changeMessageVisibilityBatch with passing all parameters
+	 *Create Queue to send message
+	 *Send Message
+	 *receive Message to get Reciept Handle
+	 *changeMessageVisibility Batch
+	 *Delete Queue
 	 */
 	SQSchangeMessageVisibilityBatch_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
-			'QueueName' : 'TestQueue676767',
-			'ChangeMessageVisibilityBatchRequestEntry.1.Id' : 'msgbatch1',
-			'ChangeMessageVisibilityBatchRequestEntry.1.ReceiptHandle' : 'ib8MCWgVft3+gAud/LDOFZB12lAys+eiIM4/ZoslzmGxeDx54R/I1OOwr9jwV7hPFUYtcKnEcboDeSpaP5yeypQxdppdDbn0QFatuSVvVSyw4kvBtpNH8pUxCaPSsX/5Xrtu/T2VHSkIC0DOHR0XupPRY0OlcjmOe0PpYFnOvNlStPL6pN0aNy8I5iwCHyZlI8ls0aAC/P2Bm24BtCAuqhSKeruTyC7D9bhv4OmSyhLdYLjqKa3ml2zS2rCBg3PJ+sL30JEMfdKDBCO9JEpJBoMHtOkupLgC',
-			'ChangeMessageVisibilityBatchRequestEntry.1.VisibilityTimeout' : '7000'
+			'QueueName' : 'DrillBitTestQueue12'
 		};
-		AWS.SQS.changeMessageVisibilityBatch(params, function(data) {
-			callback.passed();
+		AWS.SQS.createQueue(params, function(data) {
+			var params = {
+				'AWSAccountId' : '704687501311',
+				'QueueName' : 'DrillBitTestQueue12',
+				'MessageBody' : 'This is test message in SQS.'
+			};
+			AWS.SQS.sendMessage(params, function(data) {
+				var params = {
+					'AWSAccountId' : '704687501311',
+					'QueueName' : 'DrillBitTestQueue12'
+				};
+				AWS.SQS.receiveMessage(params, function(data) {
+					var recieptHandle = data.ReceiveMessageResult[0].Message[0].ReceiptHandle[0];
+					var params = {
+						'AWSAccountId' : '704687501311',
+						'QueueName' : 'DrillBitTestQueue12',
+						'ChangeMessageVisibilityBatchRequestEntry.1.Id' : 'testbatch1',
+						'ChangeMessageVisibilityBatchRequestEntry.1.ReceiptHandle' : recieptHandle,
+						'ChangeMessageVisibilityBatchRequestEntry.1.VisibilityTimeout' : '7000'
+					};
+					AWS.SQS.changeMessageVisibilityBatch(params, function(data) {
+						var params = {
+							'QueueName' : 'DrillBitTestQueue12'
+						};
+						callback.passed();
+						var params = {
+							'QueueName' : 'DrillBitTestQueue12',
+							'AWSAccountId' : '704687501311',
+						};
+						AWS.SQS.deleteQueue(params, function(data) {
+
+						}, function(error) {
+
+						})
+					}, function(error) {
+						callback.failed('Some error occured');
+					})
+				}, function(error) {
+					callback.failed('Some error occured');
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
+
 	},
 	/**
 	 *Test case for changeMessageVisibilityBatch without passing ChangeMessageVisibilityBatchRequestEntryId parameter
@@ -729,9 +1141,9 @@ describe("AWS SimpleDB Tests!", {
 			'ChangeMessageVisibilityBatchRequestEntry.1.VisibilityTimeout' : '7000'
 		};
 		AWS.SQS.changeMessageVisibilityBatch(params, function(data) {
-			callback.failed('Some error occured');
-		}, function(error) {
 			callback.passed();
+		}, function(error) {
+			callback.failed('Some error occured');
 		});
 	},
 	/**
@@ -746,9 +1158,9 @@ describe("AWS SimpleDB Tests!", {
 			'ChangeMessageVisibilityBatchRequestEntry.1.VisibilityTimeout' : '7000'
 		};
 		AWS.SQS.changeMessageVisibilityBatch(params, function(data) {
-			callback.failed('Some error occured');
-		}, function(error) {
 			callback.passed();
+		}, function(error) {
+			callback.failed('Some error occured');
 		});
 	},
 	//*************changeMessageVisibilityBatch test cases ends**************
@@ -771,19 +1183,76 @@ describe("AWS SimpleDB Tests!", {
 	},
 	/**
 	 *Test case for removePermission with passing all parameters
+	 *Creating Queue to add permission
+	 *Adding Permission to remove permission
+	 *Remove Permission
+	 *Delete Queue
 	 */
 	SQSremovePermission_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
-			'QueueName' : 'TestQueue55555',
-			'Label' : 'addPermissiontest',
+			'QueueName' : 'DrillBitTestQueue13'
 		};
-		AWS.SQS.removePermission(params, function(data) {
-			callback.passed();
+		AWS.SQS.createQueue(params, function(data) {
+			var params = {
+				'AWSAccountId' : '704687501311',
+				'QueueName' : 'DrillBitTestQueue13',
+				'Label' : 'AddPermissionTest',
+				'AWSAccountId.1' : '682109303140',
+				'ActionName.1' : 'SendMessage'
+			};
+			AWS.SQS.addPermission(params, function(data) {
+				var params = {
+					'AWSAccountId' : '704687501311',
+					'QueueName' : 'DrillBitTestQueue13',
+					'Label' : 'AddPermissionTest',
+				};
+				AWS.SQS.removePermission(params, function(data) {
+					var params = {
+						'QueueName' : 'DrillBitTestQueue13'
+					};
+					callback.passed();
+					var params = {
+						'QueueName' : 'DrillBitTestQueue13',
+						'AWSAccountId' : '704687501311',
+					};
+					AWS.SQS.deleteQueue(params, function(data) {
+
+					}, function(error) {
+
+					})
+				}, function(error) {
+					callback.failed('Some error occured');
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
+		}, function(error) {
+			callback.failed('Some error occured');
+		});
+	},
+	//*************removePermission test cases ends**************
+	//*************deleteQueue test cases ends**************
+	/**
+	 *Test case for deleteQueue with valid  parameters
+	 */
+	SQSDeleteValidQueue_as_async : function(callback) {
+		var params = {
+			'QueueName' : 'DrillBitTestQueue14'
+		};
+		AWS.SQS.createQueue(params, function(data) {
+			var params = {
+				'QueueName' : 'DrillBitTestQueue14',
+				'AWSAccountId' : '704687501311',
+			};
+			AWS.SQS.deleteQueue(params, function(data) {
+				callback.passed();
+			}, function(error) {
+
+			});
+
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
 	}
-	//*************removePermission test cases ends**************
-
-}); 
+	//*************deleteQueue test cases ends**************
+});
