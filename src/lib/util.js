@@ -144,9 +144,9 @@ function caseSensitiveComparator(a, b) {
 		return 0;
 	}
 	if(b.length > a.length) {
-		return 1;
+		return -1;
 	}
-	return -1;
+	return 1;
 }
 
 /***

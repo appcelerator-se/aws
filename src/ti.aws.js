@@ -243,10 +243,13 @@ var stsExecutor = function(params, cbOnData, cbOnError) {
 	params.Version = this.version;
 	var xhr = Ti.Network.createHTTPClient();
 	xhr.onload = function(response) {
-		Ti.App.Properties.setString('tempSessionToken', response["GetSessionTokenResult"][0]["Credentials"][0]["SessionToken"][0]);
-		Ti.App.Properties.setString('tempSecretAccessKey', response["GetSessionTokenResult"][0]["Credentials"][0]["SecretAccessKey"][0]);
-		Ti.App.Properties.setString('tempAccessKeyID', response["GetSessionTokenResult"][0]["Credentials"][0]["AccessKeyId"][0]);
-		Ti.App.Properties.setString('tempExpiration', response["GetSessionTokenResult"][0]["Credentials"][0]["Expiration"][0]);
+
+		jsResp = sessionOBJ.xmlToJSON.toJSON(this.responseText, false);
+
+		Ti.App.Properties.setString('tempSessionToken', jsResp["GetSessionTokenResult"][0]["Credentials"][0]["SessionToken"][0]);
+		Ti.App.Properties.setString('tempSecretAccessKey', jsResp["GetSessionTokenResult"][0]["Credentials"][0]["SecretAccessKey"][0]);
+		Ti.App.Properties.setString('tempAccessKeyID', jsResp["GetSessionTokenResult"][0]["Credentials"][0]["AccessKeyId"][0]);
+		Ti.App.Properties.setString('tempExpiration', jsResp["GetSessionTokenResult"][0]["Credentials"][0]["Expiration"][0]);
 		cbOnData(response);
 	};
 	xhr.onerror = function(e) {
