@@ -4,9 +4,8 @@ describe("AWS SES Tests!", {
 		AWS = require('ti.aws');
 		AWS.authorize(Titanium.App.Properties.getString('aws-access-key-id'), Titanium.App.Properties.getString('aws-secret-access-key'));
 	},
-    after_all : function()
-	{
-		AWS= null;
+	after_all : function() {
+		AWS = null;
 	},
 	timeout : 5000,
 
@@ -27,12 +26,16 @@ describe("AWS SES Tests!", {
 	/**
 	 *Test case for deleteVerifiedEmailAddress by passing a valid EmailAddress
 	 */
-	sesDeleteVerifiedEmailAddress : function(callback) {
+	sesdeleteVerifiedEmailAddress : function(callback) {
 		var params = {
-			'emailAddress' : 'abc@gmail.com'//Required
+			'emailAddress' : 'test@test.com'//Required
 		};
-		AWS.SES.deleteVerifiedEmailAddress(params, function(data) {
-			callback.passed();
+		AWS.SES.verifyEmailAddress(params, function(data) {
+			AWS.SES.deleteVerifiedEmailAddress(params, function(data) {
+				callback.passed();
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
@@ -122,13 +125,18 @@ describe("AWS SES Tests!", {
 
 	/**
 	 *Test case for verifyEmailAddress by passing a valid EmailAddress
+	 * 
 	 */
 	sesVerifyEmailAddress : function(callback) {
 		var params = {
 			'emailAddress' : 'test@test.com'//Required
 		};
 		AWS.SES.verifyEmailAddress(params, function(data) {
-			callback.passed();
+			AWS.SES.deleteVerifiedEmailAddress(params, function(data) {
+				callback.passed();
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
@@ -256,4 +264,4 @@ describe("AWS SES Tests!", {
 			callback.passed();
 		});
 	}
-});
+}); 
