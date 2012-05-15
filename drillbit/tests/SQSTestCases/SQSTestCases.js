@@ -3,6 +3,7 @@ describe("AWS SQS Tests!", {
 	before_all : function() {
 		AWS = require('ti.aws');
 		AWS.authorize(Titanium.App.Properties.getString('aws-access-key-id'), Titanium.App.Properties.getString('aws-secret-access-key'));
+	   awsAccountId = Titanium.App.Properties.getString('aws-account-id');
 	},
 	after_all : function() {
 		AWS = null;
@@ -53,7 +54,7 @@ describe("AWS SQS Tests!", {
 			callback.passed();
 			var params = {
 				'QueueName' : 'DrillBitTestQueue1',
-				'AWSAccountId' : '704687501311',
+				'AWSAccountId' : awsAccountId,
 			};
 			AWS.SQS.deleteQueue(params, function(data) {
 			}, function(error) {
@@ -110,7 +111,7 @@ describe("AWS SQS Tests!", {
 				callback.passed();
 				var params = {
 					'QueueName' : 'DrillBitTestQueue2',
-					'AWSAccountId' : '704687501311',
+					'AWSAccountId' : awsAccountId,
 				};
 				AWS.SQS.deleteQueue(params, function(data) {
 
@@ -132,7 +133,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSaddPermissionWithEmptyParams_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue55555',
 			'Label' : '',
 			'AWSAccountId.1' : '',
@@ -149,7 +150,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSaddPermissionWithEmptyLabel_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue55555',
 			'Label' : '', //Label is empty
 			'AWSAccountId.1' : '682109303140',
@@ -166,7 +167,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSaddPermissionWithEmptyAWSOtherAccountId_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue55555',
 			'Label' : 'addPermissiontest',
 			'AWSAccountId.1' : '', //AWSOtherAccountId is empty
@@ -183,7 +184,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSaddPermissionWithEmptyActionName_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue55555',
 			'Label' : 'addPermissiontest',
 			'AWSAccountId.1' : '682109303140',
@@ -208,7 +209,7 @@ describe("AWS SQS Tests!", {
 		};
 		AWS.SQS.createQueue(params, function(data) {
 			var params = {
-				'AWSAccountId' : '704687501311',
+				'AWSAccountId' : awsAccountId,
 				'QueueName' : 'DrillBitTestQueue3',
 				'Label' : 'AddPermissionTest',
 				'AWSAccountId.1' : '682109303140',
@@ -216,7 +217,7 @@ describe("AWS SQS Tests!", {
 			};
 			AWS.SQS.addPermission(params, function(data) {
 				var params = {
-					'AWSAccountId' : '704687501311',
+					'AWSAccountId' : awsAccountId,
 					'QueueName' : 'DrillBitTestQueue3',
 					'Label' : 'AddPermissionTest',
 				};
@@ -227,7 +228,7 @@ describe("AWS SQS Tests!", {
 					};
 					var params = {
 						'QueueName' : 'DrillBitTestQueue3',
-						'AWSAccountId' : '704687501311',
+						'AWSAccountId' : awsAccountId,
 					};
 					AWS.SQS.deleteQueue(params, function(data) {
 
@@ -249,7 +250,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSaddPermissionWithInvalidActionName_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue55555',
 			'Label' : 'addPermissiontest',
 			'AWSAccountId.1' : '682109303140',
@@ -266,7 +267,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSaddPermissionWithInvalidAWSOtherAccountId_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue55555',
 			'Label' : 'addPermissiontest',
 			'AWSAccountId.1' : '68210930314067', //Invalid AWSOtherAccountId
@@ -285,7 +286,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSsetQueueAttributesWithEmptyParams_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'Attribute.Name' : '',
 			'Attribute.Value' : ''
@@ -301,7 +302,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSsetQueueAttributesWithEmptyAttributeName_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'Attribute.Name' : '', //Empty Attribute.Name
 			'Attribute.Value' : '3000'
@@ -317,7 +318,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSsetQueueAttributesWithEmptyAttributeValue_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'Attribute.Name' : 'VisibilityTimeout',
 			'Attribute.Value' : ''//Empty Attribute.Value
@@ -333,7 +334,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSsetQueueAttributesWithEmptyAttributeValue_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'Attribute.Name' : 'VisibilityTimeouts', //Invalid Attribute Name
 			'Attribute.Value' : '35'
@@ -349,7 +350,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSsetQueueAttributesWithEmptyAttributeValue_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'Attribute.Name' : 'VisibilityTimeout',
 			'Attribute.Value' : '35dasda'//Invalid Attribute Value
@@ -372,7 +373,7 @@ describe("AWS SQS Tests!", {
 		};
 		AWS.SQS.createQueue(params, function(data) {
 			var params = {
-				'AWSAccountId' : '704687501311',
+				'AWSAccountId' : awsAccountId,
 				'QueueName' : 'DrillBitTestQueue4',
 				'Attribute.Name' : 'VisibilityTimeout',
 				'Attribute.Value' : '3000'
@@ -384,7 +385,7 @@ describe("AWS SQS Tests!", {
 				callback.passed();
 				var params = {
 					'QueueName' : 'DrillBitTestQueue4',
-					'AWSAccountId' : '704687501311',
+					'AWSAccountId' : awsAccountId,
 				};
 				AWS.SQS.deleteQueue(params, function(data) {
 
@@ -405,7 +406,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSgetQueueAttributesWithEmptyAttributeName_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'AttributeName.1' : ''//Empty AttributeName
 		};
@@ -420,7 +421,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSgetQueueAttributesWithEmptyAttributeName_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'AttributeName.1' : 'TestInvalid'//Invalid AttributeName
 		};
@@ -443,14 +444,14 @@ describe("AWS SQS Tests!", {
 		};
 		AWS.SQS.createQueue(params, function(data) {
 			var params = {
-				'AWSAccountId' : '704687501311',
+				'AWSAccountId' : awsAccountId,
 				'QueueName' : 'DrillBitTestQueue5',
 				'Attribute.Name' : 'VisibilityTimeout',
 				'Attribute.Value' : '3000'
 			};
 			AWS.SQS.setQueueAttributes(params, function(data) {
 				var params = {
-					'AWSAccountId' : '704687501311',
+					'AWSAccountId' : awsAccountId,
 					'QueueName' : 'DrillBitTestQueue5',
 					'AttributeName.1' : 'All'
 				};
@@ -461,7 +462,7 @@ describe("AWS SQS Tests!", {
 					callback.passed();
 					var params = {
 						'QueueName' : 'DrillBitTestQueue5',
-						'AWSAccountId' : '704687501311',
+						'AWSAccountId' : awsAccountId,
 					};
 					AWS.SQS.deleteQueue(params, function(data) {
 
@@ -486,7 +487,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSsendMessageWithEmptyMessageBody_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'MessageBody' : '', //Empty MessageBody
 			'DelaySeconds' : ''//Not a required parameter
@@ -509,7 +510,7 @@ describe("AWS SQS Tests!", {
 		};
 		AWS.SQS.createQueue(params, function(data) {
 			var params = {
-				'AWSAccountId' : '704687501311',
+				'AWSAccountId' : awsAccountId,
 				'QueueName' : 'DrillBitTestQueue6',
 				'MessageBody' : 'This is test message in SQS.'
 			};
@@ -520,7 +521,7 @@ describe("AWS SQS Tests!", {
 				callback.passed();
 				var params = {
 					'QueueName' : 'DrillBitTestQueue6',
-					'AWSAccountId' : '704687501311',
+					'AWSAccountId' : awsAccountId,
 				};
 				AWS.SQS.deleteQueue(params, function(data) {
 
@@ -542,7 +543,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSsendMessageBatchWithEmptyParams_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'SendMessageBatchRequestEntry.1.Id' : '',
 			'SendMessageBatchRequestEntry.1.MessageBody' : '',
@@ -559,7 +560,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSsendMessageBatchWithEmptyEntryId_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'SendMessageBatchRequestEntry.1.Id' : '', //Empty EntryId
 			'SendMessageBatchRequestEntry.1.MessageBody' : 'Test',
@@ -576,7 +577,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSsendMessageBatchWithEmptyMessageBody_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'SendMessageBatchRequestEntry.1.Id' : 'test_msg_1',
 			'SendMessageBatchRequestEntry.1.MessageBody' : '', //Empty MessageBody
@@ -600,7 +601,7 @@ describe("AWS SQS Tests!", {
 		};
 		AWS.SQS.createQueue(params, function(data) {
 			var params = {
-				'AWSAccountId' : '704687501311',
+				'AWSAccountId' : awsAccountId,
 				'QueueName' : 'DrillBitTestQueue7',
 				'SendMessageBatchRequestEntry.1.Id' : 'test_msg_1',
 				'SendMessageBatchRequestEntry.1.MessageBody' : 'This is DrillBit Test Cases Message Body'
@@ -611,7 +612,7 @@ describe("AWS SQS Tests!", {
 				callback.passed();
 				var params = {
 					'QueueName' : 'DrillBitTestQueue7',
-					'AWSAccountId' : '704687501311',
+					'AWSAccountId' : awsAccountId,
 				};
 				AWS.SQS.deleteQueue(params, function(data) {
 
@@ -641,13 +642,13 @@ describe("AWS SQS Tests!", {
 		};
 		AWS.SQS.createQueue(params, function(data) {
 			var params = {
-				'AWSAccountId' : '704687501311',
+				'AWSAccountId' : awsAccountId,
 				'QueueName' : 'DrillBitTestQueue8',
 				'MessageBody' : 'This is test message in SQS.'
 			};
 			AWS.SQS.sendMessage(params, function(data) {
 				var params = {
-					'AWSAccountId' : '704687501311',
+					'AWSAccountId' : awsAccountId,
 					'QueueName' : 'DrillBitTestQueue8'
 				};
 				AWS.SQS.receiveMessage(params, function(data) {
@@ -655,7 +656,7 @@ describe("AWS SQS Tests!", {
 					callback.passed();
 					var params = {
 						'QueueName' : 'DrillBitTestQueue8',
-						'AWSAccountId' : '704687501311',
+						'AWSAccountId' : awsAccountId,
 					};
 					AWS.SQS.deleteQueue(params, function(data) {
 
@@ -680,7 +681,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSdeleteMessageWithEmptyReceiptHandle_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'ReceiptHandle' : ''//Empty ReceiptHandle
 		};
@@ -704,19 +705,19 @@ describe("AWS SQS Tests!", {
 		};
 		AWS.SQS.createQueue(params, function(data) {
 			var params = {
-				'AWSAccountId' : '704687501311',
+				'AWSAccountId' : awsAccountId,
 				'QueueName' : 'DrillBitTestQueue9',
 				'MessageBody' : 'This is test message in SQS.'
 			};
 			AWS.SQS.sendMessage(params, function(data) {
 				var params = {
-					'AWSAccountId' : '704687501311',
+					'AWSAccountId' : awsAccountId,
 					'QueueName' : 'DrillBitTestQueue9'
 				};
 				AWS.SQS.receiveMessage(params, function(data) {
 					var recieptHandle = data.ReceiveMessageResult[0].Message[0].ReceiptHandle[0];
 					var params = {
-						'AWSAccountId' : '704687501311',
+						'AWSAccountId' : awsAccountId,
 						'QueueName' : 'DrillBitTestQueue9',
 						'ReceiptHandle' : recieptHandle
 					};
@@ -727,7 +728,7 @@ describe("AWS SQS Tests!", {
 						callback.passed();
 						var params = {
 							'QueueName' : 'DrillBitTestQueue9',
-							'AWSAccountId' : '704687501311',
+							'AWSAccountId' : awsAccountId,
 						};
 						AWS.SQS.deleteQueue(params, function(data) {
 
@@ -752,7 +753,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSdeleteMessageWithInvalidReceiptHandle_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'ReceiptHandle' : 'P2Bm24BtCAuqhSKeruTyC7D9bhv4OmSyhLdYLjqKa3ml2zS2rCBg3PJ+sL30JEMfdKDBCO9JEpJBoMHtOkupLgC'//Invalid ReceiptHandle
 		};
@@ -770,7 +771,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSdeleteMessageBatchWithEmptyParams_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'DeleteMessageBatchRequestEntry.1.Id' : '',
 			'DeleteMessageBatchRequestEntry.1.ReceiptHandle' : ''
@@ -786,7 +787,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSdeleteMessageBatchWithEmptyId_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'DeleteMessageBatchRequestEntry.1.Id' : '',
 			'DeleteMessageBatchRequestEntry.1.ReceiptHandle' : 'ib8MCWgVft3+gAud/LDOFZB12lAys+eiIM4/ZoslzmGxeDx54R/I1OOwr9jwV7hPFUYtcKnEcboDeSpaP5yeypQxdppdDbn0QFatuSVvVSyw4kvBtpNH8pUxCaPSsX/5Xrtu/T2VHSkIC0DOHR0XupPRY0OlcjmOe0PpYFnOvNlStPL6pN0aNy8I5iwCHyZlI8ls0aAC/P2Bm24BtCAuqhSKeruTyC7D9bhv4OmSyhLdYLjqKa3ml2zS2rCBg3PJ+sL30JEMfdKDBCO9JEpJBoMHtOkupLgC'
@@ -803,7 +804,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSdeleteMessageBatchWithEmptyReceiptHandle_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'DeleteMessageBatchRequestEntry.1.Id' : 'msg1',
 			'DeleteMessageBatchRequestEntry.1.ReceiptHandle' : ''
@@ -820,7 +821,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSdeleteMessageBatchWithInvalidReceiptHandle_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'DeleteMessageBatchRequestEntry.1.Id' : 'msg1',
 			'DeleteMessageBatchRequestEntry.1.ReceiptHandle' : 'ib8MCWgVft3+gAud/LDOFZB12lAys+eiIM4/ZoslzmGxeDx54R/I1OOwr9'//Invalid ReceiptHandle
@@ -847,19 +848,19 @@ describe("AWS SQS Tests!", {
 		};
 		AWS.SQS.createQueue(params, function(data) {
 			var params = {
-				'AWSAccountId' : '704687501311',
+				'AWSAccountId' : awsAccountId,
 				'QueueName' : 'DrillBitTestQueue10',
 				'MessageBody' : 'This is test message in SQS.'
 			};
 			AWS.SQS.sendMessage(params, function(data) {
 				var params = {
-					'AWSAccountId' : '704687501311',
+					'AWSAccountId' : awsAccountId,
 					'QueueName' : 'DrillBitTestQueue10'
 				};
 				AWS.SQS.receiveMessage(params, function(data) {
 					var recieptHandle = data.ReceiveMessageResult[0].Message[0].ReceiptHandle[0];
 					var params = {
-						'AWSAccountId' : '704687501311',
+						'AWSAccountId' : awsAccountId,
 						'QueueName' : 'DrillBitTestQueue10',
 						'DeleteMessageBatchRequestEntry.1.Id' : 'testdelete',
 						'ReceiptHandle' : recieptHandle
@@ -871,7 +872,7 @@ describe("AWS SQS Tests!", {
 						callback.passed();
 						var params = {
 							'QueueName' : 'DrillBitTestQueue10',
-							'AWSAccountId' : '704687501311',
+							'AWSAccountId' : awsAccountId,
 						};
 						AWS.SQS.deleteQueue(params, function(data) {
 
@@ -899,7 +900,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSchangeMessageVisibilityWithEmptyParams_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'ReceiptHandle' : '',
 			'VisibilityTimeout' : ''
@@ -924,19 +925,19 @@ describe("AWS SQS Tests!", {
 		};
 		AWS.SQS.createQueue(params, function(data) {
 			var params = {
-				'AWSAccountId' : '704687501311',
+				'AWSAccountId' : awsAccountId,
 				'QueueName' : 'DrillBitTestQueue11',
 				'MessageBody' : 'This is test message in SQS.'
 			};
 			AWS.SQS.sendMessage(params, function(data) {
 				var params = {
-					'AWSAccountId' : '704687501311',
+					'AWSAccountId' : awsAccountId,
 					'QueueName' : 'DrillBitTestQueue11'
 				};
 				AWS.SQS.receiveMessage(params, function(data) {
 					var recieptHandle = data.ReceiveMessageResult[0].Message[0].ReceiptHandle[0];
 					var params = {
-						'AWSAccountId' : '704687501311',
+						'AWSAccountId' : awsAccountId,
 						'QueueName' : 'DrillBitTestQueue11',
 						'VisibilityTimeout' : '9000',
 						'ReceiptHandle' : recieptHandle
@@ -948,7 +949,7 @@ describe("AWS SQS Tests!", {
 						callback.passed();
 						var params = {
 							'QueueName' : 'DrillBitTestQueue11',
-							'AWSAccountId' : '704687501311',
+							'AWSAccountId' : awsAccountId,
 						};
 						AWS.SQS.deleteQueue(params, function(data) {
 
@@ -973,7 +974,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSchangeMessageVisibilityWithEmptyReceiptHandle_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'ReceiptHandle' : '',
 			'VisibilityTimeout' : '9000'
@@ -989,7 +990,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSchangeMessageVisibilityWithEmptyVisibilityTimeout_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'ReceiptHandle' : 'ib8MCWgVft3+gAud/LDOFZB12lAys+eiIM4/ZoslzmGxeDx54R/I1OOwr9jwV7hPFUYtcKnEcboDeSpaP5yeypQxdppdDbn0QFatuSVvVSyw4kvBtpNH8pUxCaPSsX/5Xrtu/T2VHSkIC0DOHR0XupPRY0OlcjmOe0PpYFnOvNlStPL6pN0aNy8I5iwCHyZlI8ls0aAC/P2Bm24BtCAuqhSKeruTyC7D9bhv4OmSyhLdYLjqKa3ml2zS2rCBg3PJ+sL30JEMfdKDBCO9JEpJBoMHtOkupLgC',
 			'VisibilityTimeout' : ''
@@ -1005,7 +1006,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSchangeMessageVisibilityWithInvalidReceiptHandle_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'ReceiptHandle' : 'ib8MCWgVft3+gAud/LDOFZB12lAys+eiIM4eruTyC7D9bhv4OmSyhLdYLjqKa3ml2zS2rCBg3PJ+sL30JEMfdKDBCO9JEpJBoMHtOkupLgC', //Invalid ReceiptHandle
 			'VisibilityTimeout' : '9000'
@@ -1021,7 +1022,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSchangeMessageVisibilityWithInvalidVisibilityTimeout_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'ReceiptHandle' : 'ib8MCWgVft3+gAud/LDOFZB12lAys+eiIM4/ZoslzmGxeDx54R/I1OOwr9jwV7hPFUYtcKnEcboDeSpaP5yeypQxdppdDbn0QFatuSVvVSyw4kvBtpNH8pUxCaPSsX/5Xrtu/T2VHSkIC0DOHR0XupPRY0OlcjmOe0PpYFnOvNlStPL6pN0aNy8I5iwCHyZlI8ls0aAC/P2Bm24BtCAuqhSKeruTyC7D9bhv4OmSyhLdYLjqKa3ml2zS2rCBg3PJ+sL30JEMfdKDBCO9JEpJBoMHtOkupLgC',
 			'VisibilityTimeout' : '43500'//Invalid VisibilityTimeout- must not exceed 43200
@@ -1040,7 +1041,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSchangeMessageVisibilityBatchWithEmptyParameters_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'ChangeMessageVisibilityBatchRequestEntry.1.Id' : '',
 			'ChangeMessageVisibilityBatchRequestEntry.1.ReceiptHandle' : '',
@@ -1066,19 +1067,19 @@ describe("AWS SQS Tests!", {
 		};
 		AWS.SQS.createQueue(params, function(data) {
 			var params = {
-				'AWSAccountId' : '704687501311',
+				'AWSAccountId' : awsAccountId,
 				'QueueName' : 'DrillBitTestQueue12',
 				'MessageBody' : 'This is test message in SQS.'
 			};
 			AWS.SQS.sendMessage(params, function(data) {
 				var params = {
-					'AWSAccountId' : '704687501311',
+					'AWSAccountId' : awsAccountId,
 					'QueueName' : 'DrillBitTestQueue12'
 				};
 				AWS.SQS.receiveMessage(params, function(data) {
 					var recieptHandle = data.ReceiveMessageResult[0].Message[0].ReceiptHandle[0];
 					var params = {
-						'AWSAccountId' : '704687501311',
+						'AWSAccountId' : awsAccountId,
 						'QueueName' : 'DrillBitTestQueue12',
 						'ChangeMessageVisibilityBatchRequestEntry.1.Id' : 'testbatch1',
 						'ChangeMessageVisibilityBatchRequestEntry.1.ReceiptHandle' : recieptHandle,
@@ -1091,7 +1092,7 @@ describe("AWS SQS Tests!", {
 						callback.passed();
 						var params = {
 							'QueueName' : 'DrillBitTestQueue12',
-							'AWSAccountId' : '704687501311',
+							'AWSAccountId' : awsAccountId,
 						};
 						AWS.SQS.deleteQueue(params, function(data) {
 
@@ -1117,7 +1118,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSchangeMessageVisibilityBatchWithEmptyId_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'ChangeMessageVisibilityBatchRequestEntry.1.Id' : '',
 			'ChangeMessageVisibilityBatchRequestEntry.1.ReceiptHandle' : 'ib8MCWgVft3+gAud/LDOFZB12lAys+eiIM4/ZoslzmGxeDx54R/I1OOwr9jwV7hPFUYtcKnEcboDeSpaP5yeypQxdppdDbn0QFatuSVvVSyw4kvBtpNH8pUxCaPSsX/5Xrtu/T2VHSkIC0DOHR0XupPRY0OlcjmOe0PpYFnOvNlStPL6pN0aNy8I5iwCHyZlI8ls0aAC/P2Bm24BtCAuqhSKeruTyC7D9bhv4OmSyhLdYLjqKa3ml2zS2rCBg3PJ+sL30JEMfdKDBCO9JEpJBoMHtOkupLgC',
@@ -1134,7 +1135,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSchangeMessageVisibilityBatchWithEmptyReceiptHandle_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'ChangeMessageVisibilityBatchRequestEntry.1.Id' : 'msgbatch1',
 			'ChangeMessageVisibilityBatchRequestEntry.1.ReceiptHandle' : '',
@@ -1151,7 +1152,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSchangeMessageVisibilityBatchWithInvalidReceiptHandle_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'ChangeMessageVisibilityBatchRequestEntry.1.Id' : 'msgbatch1',
 			'ChangeMessageVisibilityBatchRequestEntry.1.ReceiptHandle' : 'ib8MCWgVft3+gAud/LDOFZB12lAys+eiIM4/ZoslzmGxeDx54R',
@@ -1171,7 +1172,7 @@ describe("AWS SQS Tests!", {
 	 */
 	SQSremovePermissionWithEmptyParams_as_async : function(callback) {
 		var params = {
-			'AWSAccountId' : '704687501311',
+			'AWSAccountId' : awsAccountId,
 			'QueueName' : 'TestQueue676767',
 			'Label' : ''
 		};
@@ -1194,7 +1195,7 @@ describe("AWS SQS Tests!", {
 		};
 		AWS.SQS.createQueue(params, function(data) {
 			var params = {
-				'AWSAccountId' : '704687501311',
+				'AWSAccountId' : awsAccountId,
 				'QueueName' : 'DrillBitTestQueue13',
 				'Label' : 'AddPermissionTest',
 				'AWSAccountId.1' : '682109303140',
@@ -1202,7 +1203,7 @@ describe("AWS SQS Tests!", {
 			};
 			AWS.SQS.addPermission(params, function(data) {
 				var params = {
-					'AWSAccountId' : '704687501311',
+					'AWSAccountId' : awsAccountId,
 					'QueueName' : 'DrillBitTestQueue13',
 					'Label' : 'AddPermissionTest',
 				};
@@ -1213,7 +1214,7 @@ describe("AWS SQS Tests!", {
 					callback.passed();
 					var params = {
 						'QueueName' : 'DrillBitTestQueue13',
-						'AWSAccountId' : '704687501311',
+						'AWSAccountId' : awsAccountId,
 					};
 					AWS.SQS.deleteQueue(params, function(data) {
 
@@ -1242,7 +1243,7 @@ describe("AWS SQS Tests!", {
 		AWS.SQS.createQueue(params, function(data) {
 			var params = {
 				'QueueName' : 'DrillBitTestQueue14',
-				'AWSAccountId' : '704687501311',
+				'AWSAccountId' : awsAccountId,
 			};
 			AWS.SQS.deleteQueue(params, function(data) {
 				callback.passed();
