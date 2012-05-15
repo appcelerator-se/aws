@@ -9,9 +9,11 @@ describe("AWS SimpleDB Tests!", {
 	},
 	timeout : 5000,
 
+	
 	//Start Test Cases for Create Domain
 
 	//Test case with valid domain
+
 	createDomain_as_async : function(callback) {
 		AWS.SimpleDB.createDomain({
 			DomainName : 'DrillCases1234'
@@ -989,51 +991,44 @@ describe("AWS SimpleDB Tests!", {
 		});
 	},
 	// End Test Cases for  put Attributes.
-	
+
 	// Start Test Cases for Select.
 
-		select_as_async : function(callback) {
-		   AWS.SimpleDB.createDomain({
-		  DomainName : 'DrillBit7787120'
-		 }, function(data) {
-		  AWS.SimpleDB.putAttributes({
-		   'Attribute.1.Name' : 'testAttributeName',
-		   'Attribute.1.Value' : 'testAttributeValue',
-		   'ItemName' : 'testItemName',
-		   'DomainName' : 'DrillBit7787120'
-		  }, function(data) {
-		   AWS.SimpleDB.select({
-		  'SelectExpression' : 'select * from DrillBit7787120',
-		 }, function(data) {
-		  callback.passed();
-		  AWS.SimpleDB.deleteAttributes({
-		    'ItemName' : 'testItemName',
-		    'DomainName' : 'DrillBit7787120'
-		   }, function(data) {
-		    AWS.SimpleDB.deleteDomain({
-		     'DomainName' : 'DrillBit7787120'
-		    }, function(data) {
-
-		    }, function(error) {
-
-		    });
-		   }, function(error) {
-
-		   });
-		 }, function(error) {
-		  callback.failed(JSON.stringify(error));
-		 });
-		   
-		   
-		  }, function(error) {
-		  callback.failed(JSON.stringify(error));
-		  });
-
-		 }, function(error) {
-		  callback.failed(JSON.stringify(error));
-		 });
-		 
-		},
+	select_as_async : function(callback) {
+		AWS.SimpleDB.createDomain({
+			DomainName : 'DrillBit7787120'
+		}, function(data) {
+			AWS.SimpleDB.putAttributes({
+				'Attribute.1.Name' : 'testAttributeName',
+				'Attribute.1.Value' : 'testAttributeValue',
+				'ItemName' : 'testItemName',
+				'DomainName' : 'DrillBit7787120'
+			}, function(data) {
+				AWS.SimpleDB.select({
+					'SelectExpression' : 'select * from DrillBit7787120',
+				}, function(data) {
+					callback.passed();
+					AWS.SimpleDB.deleteAttributes({
+						'ItemName' : 'testItemName',
+						'DomainName' : 'DrillBit7787120'
+					}, function(data) {
+						AWS.SimpleDB.deleteDomain({
+							'DomainName' : 'DrillBit7787120'
+						}, function(data) {
+						}, function(error) {
+						});
+					}, function(error) {
+					});
+				}, function(error) {
+					callback.failed(JSON.stringify(error));
+				});
+			}, function(error) {
+				callback.failed(JSON.stringify(error));
+			});
+		}, function(error) {
+			callback.failed(JSON.stringify(error));
+		});
+	},
 
 	selectWithInvalidExpression_as_async : function(callback) {
 		AWS.SimpleDB.select({
@@ -1044,7 +1039,7 @@ describe("AWS SimpleDB Tests!", {
 			callback.passed();
 		});
 	},
-selectWithEmptyExpression_as_async : function(callback) {
+	selectWithEmptyExpression_as_async : function(callback) {
 		AWS.SimpleDB.select({
 			'SelectExpression' : '',
 		}, function(data) {
@@ -1063,6 +1058,5 @@ selectWithEmptyExpression_as_async : function(callback) {
 			callback.passed();
 		});
 	}
-	
 	// End Test Cases for  Select.
 });
