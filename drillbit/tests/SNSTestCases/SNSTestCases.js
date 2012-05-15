@@ -3,10 +3,12 @@ describe("AWS SNS Tests!", {
 	before_all : function() {
 		AWS = require('ti.aws');
 		AWS.authorize(Titanium.App.Properties.getString('aws-access-key-id'), Titanium.App.Properties.getString('aws-secret-access-key'));
+		awsAccountId = Titanium.App.Properties.getString('aws-account-id');
 		arn = '';
 	},
 	after_all : function() {
 		AWS = null;
+		awsAccountId = null;
 	},
 	timeout : 5000,
 
@@ -133,8 +135,6 @@ describe("AWS SNS Tests!", {
 	},
 	/**
 	 *Test case for Confirming Subscription.
-	 * Test cases requires token that is sent through email, that needs to be copied to tiapp.xml
-	 *
 	 */
 	confirmSubscription_as_async : function(callback) {
 		var params = {
@@ -257,7 +257,7 @@ describe("AWS SNS Tests!", {
 			AWS.SNS.createTopic(params, function(data) {//Craeting topic
 				arn = data.CreateTopicResult[0].TopicArn[0];
 				var params = {
-					'Endpoint' : 'arn:aws:sqs:us-east-1:704687501311:DrillBitTestQueue886', //Required
+					'Endpoint' : 'arn:aws:sqs:us-east-1:'+awsAccountId+':DrillBitTestQueue886', //Required
 					'Protocol' : 'sqs', //Required
 					'TopicArn' : arn//Required
 				};
@@ -270,7 +270,7 @@ describe("AWS SNS Tests!", {
 						callback.passed();
 						AWS.SNS.unsubscribe(params, function(data) {//unsubscribing
 							var params = {
-								'AWSAccountId' : '704687501311',
+								'AWSAccountId' : awsAccountId,
 								'QueueName' : 'DrillBitTestQueue886'
 							};
 							AWS.SQS.deleteQueue(params, function(data) {//Deleting queue
@@ -667,14 +667,13 @@ describe("AWS SNS Tests!", {
 			'QueueName' : 'DrillBitTestQueue884'
 		};
 		AWS.SQS.createQueue(params, function(data) {//Creating queue
-			var queueUrl = data.CreateQueueResult[0].QueueUrl[0];
 			var params = {
 				'Name' : 'DrillBitTestTopic12346'//Required
 			};
 			AWS.SNS.createTopic(params, function(data) {//Creating topic
 				arn = data.CreateTopicResult[0].TopicArn[0];
 				var params = {
-					'Endpoint' : 'arn:aws:sqs:us-east-1:704687501311:DrillBitTestQueue884', //Required
+					'Endpoint' : 'arn:aws:sqs:us-east-1:'+awsAccountId+':DrillBitTestQueue884', //Required
 					'Protocol' : 'sqs', //Required
 					'TopicArn' : arn//Required
 				};
@@ -692,7 +691,7 @@ describe("AWS SNS Tests!", {
 						};
 						AWS.SNS.unsubscribe(params, function(data) {//Calling unsubscribe
 							var params = {
-								'AWSAccountId' : '704687501311',
+								'AWSAccountId' : awsAccountId,
 								'QueueName' : 'DrillBitTestQueue884'
 							};
 							AWS.SQS.deleteQueue(params, function(data) {//deleting the queue
@@ -937,7 +936,7 @@ describe("AWS SNS Tests!", {
 			AWS.SNS.createTopic(params, function(data) {//Creating topic
 				arn = data.CreateTopicResult[0].TopicArn[0];
 				var params = {
-					'Endpoint' : 'arn:aws:sqs:us-east-1:704687501311:DrillBitTestQueue888', //Required
+					'Endpoint' : 'arn:aws:sqs:us-east-1:'+awsAccountId+':DrillBitTestQueue888', //Required
 					'Protocol' : 'sqs', //Required
 					'TopicArn' : arn//Required
 				};
@@ -949,7 +948,7 @@ describe("AWS SNS Tests!", {
 					};
 					AWS.SNS.unsubscribe(params, function(data) {//Calling unsubscribe
 						var params = {
-							'AWSAccountId' : '704687501311',
+							'AWSAccountId' : awsAccountId,
 							'QueueName' : 'DrillBitTestQueue888'
 						};
 						AWS.SQS.deleteQueue(params, function(data) {//Deleting the queue
@@ -1018,7 +1017,7 @@ describe("AWS SNS Tests!", {
 			AWS.SNS.createTopic(params, function(data) {
 				arn = data.CreateTopicResult[0].TopicArn[0];
 				var params = {
-					'Endpoint' : 'arn:aws:sqs:us-east-1:704687501311:DrillBitTestQueue889', //Required
+					'Endpoint' : 'arn:aws:sqs:us-east-1:'+awsAccountId+':DrillBitTestQueue889', //Required
 					'Protocol' : 'sqs', //Required
 					'TopicArn' : arn//Required
 				};
@@ -1030,7 +1029,7 @@ describe("AWS SNS Tests!", {
 					AWS.SNS.unsubscribe(params, function(data) {//Calling unsubscribe
 						callback.passed();
 						var params = {
-							'AWSAccountId' : '704687501311',
+							'AWSAccountId' : awsAccountId,
 							'QueueName' : 'DrillBitTestQueue889'
 						};
 						AWS.SQS.deleteQueue(params, function(data) {//Deleting the queue
