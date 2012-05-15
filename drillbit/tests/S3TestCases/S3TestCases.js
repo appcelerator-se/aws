@@ -1,30 +1,58 @@
 describe("AWS S3 Tests!", {
-
 	before_all : function() {
 		AWS = require('ti.aws');
 		AWS.authorize(Titanium.App.Properties.getString('aws-access-key-id'), Titanium.App.Properties.getString('aws-secret-access-key'));
+		emailId = Titanium.App.Properties.getString('email-id');
 		uploadId = '';
 		ETag = '';
 	},
-	after_all : function()
-	{
-		AWS= null;
-		uploadId= null;
-		ETag= null;
+	after_all : function() {
+		AWS = null;
+		uploadId = null;
+		ETag = null;
+		emailId = null;
 	},
 	timeout : 5000,
 
 	headObject_as_async : function(callback) {
-		AWS.S3.headObject({
-			'bucketName' : 'test12398',
-			'objectName' : 'Rahul.png'
+		var f = Titanium.Filesystem.getFile('KS_nav_views.png');
+		AWS.S3.putBucket({
+			bucketName : 'test131'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putObject({
+				'bucketName' : 'test131',
+				'objectName' : 'KS_nav_views.png',
+				'file' : f
+			}, function(data) {
+				AWS.S3.headObject({
+					'bucketName' : 'test131',
+					'objectName' : 'KS_nav_views.png'
+				}, function(data) {
+					callback.passed();
+					AWS.S3.deleteObject({
+						'bucketName' : 'test131',
+						'objectName' : 'KS_nav_views.png'
+					}, function(data) {
+						AWS.S3.deleteBucket({
+							'bucketName' : 'test131'
+						}, function(data) {
+
+						}, function(error) {
+
+						});
+					}, function(error) {
+
+					});
+				}, function(error) {
+					callback.failed('Some error occured');
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
 	},
-
 	headObjectWithEmptybucketName_as_async : function(callback) {
 		AWS.S3.headObject({
 			'bucketName' : '',
@@ -65,16 +93,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
-	headBucket_as_async : function(callback) {
-		AWS.S3.headBucket({
-			'bucketName' : 'pankaj2344'
-		}, function(data) {
-			callback.passed();
-		}, function(error) {
-			callback.failed('Some error occured');
-		});
-	},
 	headBucketWithEmptybucketName_as_async : function(callback) {
 		AWS.S3.headBucket({
 			'bucketName' : ''
@@ -93,16 +111,63 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	putObjectCopy_as_async : function(callback) {
-		AWS.S3.putObjectCopy({
-			'bucketName' : 'pankaj2344',
-			'objectName' : 'xyz',
-			'copySource' : '/test12398/strus2.pdf'
+		var f = Titanium.Filesystem.getFile('KS_nav_views.png');
+		AWS.S3.putBucket({
+			bucketName : 'test231'
 		}, function(data) {
-			callback.failed('Some error occured');
+			AWS.S3.putObject({
+				'bucketName' : 'test231',
+				'objectName' : 'KS_nav_views.png',
+				'file' : f
+			}, function(data) {
+				AWS.S3.putBucket({
+					'bucketName' : 'test324'
+				}, function(data) {
+					AWS.S3.putObjectCopy({
+						'bucketName' : 'test324',
+						'objectName' : 'xyz',
+						'copySource' : '/test231/KS_nav_views.png'
+					}, function(data) {
+						callback.passed();
+						AWS.S3.deleteObject({
+							'bucketName' : 'test324',
+							'objectName' : 'xyz'
+						}, function(data) {
+							AWS.S3.deleteObject({
+								'bucketName' : 'test231',
+								'objectName' : 'KS_nav_views.png'
+							}, function(data) {
+								AWS.S3.deleteBucket({
+									'bucketName' : 'test324'
+								}, function(data) {
+									AWS.S3.deleteBucket({
+										'bucketName' : 'test231'
+									}, function(data) {
+
+									}, function(error) {
+
+									});
+								}, function(error) {
+
+								});
+							}, function(error) {
+
+							});
+						}, function(error) {
+
+						});
+					}, function(error) {
+						callback.failed('Some error occured');
+					});
+				}, function(error) {
+					callback.failed('Some error occured');
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
-			callback.passed();
+			callback.failed('Some error occured');
 		});
 	},
 	putObjectCopyWithInvalidBucketName_as_async : function(callback) {
@@ -160,30 +225,56 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	getObjectTorrent_as_async : function(callback) {
-		AWS.S3.getObjectTorrent({
-			'bucketName' : 'test12398',
-			'objectName' : 'Rahul.png'
+		var f = Titanium.Filesystem.getFile('KS_nav_views.png');
+		AWS.S3.putBucket({
+			bucketName : 'test453'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putObject({
+				'bucketName' : 'test453',
+				'objectName' : 'KS_nav_views.png',
+				'file' : f
+			}, function(data) {
+				AWS.S3.getObjectTorrent({
+					'bucketName' : 'test453',
+					'objectName' : 'KS_nav_views.png'
+				}, function(data) {
+					callback.passed();
+					AWS.S3.deleteObject({
+						'bucketName' : 'test453',
+						'objectName' : 'KS_nav_views.png'
+					}, function(data) {
+						AWS.S3.deleteBucket({
+							'bucketName' : 'test453'
+						}, function(data) {
+
+						}, function(error) {
+
+						});
+					}, function(error) {
+
+					});
+				}, function(error) {
+					callback.failed('Some error occured');
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
 	},
-
 	getObjectTorrentWithEmptyBucketName_as_async : function(callback) {
 		AWS.S3.getObjectTorrent({
 			'bucketName' : '',
 			'objectName' : 'Spring.pdf'
 		}, function(data) {
-			alert(JSON.stringify(data));
+
 			callback.failed('Some error occured');
 		}, function(error) {
 			callback.passed();
 		});
 	},
-
 	getObjectTorrentWithInvalidBucketName_as_async : function(callback) {
 		AWS.S3.getObjectTorrent({
 			'bucketName' : 'xyzw',
@@ -194,7 +285,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	getObjectTorrentWithEmptyObjectName_as_async : function(callback) {
 		AWS.S3.getObjectTorrent({
 			'bucketName' : 'pankaj2344',
@@ -203,10 +293,9 @@ describe("AWS S3 Tests!", {
 			callback.failed('Some error occured');
 		}, function(error) {
 			callback.passed();
-			
+
 		});
 	},
-
 	getObjectTorrentWithInvalidObjectName_as_async : function(callback) {
 		AWS.S3.getObjectTorrent({
 			'bucketName' : 'pankaj2344',
@@ -217,100 +306,447 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	initiateMultipartUpload_as_async : function(callback) {
-		AWS.S3.initiateMultipartUpload({
-			'bucketName' : 'test12398',
-			'objectName' : 'struts2.pdf'
+		var f = Titanium.Filesystem.getFile('KS_nav_views.png');
+		AWS.S3.putBucket({
+			bucketName : 'test572'
 		}, function(data) {
-			alert(data.UploadId);
-			uploadId = data.UploadId;
-			callback.passed();
+			AWS.S3.putObject({
+				'bucketName' : 'test572',
+				'objectName' : 'KS_nav_views.png',
+				'file' : f
+			}, function(data) {
+				AWS.S3.initiateMultipartUpload({
+					'bucketName' : 'test572',
+					'objectName' : 'KS_nav_views.png'
+				}, function(data) {
+					callback.passed();
+					AWS.S3.deleteObject({
+						'bucketName' : 'test572',
+						'objectName' : 'KS_nav_views.png'
+					}, function(data) {
+						AWS.S3.deleteBucket({
+							'bucketName' : 'test572'
+						}, function(data) {
+
+						}, function(error) {
+
+						});
+					}, function(error) {
+
+					});
+				}, function(error) {
+					callback.failed('Some error occured');
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
-			alert(error);
 			callback.failed('Some error occured');
 		});
 	},
+	uploadPart_as_async : function(callback) {
+		var f = Titanium.Filesystem.getFile('KS_nav_views.png');
+		AWS.S3.putBucket({
+			bucketName : 'test692'
+		}, function(data) {
+			AWS.S3.putObject({
+				'bucketName' : 'test692',
+				'objectName' : 'KS_nav_views.png',
+				'file' : f
+			}, function(data) {
+				AWS.S3.initiateMultipartUpload({
+					'bucketName' : 'test692',
+					'objectName' : 'KS_nav_views.png'
+				}, function(data) {
+					uploadId = data.UploadId;
+					var f1 = Titanium.Filesystem.getFile('KS_nav_ui.png');
+					AWS.S3.uploadPart({
+						'bucketName' : 'test692',
+						'objectName' : 'KS_nav_views.png',
+						'file' : f1,
+						'uploadId' : uploadId,
+						'partNumber' : '2'
+					}, function(data) {
+						callback.passed();
+						AWS.S3.deleteObject({
+							'bucketName' : 'test692',
+							'objectName' : 'KS_nav_views.png'
+						}, function(data) {
+							AWS.S3.deleteBucket({
+								'bucketName' : 'test692'
+							}, function(data) {
 
+							}, function(error) {
+
+							});
+						}, function(error) {
+
+						});
+					}, function(error) {
+						callback.failed('Some error occured');
+					});
+				}, function(error) {
+					callback.failed('Some error occured');
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
+		}, function(error) {
+			callback.failed('Some error occured');
+		});
+	},
 	uploadPartCopy_as_async : function(callback) {
-
-		AWS.S3.uploadPartCopy({
-			'bucketName' : 'test12398',
-			'objectName' : 'struts2.pdf',
-			'copySource' : '/pankaj2344/Spring.pdf',
-			'uploadId' : uploadId,
-			'partNumber' : '2'
+		var f = Titanium.Filesystem.getFile('KS_nav_views.png');
+		AWS.S3.putBucket({
+			bucketName : 'test794'
 		}, function(data) {
-			ETag = data.ETag;
-			callback.passed();
+			AWS.S3.putObject({
+				'bucketName' : 'test794',
+				'objectName' : 'KS_nav_views.png',
+				'file' : f
+			}, function(data) {
+				var f1 = Titanium.Filesystem.getFile('KS_nav_ui.png');
+				AWS.S3.putBucket({
+					bucketName : 'test835'
+				}, function(data) {
+					AWS.S3.putObject({
+						'bucketName' : 'test835',
+						'objectName' : 'KS_nav_ui.png',
+						'file' : f1
+					}, function(data) {
+						AWS.S3.initiateMultipartUpload({
+							'bucketName' : 'test794',
+							'objectName' : 'KS_nav_views.png'
+						}, function(data) {
+							uploadId = data.UploadId;
+							AWS.S3.uploadPartCopy({
+								'bucketName' : 'test794',
+								'objectName' : 'KS_nav_views.png',
+								'copySource' : '/test835/KS_nav_ui.png',
+								'uploadId' : uploadId,
+								'partNumber' : '2'
+							}, function(data) {
+								callback.passed();
+								AWS.S3.deleteObject({
+									'bucketName' : 'test794',
+									'objectName' : 'KS_nav_views.png'
+								}, function(data) {
+									AWS.S3.deleteBucket({
+										'bucketName' : 'test794'
+									}, function(data) {
+										AWS.S3.deleteObject({
+											'bucketName' : 'test835',
+											'objectName' : 'KS_nav_ui.png'
+										}, function(data) {
+											AWS.S3.deleteBucket({
+												'bucketName' : 'test835'
+											}, function(data) {
+
+											}, function(error) {
+
+											});
+										}, function(error) {
+
+										});
+									}, function(error) {
+
+									});
+								}, function(error) {
+
+								});
+							}, function(error) {
+								callback.failed('Some error occured');
+							});
+						}, function(error) {
+							callback.failed('Some error occured');
+						});
+					}, function(error) {
+						callback.failed('Some error occured');
+					});
+				}, function(error) {
+					callback.failed('Some error occured');
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
 	},
-	completeMultipartUpload_as_async : function(callback) {
-		AWS.S3.completeMultipartUpload({
-			'bucketName' : 'test12398',
-			'objectName' : 'struts2.pdf',
-			'uploadId' : uploadId,
-			'xmlTemplate' : '<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>' + ETag + '</ETag></Part></CompleteMultipartUpload>'
-		}, function(data) {
-			callback.passed();
-		}, function(error) {
-			callback.failed('Some error occured');
-		});
-	},
+	/**
+	 *  Complete MultiPart Upload is used for completing the process of uploading in MultiPart.
+	 */
 
+	/*completeMultipartUpload_as_async : function(callback) {
+		AWS.S3.putBucket({
+			bucketName : 'test953'
+		}, function(data) {
+			alert('putBucket success');
+			var f = Titanium.Filesystem.getFile('ATC.pdf');
+			Ti.App.AWS.S3.putObject({
+				'bucketName' : 'test953',
+				'objectName' : 'ATC.pdf',
+				'file' : f
+			}, function(data) {
+				alert('putObject success');
+				Ti.App.AWS.S3.putBucket({
+					bucketName : 'test1087890'
+				}, function(data) {
+					alert('putBucket success');
+					var f1 = Titanium.Filesystem.getFile('Sxml.pdf');
+					Ti.App.AWS.S3.putObject({
+						'bucketName' : 'test1087890',
+						'objectName' : 'Sxml.pdf',
+						'file' : f
+					}, function(data) {
+						alert('putObject success');
+						Ti.App.AWS.S3.initiateMultipartUpload({
+							'bucketName' : 'test953',
+							'objectName' : 'ATC.pdf'
+						}, function(data) {
+							alert('initiateMultipartUpload success');
+							test = data.UploadId;
+							Ti.App.AWS.S3.uploadPartCopy({
+								'bucketName' : 'test953',
+								'objectName' : 'ATC.pdf',
+								'copySource' : '/test1087890/Sxml.pdf',
+								'uploadId' : data.UploadId,
+								'partNumber' : '2'
+							}, function(data) {
+								alert('uploadPartCopy success');
+								Ti.API.info(JSON.stringify(data));
+								Ti.App.AWS.S3.completeMultipartUpload({
+									'bucketName' : 'test953',
+									'objectName' : 'ATC.pdf',
+									'uploadId' : test,
+									'xmlTemplate' : '<CompleteMultipartUpload><Part><PartNumber>2</PartNumber><ETag>' + data.ETag + '</ETag></Part></CompleteMultipartUpload>'
+								}, function(data) {
+									alert('completeMultipartUpload success');
+									Ti.API.info(JSON.stringify(data));
+									//callback.passed();
+									Ti.App.AWS.S3.deleteObject({
+										'bucketName' : 'test953',
+										'objectName' : 'ATC.pdf'
+									}, function(data) {
+										alert('deleteObject success');
+										Ti.App.AWS.S3.deleteBucket({
+											'bucketName' : 'test953'
+										}, function(data) {
+											alert('deleteBucket success');
+											Ti.App.AWS.S3.deleteObject({
+												'bucketName' : 'test1087890',
+												'objectName' : 'Sxml.pdf'
+											}, function(data) {
+												alert('deleteObject success');
+												Ti.App.AWS.S3.deleteBucket({
+													'bucketName' : 'test1087890'
+												}, function(data) {
+													alert('deleteBucket success');
+												}, function(error) {
+													alert('Some error occured' + JSON.stringify(error));
+												});
+											}, function(error) {
+												alert('Some error occured' + JSON.stringify(error));
+											});
+										}, function(error) {
+											alert('Some error occured' + JSON.stringify(error));
+										});
+									}, function(error) {
+										alert('Some error occured' + JSON.stringify(error));
+									});
+								}, function(error) {
+									alert('Some error occured' + JSON.stringify(error));
+									//callback.failed('Some error occured'+JSON.stringify(error));
+								});
+							}, function(error) {
+								alert('Some error occured' + JSON.stringify(error));
+							});
+						}, function(error) {
+							alert('Some error occured' + JSON.stringify(error));
+						});
+					}, function(error) {
+						alert('Some error occured' + JSON.stringify(error));
+					});
+				}, function(error) {
+					alert('Some error occured' + JSON.stringify(error));
+				});
+			}, function(error) {
+				alert('Some error occured' + JSON.stringify(error));
+			});
+		}, function(error) {
+			alert('Some error occured' + JSON.stringify(error));
+		});
+	},*/
 	putObject_as_async : function(callback) {
 		var f = Titanium.Filesystem.getFile('KS_nav_views.png');
-		AWS.S3.putObject({
-			'bucketName' : 'pankaj8888',
-			'objectName' : 'KS_nav_views.png',
-			'file' : f
+		AWS.S3.putBucket({
+			bucketName : 'test535'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putObject({
+				'bucketName' : 'test535',
+				'objectName' : 'KS_nav_views.png',
+				'file' : f
+			}, function(data) {
+				callback.passed();
+				AWS.S3.deleteObject({
+					'bucketName' : 'test535',
+					'objectName' : 'KS_nav_views.png'
+				}, function(data) {
+					AWS.S3.deleteBucket({
+						'bucketName' : 'test535'
+					}, function(data) {
+
+					}, function(error) {
+
+					});
+				}, function(error) {
+
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
 	},
 	listMultipartUploads_as_async : function(callback) {
-		AWS.S3.listMultipartUploads({
-			'bucketName' : 'pankaj9999'
-		}, function(data) {
-			callback.passed();
-		}, function(error) {
-			callback.failed('Some error occured');
-		});
-	},
 
-	deleteMultipleObjects_as_async : function(callback) {
-		AWS.S3.deleteMultipleObjects({
-			'bucketName' : 'pankaj5555',
-			'xmlTemplate' : '<Delete><Object><Key>sample1.txt</Key></Object><Object><Key>sample2.txt</Key></Object></Delete>'
-		}, function(data) {
-			callback.passed();
-		}, function(error) {
-			callback.failed('Some error occured');
-		});
-	},
-	getBucketPolicy_as_async : function(callback) {
-		AWS.S3.getBucketPolicy({
-			'bucketName' : 'test12398'
-		}, function(data) {
-			callback.passed();
-		}, function(error) {
-			callback.failed('Some error occured');
-		});
-	},
-
-	//Start Test Cases for put Bucket
-	putBucket_as_async : function(callback) {
 		AWS.S3.putBucket({
-			bucketName : 'global1234'
+			bucketName : 'test723'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.listMultipartUploads({
+				'bucketName' : 'test723'
+			}, function(data) {
+				callback.passed();
+				AWS.S3.deleteBucket({
+					'bucketName' : 'test723'
+				}, function(data) {
+
+				}, function(error) {
+
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
 			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
+	},
+	/*
+	 *  delete Multiple Objects is used for deleting multiple Objects from a Single Bucket.
+	 **/
+	deleteMultipleObjects_as_async : function(callback) {
+		AWS.S3.putBucket({
+			bucketName : 'test024'
+		}, function(data) {
+			var f = Titanium.Filesystem.getFile('KS_nav_views.png');
+			AWS.S3.putObject({
+				'bucketName' : 'test024',
+				'objectName' : 'KS_nav_views.png',
+				'file' : f
+			}, function(data) {
+				var f1 = Titanium.Filesystem.getFile('KS_nav_ui.png');
+				AWS.S3.putObject({
+					'bucketName' : 'test024',
+					'objectName' : 'KS_nav_ui.png',
+					'file' : f1
+				}, function(data) {
+					AWS.S3.deleteMultipleObjects({
+						'bucketName' : 'test024',
+						'xmlTemplate' : '<Delete><Object><Key>KS_nav_views.png</Key></Object><Object><Key>KS_nav_ui.png</Key></Object></Delete>'
+					}, function(data) {
+						callback.passed();
+						AWS.S3.deleteBucket({
+							'bucketName' : 'test024'
+						}, function(data) {
+
+						}, function(error) {
+
+						});
+					}, function(error) {
+						callback.failed('Some error occured');
+					});
+				}, function(error) {
+					callback.failed('Some error occured');
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
+		}, function(error) {
+			callback.failed('Some error occured  ' + JSON.stringify(error));
+		});
+	},
+	getBucketPolicy_as_async : function(callback) {
+
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitGetBucketPolicy'
+		}, function(data) {
+
+			var jsonObject = {
+				"Version" : "2008-10-17",
+				"Id" : "bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364",
+				"Statement" : [{
+					"Effect" : 'Allow',
+					"Sid" : "1",
+					"Principal" : {
+						"AWS" : "*"
+					},
+					"Action" : ["s3:*"],
+					"Resource" : "arn:aws:s3:::DrillBitGetBucketPolicy/*"
+				}]
+			}
+
+			AWS.S3.putBucketPolicy({
+				'bucketName' : 'DrillBitGetBucketPolicy',
+				'xmlTemplate' : JSON.stringify(jsonObject)
+			}, function(data) {
+
+				AWS.S3.getBucketPolicy({
+					'bucketName' : 'DrillBitGetBucketPolicy'
+				}, function(data) {
+
+					callback.passed();
+					AWS.S3.deleteBucket({
+						'bucketName' : 'DrillBitGetBucketPolicy'
+					}, function(data) {
+
+					}, function(error) {
+
+					});
+				}, function(error) {
+
+					callback.failed('Some error occured');
+				});
+
+			}, function(error) {
+
+				callback.failed('Some error occured' + JSON.stringify(error));
+			});
+		}, function(error) {
+
+			callback.failed('Some error occured  ' + JSON.stringify(error));
+		});
+	},
+	//Start Test Cases for put Bucket
+	putBucket_as_async : function(callback) {
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitPutBucket'
+		}, function(data) {
+
+			callback.passed();
+			AWS.S3.deleteBucket({
+				'bucketName' : 'DrillBitPutBucket'
+			}, function(data) {
+
+			}, function(error) {
+
+			});
+		}, function(error) {
+
+			callback.failed('Some error occured  ' + JSON.stringify(error));
+		});
+
 	},
 	putEmptyBucket_as_async : function(callback) {
 		AWS.S3.putBucket({
@@ -323,20 +759,37 @@ describe("AWS S3 Tests!", {
 	},
 	// End Test Cases for Put Bucket.
 	// Start Test Cases for putBucketACL
-	putBucketACL_as_async : function(callback) {
-		AWS.S3.putBucketAcl({
-			'bucketName' : 't16est12354',
-			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>sood.is.in@gmail.com</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
+	putBucketAcl_as_async : function(callback) {
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitPutBucketAcl'
 		}, function(data) {
-			callback.passed();
+
+			AWS.S3.putBucketAcl({
+				'bucketName' : 'DrillBitPutBucketAcl',
+				'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonAWS.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>' + emailId + '</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
+			}, function(data) {
+				callback.passed();
+
+				AWS.S3.deleteBucket({
+					'bucketName' : 'DrillBitPutBucketAcl'
+				}, function(data) {
+
+				}, function(error) {
+
+				});
+			}, function(error) {
+
+				callback.failed('Some error occured' + JSON.stringify(error));
+			});
 		}, function(error) {
-			callback.failed('Some error occured');
+
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	putEmptyBucketACL_as_async : function(callback) {
 		AWS.S3.putBucketAcl({
 			'bucketName' : '',
-			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>sood.is.in@gmail.com</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
+			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>' + emailId + '</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
 		}, function(data) {
 			callback.failed('Some error occured');
 		}, function(error) {
@@ -346,7 +799,7 @@ describe("AWS S3 Tests!", {
 	putBucketACLWithInvalidbucketName_as_async : function(callback) {
 		AWS.S3.putBucketAcl({
 			'bucketName' : 'xyzw',
-			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>sood.is.in@gmail.com</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
+			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>' + emailId + '</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
 		}, function(data) {
 			callback.failed('Some error occured');
 		}, function(error) {
@@ -366,7 +819,7 @@ describe("AWS S3 Tests!", {
 	putBucketACLWithInvalidXmlTemplate_as_async : function(callback) {
 		AWS.S3.putBucketAcl({
 			'bucketName' : 'xyzw',
-			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName></DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
+			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName></DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
 		}, function(data) {
 			callback.failed('Some error occured');
 		}, function(error) {
@@ -374,13 +827,31 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	putBucketLifeCycle_as_async : function(callback) {
-		AWS.S3.putBucketLifecycle({
-			'bucketName' : 'manchester1',
-			'xmlTemplate' : '<LifecycleConfiguration><Rule><ID>delete-logs-rule</ID><Prefix>logs/</Prefix><Status>Enabled</Status><Expiration><Days>30</Days></Expiration></Rule><Rule><ID>delete-documents-rule</ID><Prefix>documents/</Prefix><Status>Enabled</Status><Expiration><Days>365</Days></Expiration></Rule></LifecycleConfiguration>'
+		AWS.S3.putBucket({
+			bucketName : 'test17'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putBucketLifecycle({
+				'bucketName' : 'test17',
+				'xmlTemplate' : '<LifecycleConfiguration><Rule><ID>delete-logs-rule</ID><Prefix>logs/</Prefix><Status>Enabled</Status><Expiration><Days>30</Days></Expiration></Rule><Rule><ID>delete-documents-rule</ID><Prefix>documents/</Prefix><Status>Enabled</Status><Expiration><Days>365</Days></Expiration></Rule></LifecycleConfiguration>'
+			}, function(data) {
+				callback.passed();
+				AWS.S3.deleteBucketLifecycle({
+					'bucketName' : 'test17'
+				}, function(data) {
+					AWS.S3.deleteBucket({
+						'bucketName' : 'test17'
+					}, function(data) {
+
+					}, function(error) {
+					});
+				}, function(error) {
+
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	putEmptyBucketLifeCycle_as_async : function(callback) {
@@ -393,7 +864,7 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-	putBucketLifeCycleWithInalidbucketName_as_async : function(callback) {
+	putBucketLifeCycleWithInvalidbucketName_as_async : function(callback) {
 		AWS.S3.putBucketLifecycle({
 			'bucketName' : 'xyzw',
 			'xmlTemplate' : '<LifecycleConfiguration><Rule><ID>delete-logs-rule</ID><Prefix>logs/</Prefix><Status>Enabled</Status><Expiration><Days>30</Days></Expiration></Rule><Rule><ID>delete-documents-rule</ID><Prefix>documents/</Prefix><Status>Enabled</Status><Expiration><Days>365</Days></Expiration></Rule></LifecycleConfiguration>'
@@ -413,7 +884,7 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-	putBucketLifeCycleWithInalidXmlTemplate_as_async : function(callback) {
+	putBucketLifeCycleWithInvalidXmlTemplate_as_async : function(callback) {
 		AWS.S3.putBucketLifecycle({
 			'bucketName' : 'xyzw',
 			'xmlTemplate' : '<LifecycleConfiguration><ID>delete-documents-rule</ID><Prefix>documents/</Prefix><Status>Enabled</Status><Expiration><Days>365</Days></Expiration></LifecycleConfiguration>'
@@ -424,26 +895,44 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	putBucketPolicy_as_async : function(callback) {
-		var jsonObject = {
-			"Version" : "2008-10-17",
-			"Id" : "bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364",
-			"Statement" : [{
-				"Effect" : 'Allow',
-				"Sid" : "1",
-				"Principal" : {
-					"AWS" : "*"
-				},
-				"Action" : ["s3:*"],
-				"Resource" : "arn:aws:s3:::test12354/*"
-			}]
-		}
-		AWS.S3.putBucketPolicy({
-			'bucketName' : 'test12354',
-			'xmlTemplate' : JSON.stringify(jsonObject)
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitPutBucketPolicy'
 		}, function(data) {
-			callback.passed();
+
+			var jsonObject = {
+				"Version" : "2008-10-17",
+				"Id" : "bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364",
+				"Statement" : [{
+					"Effect" : 'Allow',
+					"Sid" : "1",
+					"Principal" : {
+						"AWS" : "*"
+					},
+					"Action" : ["s3:*"],
+					"Resource" : "arn:aws:s3:::DrillBitPutBucketPolicy/*"
+				}]
+			}
+
+			AWS.S3.putBucketPolicy({
+				'bucketName' : 'DrillBitPutBucketPolicy',
+				'xmlTemplate' : JSON.stringify(jsonObject)
+			}, function(data) {
+
+				callback.passed();
+				AWS.S3.deleteBucket({
+					'bucketName' : 'DrillBitPutBucketPolicy'
+				}, function(data) {
+
+				}, function(error) {
+
+				});
+			}, function(error) {
+
+				callback.failed('Some error occured' + JSON.stringify(error));
+			});
 		}, function(error) {
-			callback.failed('Some error occured');
+
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	putEmptyBucketPolicy_as_async : function(callback) {
@@ -526,19 +1015,30 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	putBucketLogging_as_async : function(callback) {
-		AWS.S3.putBucketLogging({
-			'bucketName' : 'global123',
-			'xmlTemplate' : '<BucketLoggingStatus xmlns="http://doc.s3.amazonaws.com/2006-03-01"><LoggingEnabled><TargetBucket>global123</TargetBucket><TargetPrefix>global123-access_log-/</TargetPrefix><TargetGrants><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>WRITE</Permission></Grant></TargetGrants></LoggingEnabled></BucketLoggingStatus>'
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitPutBucketLogging'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putBucketLogging({
+				'bucketName' : 'DrillBitPutBucketLogging',
+				'xmlTemplate' : '<BucketLoggingStatus xmlns="http://doc.s3.amazonaws.com/2006-03-01"><LoggingEnabled><TargetBucket>global123</TargetBucket><TargetPrefix>global123-access_log-/</TargetPrefix><TargetGrants><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>WRITE</Permission></Grant></TargetGrants></LoggingEnabled></BucketLoggingStatus>'
+			}, function(data) {
+				callback.passed();
+				AWS.S3.deleteBucket({
+					'bucketName' : 'DrillBitPutBucketLogging'
+				}, function(data) {
+				}, function(error) {
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	putEmptyBucketLogging_as_async : function(callback) {
 		AWS.S3.putBucketLogging({
 			'bucketName' : '',
-			'xmlTemplate' : '<BucketLoggingStatus xmlns="http://doc.s3.amazonaws.com/2006-03-01"><LoggingEnabled><TargetBucket>pankaj1234567</TargetBucket><TargetPrefix>pankaj1234567-access_log-/</TargetPrefix><TargetGrants><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>WRITE</Permission></Grant></TargetGrants></LoggingEnabled></BucketLoggingStatus>'
+			'xmlTemplate' : '<BucketLoggingStatus xmlns="http://doc.s3.amazonaws.com/2006-03-01"><LoggingEnabled><TargetBucket>pankaj1234567</TargetBucket><TargetPrefix>pankaj1234567-access_log-/</TargetPrefix><TargetGrants><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>WRITE</Permission></Grant></TargetGrants></LoggingEnabled></BucketLoggingStatus>'
 		}, function(data) {
 			callback.failed('Some error occured');
 		}, function(error) {
@@ -548,7 +1048,7 @@ describe("AWS S3 Tests!", {
 	putBucketLoggingWithInvalidbucketName_as_async : function(callback) {
 		AWS.S3.putBucketLogging({
 			'bucketName' : 'xyzw',
-			'xmlTemplate' : '<BucketLoggingStatus xmlns="http://doc.s3.amazonaws.com/2006-03-01"><LoggingEnabled><TargetBucket>pankaj1234567</TargetBucket><TargetPrefix>pankaj1234567-access_log-/</TargetPrefix><TargetGrants><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>WRITE</Permission></Grant></TargetGrants></LoggingEnabled></BucketLoggingStatus>'
+			'xmlTemplate' : '<BucketLoggingStatus xmlns="http://doc.s3.amazonaws.com/2006-03-01"><LoggingEnabled><TargetBucket>pankaj1234567</TargetBucket><TargetPrefix>pankaj1234567-access_log-/</TargetPrefix><TargetGrants><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>WRITE</Permission></Grant></TargetGrants></LoggingEnabled></BucketLoggingStatus>'
 		}, function(data) {
 			callback.failed('Some error occured');
 		}, function(error) {
@@ -568,7 +1068,7 @@ describe("AWS S3 Tests!", {
 	putBucketLoggingWithInvalidXmlTemplate_as_async : function(callback) {
 		AWS.S3.putBucketLogging({
 			'bucketName' : 'xyzw',
-			'xmlTemplate' : '<BucketLoggingStatus xmlns="http://doc.s3.amazonaws.com/2006-03-01"><LoggingEnabled><TargetPrefix>pankaj1234567-access_log-/</TargetPrefix><TargetGrants><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>WRITE</Permission></Grant></TargetGrants></LoggingEnabled></BucketLoggingStatus>'
+			'xmlTemplate' : '<BucketLoggingStatus xmlns="http://doc.s3.amazonaws.com/2006-03-01"><LoggingEnabled><TargetPrefix>pankaj1234567-access_log-/</TargetPrefix><TargetGrants><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>WRITE</Permission></Grant></TargetGrants></LoggingEnabled></BucketLoggingStatus>'
 		}, function(data) {
 			callback.failed('Some error occured');
 		}, function(error) {
@@ -576,13 +1076,24 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	putBucketNotification_as_async : function(callback) {
-		AWS.S3.putBucketNotification({
-			'bucketName' : 'manchester1',
-			'xmlTemplate' : '<NotificationConfiguration><TopicConfiguration><Topic>arn:aws:sns:us-east-1:704687501311:myTopic</Topic><Event>s3:ReducedRedundancyLostObject</Event></TopicConfiguration></NotificationConfiguration>'
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitPutBucketNotification'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putBucketNotification({
+				'bucketName' : 'DrillBitPutBucketNotification',
+				'xmlTemplate' : '<NotificationConfiguration><TopicConfiguration><Topic>arn:aws:sns:us-east-1:704687501311:myTopic</Topic><Event>s3:ReducedRedundancyLostObject</Event></TopicConfiguration></NotificationConfiguration>'
+			}, function(data) {
+				callback.passed();
+				AWS.S3.deleteBucket({
+					'bucketName' : 'DrillBitPutBucketNotification'
+				}, function(data) {
+				}, function(error) {
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	putEmptyBucketNotification_as_async : function(callback) {
@@ -623,16 +1134,6 @@ describe("AWS S3 Tests!", {
 			callback.failed('Some error occured');
 		}, function(error) {
 			callback.passed();
-		});
-	},
-	putBucketRequestPayment_as_async : function(callback) {
-		AWS.S3.putBucketRequestPayment({
-			'bucketName' : 'manchester1',
-			'xmlTemplate' : '<RequestPaymentConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Payer>Requester</Payer></RequestPaymentConfiguration>'
-		}, function(data) {
-			callback.passed();
-		}, function(error) {
-			callback.failed('Some error occured');
 		});
 	},
 	putEmptyBucketRequestPayment_as_async : function(callback) {
@@ -676,13 +1177,24 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	putBucketVersioning_as_async : function(callback) {
-		AWS.S3.putBucketVersioning({
-			'bucketName' : 'pankaj12345',
-			'xmlTemplate' : '<VersioningConfiguration xmlns= "http://s3.amazonaws.com/doc/2006-03-01/"><Status>Enabled</Status><MfaDelete>Disabled</MfaDelete></VersioningConfiguration>'
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitPutBucketVersioning'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putBucketVersioning({
+				'bucketName' : 'DrillBitPutBucketVersioning',
+				'xmlTemplate' : '<VersioningConfiguration xmlns= "http://s3.amazonaws.com/doc/2006-03-01/"><Status>Enabled</Status><MfaDelete>Disabled</MfaDelete></VersioningConfiguration>'
+			}, function(data) {
+				callback.passed();
+				AWS.S3.deleteBucket({
+					'bucketName' : 'DrillBitPutBucketVersioning'
+				}, function(data) {
+				}, function(error) {
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	putEmptyBucketVersioning_as_async : function(callback) {
@@ -726,16 +1238,41 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	putBucketWebsite_as_async : function(callback) {
-		AWS.S3.putBucketWebsite({
-			'bucketName' : 'manchester1',
-			'xmlTemplate' : '<WebsiteConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><IndexDocument><Suffix>index.html</Suffix></IndexDocument><ErrorDocument><Key>404.html</Key></ErrorDocument></WebsiteConfiguration>'
+
+		AWS.S3.putBucket({
+			bucketName : 'test12345987'
 		}, function(data) {
-			callback.passed();
+
+			AWS.S3.putBucketWebsite({
+				bucketName : 'test12345987',
+				'xmlTemplate' : '<WebsiteConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><IndexDocument><Suffix>index.html</Suffix></IndexDocument><ErrorDocument><Key>404.html</Key></ErrorDocument></WebsiteConfiguration>'
+			}, function(data) {
+
+				callback.passed();
+				AWS.S3.deleteBucketWebsite({
+					bucketName : 'test12345987'
+				}, function(data) {
+
+					AWS.S3.deleteBucket({
+						bucketName : 'test12345987'
+					}, function(data) {
+
+					}, function(error) {
+
+					});
+				}, function(error) {
+
+				});
+			}, function(error) {
+
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
-			callback.failed('Some error occured');
+
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
-	putEmptyBucketWebsite_as_async : function(callback) {
+	putBucketWebsitewithEmptyBucketName_as_async : function(callback) {
 		AWS.S3.putBucketWebsite({
 			'bucketName' : '',
 			'xmlTemplate' : '<WebsiteConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><IndexDocument><Suffix>index.html</Suffix></IndexDocument><ErrorDocument><Key>404.html</Key></ErrorDocument></WebsiteConfiguration>'
@@ -775,18 +1312,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-	putObject_as_async : function(callback) {
-		var f = Titanium.Filesystem.getFile('KS_nav_views.png');
-		AWS.S3.putObject({
-			'bucketName' : 'pankaj8888',
-			'objectName' : 'KS_nav_views.png',
-			'file' : f
-		}, function(data) {
-			callback.passed();
-		}, function(error) {
-			callback.failed('Some error occured');
-		});
-	},
 	putObjectWithEmptybucketName_as_async : function(callback) {
 		var f = Titanium.Filesystem.getFile('KS_nav_ui.png');
 		AWS.S3.putObject({
@@ -824,12 +1349,41 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	putObjectAcl_as_async : function(callback) {
-		AWS.S3.putObjectAcl({
-			'bucketName' : 'pankaj123456',
-			'objectName' : 'KS_nav_ui.png',
-			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>sood.is.in@gmail.com</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
+		var f = Titanium.Filesystem.getFile('KS_nav_views.png');
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitPutObjectAcl'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putObject({
+				'bucketName' : 'DrillBitPutObjectAcl',
+				'objectName' : 'KS_nav_views.png',
+				'file' : f
+			}, function(data) {
+				AWS.S3.putObjectAcl({
+					'bucketName' : 'DrillBitPutObjectAcl',
+					'objectName' : 'KS_nav_views.png',
+					'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>' + emailId + '</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
+				}, function(data) {
+					callback.passed();
+					AWS.S3.deleteObject({
+						'bucketName' : 'DrillBitPutObjectAcl',
+						'objectName' : 'KS_nav_views.png'
+					}, function(data) {
+						AWS.S3.deleteBucket({
+							'bucketName' : 'DrillBitPutObjectAcl'
+						}, function(data) {
+
+						}, function(error) {
+
+						})
+					}, function(error) {
+
+					})
+				}, function(error) {
+					callback.failed('Some error occured');
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
@@ -838,7 +1392,7 @@ describe("AWS S3 Tests!", {
 		AWS.S3.putObjectAcl({
 			'bucketName' : '',
 			'objectName' : 'myFile1.png',
-			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>sood.is.in@gmail.com</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
+			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>' + emailId + '</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
 		}, function(data) {
 			callback.failed('Some error occured');
 		}, function(error) {
@@ -849,7 +1403,7 @@ describe("AWS S3 Tests!", {
 		AWS.S3.putObjectAcl({
 			'bucketName' : 'xyzw',
 			'objectName' : 'myFile1.png',
-			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>sood.is.in@gmail.com</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
+			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>' + emailId + '</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
 		}, function(data) {
 			callback.failed('Some error occured');
 		}, function(error) {
@@ -860,7 +1414,7 @@ describe("AWS S3 Tests!", {
 		AWS.S3.putObjectAcl({
 			'bucketName' : 'pankaj12345',
 			'objectName' : '',
-			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>sood.is.in@gmail.com</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>sood.is.in@gmail.com</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
+			'xmlTemplate' : '<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364</ID><DisplayName>' + emailId + '</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AmazonCustomerByEmail"><EmailAddress>' + emailId + '</EmailAddress></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>'
 		}, function(data) {
 			callback.failed('Some error occured');
 		}, function(error) {
@@ -886,12 +1440,26 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	getBucket_as_async : function(callback) {
-		AWS.S3.getBucket({
-			'bucketName' : 'manchester12'
+
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitGetBucket'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.getBucket({
+				'bucketName' : 'DrillBitGetBucket'
+			}, function(data) {
+				callback.passed();
+				AWS.S3.deleteBucket({
+					'bucketName' : 'DrillBitGetBucket'
+				}, function(data) {
+
+				}, function(error) {
+
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	getBucketWithEmptybucketName_as_async : function(callback) {
@@ -913,12 +1481,26 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	getBucketAcl_as_async : function(callback) {
-		AWS.S3.getBucketAcl({
-			'bucketName' : 'test12354'
+
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitGetBucketAcl'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.getBucketAcl({
+				'bucketName' : 'DrillBitGetBucketAcl'
+			}, function(data) {
+				callback.passed();
+				AWS.S3.deleteBucket({
+					'bucketName' : 'DrillBitGetBucketAcl'
+				}, function(data) {
+
+				}, function(error) {
+
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	getBucketAclWithEmptybucketName_as_async : function(callback) {
@@ -940,13 +1522,39 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	getBucketLifecycle_as_async : function(callback) {
-		AWS.S3.getBucketLifecycle({
-			'bucketName' : 'manchester1'
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitGetBucketLifecycle'
 		}, function(data) {
-			callback.passed();
+
+			AWS.S3.putBucketLifecycle({
+				'bucketName' : 'DrillBitGetBucketLifecycle',
+				'xmlTemplate' : '<LifecycleConfiguration><Rule><ID>delete-logs-rule</ID><Prefix>logs/</Prefix><Status>Enabled</Status><Expiration><Days>30</Days></Expiration></Rule><Rule><ID>delete-documents-rule</ID><Prefix>documents/</Prefix><Status>Enabled</Status><Expiration><Days>365</Days></Expiration></Rule></LifecycleConfiguration>'
+			}, function(data) {
+
+				AWS.S3.getBucketLifecycle({
+					'bucketName' : 'DrillBitGetBucketLifecycle'
+				}, function(data) {
+					callback.passed();
+
+					AWS.S3.deleteBucket({
+						'bucketName' : 'DrillBitGetBucketLifecycle'
+					}, function(data) {
+
+					}, function(error) {
+
+					})
+				}, function(error) {
+					callback.failed('Some error occured  ' + JSON.stringify(error));
+				})
+			}, function(error) {
+
+				callback.failed('Some error occured  ' + JSON.stringify(error));
+			})
 		}, function(error) {
+
 			callback.failed('Some error occured');
 		});
+
 	},
 	getBucketLifecycleWithEmptybucketName_as_async : function(callback) {
 		AWS.S3.getBucketLifecycle({
@@ -985,12 +1593,26 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	getBucketLocation_as_async : function(callback) {
-		AWS.S3.getBucketLocation({
-			'bucketName' : 'test12354'
+
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitGetBucketLocation'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.getBucketLocation({
+				'bucketName' : 'DrillBitGetBucketLocation'
+			}, function(data) {
+				callback.passed();
+				AWS.S3.deleteBucket({
+					'bucketName' : 'DrillBitGetBucketLocation'
+				}, function(data) {
+
+				}, function(error) {
+
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	getBucketLocationWithEmptybucketName_as_async : function(callback) {
@@ -1012,12 +1634,26 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	getBucketLogging_as_async : function(callback) {
-		AWS.S3.getBucketLogging({
-			'bucketName' : 'test12354'
+
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitGetBucketLogging'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.getBucketLogging({
+				'bucketName' : 'DrillBitGetBucketLogging'
+			}, function(data) {
+				callback.passed();
+				AWS.S3.deleteBucket({
+					'bucketName' : 'DrillBitGetBucketLogging'
+				}, function(data) {
+
+				}, function(error) {
+
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	getBucketLoggingWithEmptybucketName_as_async : function(callback) {
@@ -1039,12 +1675,26 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	getBucketNotification_as_async : function(callback) {
-		AWS.S3.getBucketNotification({
-			'bucketName' : 'test12354'
+
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitGetBucketNotification'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.getBucketNotification({
+				'bucketName' : 'DrillBitGetBucketNotification'
+			}, function(data) {
+				callback.passed();
+				AWS.S3.deleteBucket({
+					'bucketName' : 'DrillBitGetBucketNotification'
+				}, function(data) {
+
+				}, function(error) {
+
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	getBucketNotificationWithEmptybucketName_as_async : function(callback) {
@@ -1066,12 +1716,26 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	getBucketObjectVersions_as_async : function(callback) {
-		AWS.S3.getBucketObjectVersions({
-			'bucketName' : 'manchester12'
+
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitGetBucketObjectVersions'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.getBucketObjectVersions({
+				'bucketName' : 'DrillBitGetBucketObjectVersions'
+			}, function(data) {
+				callback.passed();
+				AWS.S3.deleteBucket({
+					'bucketName' : 'DrillBitGetBucketObjectVersions'
+				}, function(data) {
+
+				}, function(error) {
+
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	getBucketObjectVersionsWithEmptybucketName_as_async : function(callback) {
@@ -1093,12 +1757,26 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	getBucketRequestPayment_as_async : function(callback) {
-		AWS.S3.getBucketRequestPayment({
-			'bucketName' : 'test12354'
+
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitGetBucketRequestPayment'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.getBucketRequestPayment({
+				'bucketName' : 'DrillBitGetBucketRequestPayment'
+			}, function(data) {
+				callback.passed();
+				AWS.S3.deleteBucket({
+					'bucketName' : 'DrillBitGetBucketRequestPayment'
+				}, function(data) {
+
+				}, function(error) {
+
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	getBucketRequestPaymentWithEmptybucketName_as_async : function(callback) {
@@ -1120,12 +1798,26 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	getBucketVersioning_as_async : function(callback) {
-		AWS.S3.getBucketVersioning({
-			'bucketName' : 'test12354'
+
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitGetBucketVersioning'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.getBucketVersioning({
+				'bucketName' : 'DrillBitGetBucketVersioning'
+			}, function(data) {
+				callback.passed();
+				AWS.S3.deleteBucket({
+					'bucketName' : 'DrillBitGetBucketVersioning'
+				}, function(data) {
+
+				}, function(error) {
+
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	getBucketVersioningWithEmptybucketName_as_async : function(callback) {
@@ -1147,12 +1839,30 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	getBucketWebsite_as_async : function(callback) {
-		AWS.S3.getBucketWebsite({
-			'bucketName' : 'pankaj123456'
+		AWS.S3.putBucket({
+			bucketName : 'test543219876'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putBucketWebsite({
+				bucketName : 'test543219876',
+				'xmlTemplate' : '<WebsiteConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><IndexDocument><Suffix>index.html</Suffix></IndexDocument><ErrorDocument><Key>404.html</Key></ErrorDocument></WebsiteConfiguration>'
+			}, function(data) {
+				AWS.S3.getBucketWebsite({
+					'bucketName' : 'test543219876'
+				}, function(data) {
+					callback.passed();
+					AWS.S3.deleteBucket({
+						bucketName : 'test543219876'
+					}, function(data) {
+					}, function(error) {
+					});
+				}, function(error) {
+					callback.failed('Some error occured');
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	getBucketWebsiteWithEmptybucketName_as_async : function(callback) {
@@ -1173,7 +1883,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	listMultipartUploadsWithEmptybucketName_as_async : function(callback) {
 		AWS.S3.listMultipartUploads({
 			'bucketName' : ''
@@ -1193,12 +1902,18 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	deleteBucket_as_async : function(callback) {
-		AWS.S3.deleteBucket({
-			'bucketName' : 'global1234'
+		AWS.S3.putBucket({
+			bucketName : 'DrillBucketDeleteBucket'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.deleteBucket({
+				'bucketName' : 'DrillBucketDeleteBucket'
+			}, function(data) {
+				callback.passed();
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	deleteBucketWithEmptybucketName_as_async : function(callback) {
@@ -1220,12 +1935,31 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	deleteBucketLifecycle_as_async : function(callback) {
-		AWS.S3.deleteBucketLifecycle({
-			'bucketName' : 'test12354'
+
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitDeleteBucketLifecycle'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putBucketLifecycle({
+				'bucketName' : 'DrillBitDeleteBucketLifecycle',
+				'xmlTemplate' : '<LifecycleConfiguration><Rule><ID>delete-logs-rule</ID><Prefix>logs/</Prefix><Status>Enabled</Status><Expiration><Days>30</Days></Expiration></Rule><Rule><ID>delete-documents-rule</ID><Prefix>documents/</Prefix><Status>Enabled</Status><Expiration><Days>365</Days></Expiration></Rule></LifecycleConfiguration>'
+			}, function(data) {
+				AWS.S3.deleteBucketLifecycle({
+					'bucketName' : 'DrillBitDeleteBucketLifecycle'
+				}, function(data) {
+					callback.passed();
+					AWS.S3.deleteBucket({
+						'bucketName' : 'DrillBitDeleteBucketLifecycle'
+					}, function(data) {
+					}, function(error) {
+					});
+				}, function(error) {
+					callback.failed('Some error occured');
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	deleteBucketLifecycleWithEmptybucketName_as_async : function(callback) {
@@ -1247,12 +1981,44 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	deleteBucketPolicy_as_async : function(callback) {
-		AWS.S3.deleteBucketPolicy({
-			'bucketName' : 'test12354'
+		var jsonObject = {
+			"Version" : "2008-10-17",
+			"Id" : "bdc36625affafdb55b4eef63987c06e225014c5e6cbbe103161eb0833222b364",
+			"Statement" : [{
+				"Effect" : 'Allow',
+				"Sid" : "1",
+				"Principal" : {
+					"AWS" : "*"
+				},
+				"Action" : ["s3:*"],
+				"Resource" : "arn:aws:s3:::DrillBitDeleteBucketPolicy/*"
+			}]
+		}
+
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitDeleteBucketPolicy'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putBucketPolicy({
+				'bucketName' : 'DrillBitDeleteBucketPolicy',
+				'xmlTemplate' : JSON.stringify(jsonObject)
+			}, function(data) {
+				AWS.S3.deleteBucketPolicy({
+					'bucketName' : 'DrillBitDeleteBucketPolicy'
+				}, function(data) {
+					callback.passed();
+					AWS.S3.deleteBucket({
+						'bucketName' : 'DrillBitDeleteBucketPolicy'
+					}, function(data) {
+					}, function(error) {
+					});
+				}, function(error) {
+					callback.failed('Some error occured');
+				});
+			}, function(error) {
+				callback.failed('Some error occured');
+			});
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
 	},
 	deleteBucketPolicyWithEmptybucketName_as_async : function(callback) {
@@ -1274,13 +2040,41 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	deleteBucketWebsite_as_async : function(callback) {
-		AWS.S3.deleteBucketWebsite({
-			'bucketName' : 'test12354'
+
+		AWS.S3.putBucket({
+			bucketName : 'test987654321'
 		}, function(data) {
-			callback.passed();
+
+			AWS.S3.putBucketWebsite({
+				'bucketName' : 'test987654321',
+				'xmlTemplate' : '<WebsiteConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><IndexDocument><Suffix>index.html</Suffix></IndexDocument><ErrorDocument><Key>404.html</Key></ErrorDocument></WebsiteConfiguration>'
+			}, function(data) {
+
+				AWS.S3.deleteBucketWebsite({
+					'bucketName' : 'test987654321'
+				}, function(data) {
+
+					callback.passed();
+					AWS.S3.deleteBucket({
+						'bucketName' : 'test987654321'
+					}, function(data) {
+
+					}, function(error) {
+
+					});
+				}, function(error) {
+
+					callback.failed('Some error occured  ' + JSON.stringify(error));
+				})
+			}, function(error) {
+
+			callback.failed('Some error occured  ' + JSON.stringify(error));
+			});
 		}, function(error) {
-			callback.failed('Some error occured');
+
+			callback.failed('Some error occured  ' + JSON.stringify(error));
 		});
+
 	},
 	deleteBucketWebsiteWithEmptybucketName_as_async : function(callback) {
 		AWS.S3.deleteBucketWebsite({
@@ -1301,11 +2095,33 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	deleteObject_as_async : function(callback) {
-		AWS.S3.deleteObject({
-			'bucketName' : 'velocity-gl',
-			'objectName' : 'image.part.63'
+		var f = Titanium.Filesystem.getFile('KS_nav_views.png');
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitDeleteObject'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putObject({
+				'bucketName' : 'DrillBitDeleteObject',
+				'objectName' : 'KS_nav_views.png',
+				'file' : f
+			}, function(data) {
+				AWS.S3.deleteObject({
+					'bucketName' : 'DrillBitDeleteObject',
+					'objectName' : 'KS_nav_views.png'
+				}, function(data) {
+					callback.passed();
+					AWS.S3.deleteBucket({
+						'bucketName' : 'DrillBitDeleteObject'
+					}, function(data) {
+
+					}, function(error) {
+
+					})
+				}, function(error) {
+					callback.failed('Some error occured');
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
@@ -1391,11 +2207,40 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	getObject_as_async : function(callback) {
-		AWS.S3.getObject({
-			'bucketName' : 'test12398',
-			'objectName' : 'Rahul.png'
+		var f = Titanium.Filesystem.getFile('KS_nav_views.png');
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitGetObject'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putObject({
+				'bucketName' : 'DrillBitGetObject',
+				'objectName' : 'KS_nav_views.png',
+				'file' : f
+			}, function(data) {
+				AWS.S3.getObject({
+					'bucketName' : 'DrillBitGetObject',
+					'objectName' : 'KS_nav_views.png'
+				}, function(data) {
+					callback.passed();
+					AWS.S3.deleteObject({
+						'bucketName' : 'DrillBitGetObject',
+						'objectName' : 'KS_nav_views.png'
+					}, function(data) {
+						AWS.S3.deleteBucket({
+							'bucketName' : 'DrillBitGetObject'
+						}, function(data) {
+
+						}, function(error) {
+
+						})
+					}, function(error) {
+
+					})
+				}, function(error) {
+					callback.failed('Some error occured');
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
@@ -1441,11 +2286,40 @@ describe("AWS S3 Tests!", {
 		});
 	},
 	getObjectAcl_as_async : function(callback) {
-		AWS.S3.getObjectAcl({
-			'bucketName' : 'pankaj123456',
-			'objectName' : 'KS_nav_ui.png'
+		var f = Titanium.Filesystem.getFile('KS_nav_views.png');
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitAcl'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putObject({
+				'bucketName' : 'DrillBitAcl',
+				'objectName' : 'KS_nav_views.png',
+				'file' : f
+			}, function(data) {
+				AWS.S3.getObjectAcl({
+					'bucketName' : 'DrillBitAcl',
+					'objectName' : 'KS_nav_views.png'
+				}, function(data) {
+					callback.passed();
+					AWS.S3.deleteObject({
+						'bucketName' : 'DrillBitAcl',
+						'objectName' : 'KS_nav_views.png'
+					}, function(data) {
+						AWS.S3.deleteBucket({
+							'bucketName' : 'DrillBitAcl'
+						}, function(data) {
+
+						}, function(error) {
+
+						})
+					}, function(error) {
+
+					})
+				}, function(error) {
+					callback.failed('Some error occured');
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
@@ -1490,7 +2364,58 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
+	/**
+	 *  abort MultiPart upload is used to Abort the MultiPart Upload.
+	 */
 
+	abortMultipartUpload_as_async : function(callback) {
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitUpload'
+		}, function(data) {
+			var f = Titanium.Filesystem.getFile('KS_nav_views.png');
+			AWS.S3.putObject({
+				'bucketName' : 'DrillBitUpload',
+				'objectName' : 'KS_nav_views.png',
+				'file' : f
+			}, function(data) {
+				AWS.S3.initiateMultipartUpload({
+					'bucketName' : 'DrillBitUpload',
+					'objectName' : 'KS_nav_views.png'
+				}, function(data) {
+					AWS.S3.abortMultipartUpload({
+						'bucketName' : 'DrillBitUpload',
+						'objectName' : 'KS_nav_views.png',
+						'uploadId' : data.UploadId
+
+					}, function(data) {
+						callback.passed();
+						AWS.S3.deleteObject({
+							'bucketName' : 'DrillBitUpload',
+							'objectName' : 'KS_nav_views.png'
+						}, function(data) {
+							AWS.S3.deleteBucket({
+								'bucketName' : 'DrillBitUpload'
+							}, function(data) {
+
+							}, function(error) {
+
+							})
+						}, function(error) {
+
+						});
+					}, function(error) {
+						callback.failed('Some error occured');
+					})
+				}, function(error) {
+					callback.failed('Some error occured');
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
+		}, function(error) {
+			callback.failed('Some error occured');
+		});
+	},
 	abortMultipartUploadWithEmptybucketName_as_async : function(callback) {
 		AWS.S3.abortMultipartUpload({
 			'bucketName' : 'test12398',
@@ -1580,7 +2505,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	initiateMultipartUploadWithEmptybucketName_as_async : function(callback) {
 		AWS.S3.initiateMultipartUpload({
 			'bucketName' : '',
@@ -1591,7 +2515,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	initiateMultipartUploadWithInvalidbucketName_as_async : function(callback) {
 		AWS.S3.initiateMultipartUpload({
 			'bucketName' : 'xyzw',
@@ -1602,7 +2525,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	initiateMultipartUploadWithEmptyobjectName_as_async : function(callback) {
 		AWS.S3.initiateMultipartUpload({
 			'bucketName' : 'test12398',
@@ -1613,7 +2535,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	initiateMultipartUploadsWithInvalidobjectName_as_async : function(callback) {
 		AWS.S3.initiateMultipartUpload({
 			'bucketName' : 'test12398',
@@ -1621,22 +2542,58 @@ describe("AWS S3 Tests!", {
 		}, function(data) {
 			callback.passed();
 		}, function(error) {
-			callback.failed('Some error occured');
+			callback.failed('Some error occured ' + JSON.stringify(error));
 		});
 	},
-
 	listParts_as_async : function(callback) {
-		AWS.S3.listParts({
-			'bucketName' : 'test12398',
-			'objectName' : 'struts2.pdf',
-			'uploadId' : uploadId
+
+		var f = Titanium.Filesystem.getFile('KS_nav_views.png');
+		AWS.S3.putBucket({
+			bucketName : 'DrillBitlist123'
 		}, function(data) {
-			callback.passed();
+			AWS.S3.putObject({
+				'bucketName' : 'DrillBitlist123',
+				'objectName' : 'KS_nav_views.png',
+				'file' : f
+			}, function(data) {
+				AWS.S3.initiateMultipartUpload({
+					'bucketName' : 'DrillBitlist123',
+					'objectName' : 'KS_nav_views.png'
+				}, function(data) {
+					uploadId = data.UploadId;
+					AWS.S3.listParts({
+						'bucketName' : 'DrillBitlist123',
+						'objectName' : 'KS_nav_views.png',
+						'uploadId' : uploadId
+					}, function(data) {
+						callback.passed();
+						AWS.S3.deleteObject({
+							'bucketName' : 'DrillBitlist123',
+							'objectName' : 'KS_nav_views.png'
+						}, function(data) {
+							AWS.S3.deleteBucket({
+								'bucketName' : 'DrillBitlist123'
+							}, function(data) {
+
+							}, function(error) {
+
+							})
+						}, function(error) {
+
+						})
+					}, function(error) {
+						callback.failed('Some error occured');
+					})
+				}, function(error) {
+					callback.failed('Some error occured');
+				})
+			}, function(error) {
+				callback.failed('Some error occured');
+			})
 		}, function(error) {
 			callback.failed('Some error occured');
 		});
 	},
-
 	listPartsWithEmptybucketName_as_async : function(callback) {
 		AWS.S3.listParts({
 			'bucketName' : '',
@@ -1648,7 +2605,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	listPartsWithInvalidbucketName_as_async : function(callback) {
 		AWS.S3.listParts({
 			'bucketName' : 'xyzw',
@@ -1660,7 +2616,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	listPartsWithEmptyobjectName_as_async : function(callback) {
 		AWS.S3.listParts({
 			'bucketName' : 'test12398',
@@ -1672,7 +2627,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	listPartsWithInvalidobjectName_as_async : function(callback) {
 		AWS.S3.listParts({
 			'bucketName' : 'test12398',
@@ -1695,7 +2649,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	listPartsWithInvaliduploadId_as_async : function(callback) {
 		AWS.S3.listParts({
 			'bucketName' : 'test12398',
@@ -1707,7 +2660,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	uploadPartCopyWithEmptybucketName_as_async : function(callback) {
 		AWS.S3.uploadPartCopy({
 			'bucketName' : '',
@@ -1721,10 +2673,10 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	uploadPartCopyWithInvalidbucketName_as_async : function(callback) {
 		AWS.S3.uploadPartCopy({
 			'bucketName' : 'xyzw',
+
 			'objectName' : 'struts2.pdf',
 			'copySource' : '/pankaj2344/Spring.pdf',
 			'uploadId' : uploadId,
@@ -1735,7 +2687,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	uploadPartCopyWithEmptyobjectName_as_async : function(callback) {
 		AWS.S3.uploadPartCopy({
 			'bucketName' : 'test12398',
@@ -1749,7 +2700,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	uploadPartCopyWithInvalidobjectName_as_async : function(callback) {
 		AWS.S3.uploadPartCopy({
 			'bucketName' : 'test12398',
@@ -1776,7 +2726,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	uploadPartCopyWithInvaliduploadId_as_async : function(callback) {
 		AWS.S3.uploadPartCopy({
 			'bucketName' : 'test12398',
@@ -1790,7 +2739,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	uploadPartCopyWithEmptyPartNumber_as_async : function(callback) {
 		AWS.S3.uploadPartCopy({
 			'bucketName' : 'test12398',
@@ -1804,7 +2752,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	uploadPartCopyWithInvalidpartNumber_as_async : function(callback) {
 		AWS.S3.uploadPartCopy({
 			'bucketName' : 'test12398',
@@ -1844,7 +2791,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	completeMultipartUploadWithEmptybucketName_as_async : function(callback) {
 		AWS.S3.completeMultipartUpload({
 			'bucketName' : '',
@@ -1857,7 +2803,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	completeMultipartUploadWithInvalidbucketName_as_async : function(callback) {
 		AWS.S3.completeMultipartUpload({
 			'bucketName' : 'xyzw',
@@ -1870,7 +2815,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	completeMultipartUploadWithEmptyobjectName_as_async : function(callback) {
 		AWS.S3.completeMultipartUpload({
 			'bucketName' : 'test12398',
@@ -1883,7 +2827,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	completeMultipartUploadWithInvalidobjectName_as_async : function(callback) {
 		AWS.S3.completeMultipartUpload({
 			'bucketName' : 'test12398',
@@ -1908,7 +2851,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	completeMultipartUploadWithInvaliduploadId_as_async : function(callback) {
 		AWS.S3.completeMultipartUpload({
 			'bucketName' : 'test12398',
@@ -1921,7 +2863,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	completeMultipartUploadWithEmptyXmlTemplate_as_async : function(callback) {
 		AWS.S3.completeMultipartUpload({
 			'bucketName' : 'test12398',
@@ -1934,7 +2875,6 @@ describe("AWS S3 Tests!", {
 			callback.passed();
 		});
 	},
-
 	completeMultipartUploadWithInvalidXmlTemplate_as_async : function(callback) {
 		AWS.S3.completeMultipartUpload({
 			'bucketName' : 'test12398',
