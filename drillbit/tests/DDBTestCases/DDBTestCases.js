@@ -1,8 +1,10 @@
 describe("DDB tests", {
 
 	before_all : function() {
+
 		AWS = require('ti.aws');
 		AWS.authorize(Titanium.App.Properties.getString('aws-access-key-id'), Titanium.App.Properties.getString('aws-secret-access-key'));
+		tableName = Titanium.App.Properties.getString('ddbTableName');
 		AWS.STS.getSessionToken({}, function(response) {
 
 			Ti.App.Properties.setString('tempSessionToken', response["GetSessionTokenResult"][0]["Credentials"][0]["SessionToken"][0]);
@@ -19,55 +21,6 @@ describe("DDB tests", {
 		AWS = null;
 	},
 	timeout : 5000,
-	/**
-	 *Test case for deleteTable With a valid requestJSON.
-	 */
-	/*deleteTable_as_async : function(callback) {
-		var params = {
-			'requestJSON' : {
-				"TableName" : "my-panki-goyal098567-tab",
-			}//Required
-		};
-		AWS.DDB.deleteTable(params, function(data) {
-			callback.passed();
-		}, function(error) {
-			callback.failed('Some error occured')
-		});
-	},*/
-
-	/**
-	 *Test case for createTable With a valid requestJSON.
-	 */
-	createTable_as_async : function(callback) {
-
-		var param = {
-			"requestJSON" : {
-				"TableName" : "my-panki-goyal098567-tab",
-				"KeySchema" : {
-					"HashKeyElement" : {
-						"AttributeName" : "name",
-						"AttributeType" : "S",
-						"AttributeValue" : "pankaj"
-					},
-					"RangeKeyElement" : {
-						"AttributeName" : "1234",
-						"AttributeType" : "N",
-						"AttributeValue" : "12345"
-					}
-				},
-				"ProvisionedThroughput" : {
-					"ReadCapacityUnits" : 10,
-					"WriteCapacityUnits" : 10
-				}
-			}
-		}
-
-		AWS.DDB.createTable(param, function(data) {
-			callback.passed();
-		}, function(error) {
-			callback.failed('Some error occured' + JSON.stringify(error));
-		});
-	},
 
 	//***************batchGetItem test cases start**************
 	/**
@@ -103,30 +56,55 @@ describe("DDB tests", {
 	/**
 	 *Test case for batchGetItem With a valid requestJSON.
 	 */
+
 	batchGetItem_as_async : function(callback) {
+
 		var params = {
-			requestJSON : {
-				"RequestItems" : {
-					"my-panki-goyal12345-tab" : {
-						"Keys" : [{
+			'requestJSON' : {
+				"TableName" : tableName,
+				"Item" : {
+					"name" : {
+						"S" : "Bill & Ted's Excellent Adventure"
+					},
+					"1234" : {
+						"N" : "12345"
+					}
+				}
+			} //Required
+		};
+		AWS.DDB.putItem(params, function(data) {
+			var params = '{"requestJSON":{"RequestItems":{"' + tableName + '": {"Keys":   [{"HashKeyElement":{"S":"name"},"RangeKeyElement":{"N":"1234"}}]} }}}';
+			AWS.DDB.batchGetItem(JSON.parse(params), function(data) {
+
+				callback.passed();
+				var params = {
+					'requestJSON' : {
+						"TableName" : tableName,
+						"Key" : {
 							"HashKeyElement" : {
 								"S" : "name"
 							},
 							"RangeKeyElement" : {
 								"N" : "1234"
 							}
-						}]
-					}
-				}
-			}
-		}//Required
+						}
+					} //Required
+				};
+				AWS.DDB.deleteItem(params, function(data) {
 
-		AWS.DDB.batchGetItem(params, function(data) {
-			callback.passed();
+				}, function(error) {
+
+				});
+			}, function(error) {
+				callback.failed(error);
+			});
+
 		}, function(error) {
 			callback.failed(error);
 		});
+
 	},
+
 	//*************batchGetItem test cases ends**************
 
 	//***************batchWriteItem test cases start**************
@@ -165,36 +143,69 @@ describe("DDB tests", {
 	/**
 	 *Test case for batchWriteItem With a valid requestJSON.
 	 */
-	batchWriteItem_as_async : function(callback) {
-		var params = {
-			'requestJSON' : {
-				"RequestItems" : {
-					"my-panki-goyal12345-tab" : [{
-						"PutRequest" : {
-							"Item" : {
-								"name" : {
-									"S" : "dynamodbtestwrite"
-								},
 
-								"1234" : {
-									"N" : "1234567"
-								}
-							}
-						}
-					}]
-				}
-			}//Required
-		};
-		AWS.DDB.batchWriteItem(params, function(data) {
+	batchWriteItem_as_async : function(callback) {
+
+		var params = '{"requestJSON" : {"RequestItems":{"' + tableName + '":{"Keys": [{"HashKeyElement": {"S":"name"}, "RangeKeyElement":{"N":"1234"}}]}},"ReplyDateTime":{"S":"2012-05-10T11:04:47.034Z"}, "Id":{"S":"testing"},"RequestItems":{"my-ddb-test-tab":[{"PutRequest":{"Item":{"name":{"S":"dynamodbtestwrite"}, "1234":{"N":"1234567"}}}}]}}}';
+
+		AWS.DDB.batchWriteItem(JSON.parse(params), function(data) {
 			callback.passed();
+
 		}, function(error) {
-			callback.failed('Some error occured')
+			callback.failed(error);
 		});
+
 	},
 
 	//*************batchWriteItem test cases ends**************
 
 	//***************createTable test cases start**************
+
+	/**
+	 *Test case for createTable With a valid requestJSON.
+	 */
+	/*createTable_as_async : function(callback) {
+
+	var param = {
+	"requestJSON" : {
+	"TableName" : "my-ddb-goyal1-tab",
+	"KeySchema" : {
+	"HashKeyElement" : {
+	"AttributeName" : "name",
+	"AttributeType" : "S",
+	"AttributeValue" : "pankaj"
+	},
+	"RangeKeyElement" : {
+	"AttributeName" : "1234",
+	"AttributeType" : "N",
+	"AttributeValue" : "12345"
+	}
+	},
+	"ProvisionedThroughput" : {
+	"ReadCapacityUnits" : 10,
+	"WriteCapacityUnits" : 10
+	}
+	}
+	}
+
+	AWS.DDB.createTable(param, function(data) {
+	callback.passed();
+	var param = {
+	'requestJSON' : {
+	"TableName" : "my-ddb-goyal1-tab",
+	}
+	};
+	AWS.DDB.deleteTable(param, function(data) {
+
+	}, function(error) {
+
+	});
+
+	}, function(error) {
+	callback.failed('Some error occured' + JSON.stringify(error));
+	});
+	},
+	*/
 
 	/**
 	 *Test case for createTable WithEmpty  requestJSON.
@@ -262,23 +273,48 @@ describe("DDB tests", {
 	/**
 	 *Test case for deleteItem With a valid requestJSON.
 	 */
+
 	deleteItem_as_async : function(callback) {
+
 		var params = {
 			'requestJSON' : {
-				"TableName" : "my-panki-goyal098567-tab",
-				"Key" : {
-					"HashKeyElement" : {
-						"S" : "name"
+				"TableName" : tableName,
+				"Item" : {
+					"name" : {
+						"S" : "Bill & Ted's Excellent Adventure"
+					},
+					"1234" : {
+						"N" : "12345"
 					}
 				}
 			} //Required
 		};
-		AWS.DDB.deleteItem(params, function(data) {
-			callback.passed();
+		AWS.DDB.putItem(params, function(data) {
+			var params = {
+				'requestJSON' : {
+					"TableName" : tableName,
+					"Key" : {
+						"HashKeyElement" : {
+							"S" : "name"
+						},
+						"RangeKeyElement" : {
+							"N" : "1234"
+						}
+					}
+				} //Required
+			};
+			AWS.DDB.deleteItem(params, function(data) {
+				callback.passed();
+
+			}, function(error) {
+
+			});
 		}, function(error) {
 			callback.failed(error);
 		});
+
 	},
+
 	//*************deleteItem test cases ends**************
 
 	//***************describeTable test cases start**************
@@ -311,21 +347,32 @@ describe("DDB tests", {
 			callback.passed();
 		});
 	},
+
 	/**
 	 *Test case for describeTable With a valid requestJSON.
 	 */
+
 	describeTable_as_async : function(callback) {
+
 		var params = {
 			'requestJSON' : {
-				'TableName' : 'my-panki-goyal098567-tab'
+				'TableName' : tableName
 			}//Required
 		};
 		AWS.DDB.describeTable(params, function(data) {
 			callback.passed();
+			var params = {
+				'requestJSON' : {
+					"TableName" : tableName,
+				}
+			};
+
 		}, function(error) {
 			callback.failed(error);
 		});
+
 	},
+
 	//*************DescribeTable test cases ends**************
 
 	//***************GetItem test cases start**************
@@ -361,24 +408,68 @@ describe("DDB tests", {
 	/**
 	 *Test case for getItem With a valid requestJSON.
 	 */
+
 	getItem_as_async : function(callback) {
+
 		var params = {
 			'requestJSON' : {
-				"TableName" : "my-panki-goyal098567-tab",
-				"Key" : {
-					"HashKeyElement" : {
-						"S" : "name"
+				"TableName" : tableName,
+				"Item" : {
+					"name" : {
+						"S" : "Bill & Ted's Excellent Adventure"
+					},
+					"1234" : {
+						"N" : "12345"
 					}
-				},
-				"ConsistentRead" : true
-			}   //Required
+				}
+			} //Required
 		};
-		AWS.DDB.getItem(params, function(data) {
-			callback.passed();
+		AWS.DDB.putItem(params, function(data) {
+			var params = {
+				'requestJSON' : {
+					"TableName" : tableName,
+					"Key" : {
+						"HashKeyElement" : {
+							"S" : "name"
+						},
+						"RangeKeyElement" : {
+							"N" : "1234"
+						}
+					},
+					"ConsistentRead" : true
+				}   //Required
+			};
+			AWS.DDB.getItem(params, function(data) {
+
+				callback.passed();
+				var params = {
+					'requestJSON' : {
+						"TableName" : tableName,
+						"Key" : {
+							"HashKeyElement" : {
+								"S" : "name"
+							},
+							"RangeKeyElement" : {
+								"N" : "1234"
+							}
+						}
+					} //Required
+				};
+				AWS.DDB.deleteItem(params, function(data) {
+
+				}, function(error) {
+
+				});
+			}, function(error) {
+				callback.failed(error);
+			});
+
 		}, function(error) {
-			callback.failed('Some error occured')
+			callback.failed(error);
 		});
+
 	},
+
 	//*************getItem test cases ends**************
 
 	//***************listTables test cases start**************
@@ -404,12 +495,12 @@ describe("DDB tests", {
 	 */
 	listTables_as_async : function(callback) {
 		var params = {
-			'requestJSON' : {}//Required
+			'requestJSON' : {}
 		};
 		AWS.DDB.listTables(params, function(data) {
 			callback.passed();
 		}, function(error) {
-			callback.failed('Some error occured')
+			callback.failed(error);
 		});
 	},
 	//*************listTables test cases ends**************
@@ -447,23 +538,48 @@ describe("DDB tests", {
 	/**
 	 *Test case for putItem With a valid requestJSON.
 	 */
+
 	putItem_as_async : function(callback) {
+
 		var params = {
 			'requestJSON' : {
-				"TableName" : "my-pank-goyal1-tab",
+				"TableName" : tableName,
 				"Item" : {
 					"name" : {
 						"S" : "Bill & Ted's Excellent Adventure"
+					},
+					"1234" : {
+						"N" : "12345"
 					}
 				}
 			} //Required
 		};
 		AWS.DDB.putItem(params, function(data) {
 			callback.passed();
+			var params = {
+				'requestJSON' : {
+					"TableName" : tableName,
+					"Key" : {
+						"HashKeyElement" : {
+							"S" : "name"
+						},
+						"RangeKeyElement" : {
+							"N" : "1234"
+						}
+					}
+				} //Required
+			};
+			AWS.DDB.deleteItem(params, function(data) {
+
+			}, function(error) {
+
+			});
 		}, function(error) {
-			callback.failed('Some error occured')
+			callback.failed(error);
 		});
+
 	},
+
 	//*************putItem test cases ends**************
 
 	//***************query test cases start**************
@@ -499,10 +615,12 @@ describe("DDB tests", {
 	/**
 	 *Test case for query With a valid requestJSON.
 	 */
+
 	query_as_async : function(callback) {
+
 		var params = {
 			'requestJSON' : {
-				"TableName" : "my-pank-goyal12-tab",
+				"TableName" : tableName,
 				"HashKeyValue" : {
 					"S" : "name"
 				}
@@ -510,10 +628,18 @@ describe("DDB tests", {
 		};
 		AWS.DDB.query(params, function(data) {
 			callback.passed();
+			var params = {
+				'requestJSON' : {
+					"TableName" : tableName,
+				}//Required
+			};
+
 		}, function(error) {
-			callback.failed('Some error occured')
+			callback.failed(error);
 		});
+
 	},
+
 	//*************query test cases ends**************
 
 	//***************scan test cases start**************
@@ -549,14 +675,16 @@ describe("DDB tests", {
 	/**
 	 *Test case for scan With a valid requestJSON.
 	 */
+
 	scan_as_async : function(callback) {
+
 		var params = {
 			'requestJSON' : {
-				"TableName" : "my-pang-goyal12341-tab",
+				"TableName" : tableName,
 				"ScanFilter" : {
 					"year" : {
 						"AttributeValueList" : [{
-							"N" : "1985"
+							"N" : "12345"
 						}],
 						"ComparisonOperator" : "GT"
 					}
@@ -565,10 +693,18 @@ describe("DDB tests", {
 		};
 		AWS.DDB.scan(params, function(data) {
 			callback.passed();
+			var params = {
+				'requestJSON' : {
+					"TableName" : tableName,
+				}//Required
+			};
+
 		}, function(error) {
-			callback.failed('Some error occured')
+			callback.failed(error);
 		});
+
 	},
+
 	//*************scan test cases ends**************
 
 	//***************updateItem test cases start**************
@@ -604,43 +740,75 @@ describe("DDB tests", {
 	/**
 	 *Test case for updateItem With a valid requestJSON.
 	 */
+
 	updateItem_as_async : function(callback) {
+
 		var params = {
 			'requestJSON' : {
-				"TableName" : "my-panki-goyal098567-tab",
-				"Key" : {
-					"HashKeyElement" : {
-						"S" : "name"
+				"TableName" : tableName,
+				"Item" : {
+					"name" : {
+						"S" : "Bill & Ted's Excellent Adventure"
 					},
-					"RangeKeyElement" : {
-						"N" : "1234"
+					"1234" : {
+						"N" : "12345"
 					}
-				},
-				"AttributeUpdates" : {
-					"status" : {
-						"Value" : {
-							"S" : "name1234"
-						},
-						"Action" : "PUT"
-					}
-				},
-				"Expected" : {
-					"status" : {
-						"Value" : {
-							"S" : "name12345"
-						}
-					}
-				},
-				"ReturnValues" : "ALL_NEW"
-			}
-			//Required
+				}
+			} //Required
 		};
-		AWS.DDB.updateItem(params, function(data) {
-			callback.passed();
+		AWS.DDB.putItem(params, function(data) {
+			var params = {
+				'requestJSON' : {
+					"TableName" : tableName,
+					"Key" : {
+						"HashKeyElement" : {
+							"S" : "name"
+						},
+						"RangeKeyElement" : {
+							"N" : "1234"
+						}
+					},
+					"AttributeUpdates" : {
+						"status" : {
+							"Value" : {
+								"S" : "newvalue"
+							},
+							"Action" : "PUT"
+						}
+					},
+					"ReturnValues" : "ALL_NEW"
+				}
+				//Required
+			};
+			AWS.DDB.updateItem(params, function(data) {
+				callback.passed();
+				var params = {
+					'requestJSON' : {
+						"TableName" : tableName,
+						"Key" : {
+							"HashKeyElement" : {
+								"S" : "name"
+							},
+							"RangeKeyElement" : {
+								"N" : "1234"
+							}
+						}
+					} //Required
+				};
+				AWS.DDB.deleteItem(params, function(data) {
+
+				}, function(error) {
+
+				});
+			}, function(error) {
+				callback.failed(error);
+			});
 		}, function(error) {
 			callback.failed(error);
 		});
+
 	},
+
 	//*************updateItem test cases ends**************
 
 	//***************updateTable test cases start**************
@@ -676,25 +844,65 @@ describe("DDB tests", {
 	/**
 	 *Test case for updateTable With a valid requestJSON.
 	 */
+
 	updateTable_as_async : function(callback) {
-		var params = {
-			'requestJSON' : {
-				"TableName" : "my-panki-goyal098567-tab",
-				"ProvisionedThroughput" : {
-					"ReadCapacityUnits" : 5,
-					"WriteCapacityUnits" : 15
-				}
-			} //Required
-		};
-		AWS.DDB.updateTable(params, function(data) {
+
+		var params = '{"requestJSON" : {"TableName" : "' + tableName + '","ProvisionedThroughput" : {"ReadCapacityUnits" : 10,"WriteCapacityUnits" : 25}}}';
+		AWS.DDB.updateTable(JSON.parse(params), function(data) {
 			callback.passed();
+
 		}, function(error) {
 			callback.failed(error);
 		});
+
 	},
 
 	//*************updateTable test cases ends**************
 	//***************deleteTable test cases start**************
+
+	/**
+	 *Test case for deleteTable With a valid requestJSON.
+	 */
+	/*deleteTable_as_async : function(callback) {
+	var param = {
+	"requestJSON" : {
+	"TableName" : "my-ddb-goyal-tab",
+	"KeySchema" : {
+	"HashKeyElement" : {
+	"AttributeName" : "name",
+	"AttributeType" : "S",
+	"AttributeValue" : "pankaj"
+	},
+	"RangeKeyElement" : {
+	"AttributeName" : "1234",
+	"AttributeType" : "N",
+	"AttributeValue" : "12345"
+	}
+	},
+	"ProvisionedThroughput" : {
+	"ReadCapacityUnits" : 10,
+	"WriteCapacityUnits" : 10
+	}
+	}
+	}
+
+	AWS.DDB.createTable(param, function(data) {
+	var param = {
+	'requestJSON' : {
+	"TableName" : "my-ddb-test-tab",
+	}
+	};
+	AWS.DDB.deleteTable(param, function(data) {
+	callback.passed();
+	}, function(error) {
+	callback.failed('Some error occured' + JSON.stringify(error));
+	});
+
+	}, function(error) {
+	callback.failed('Some error occured' + JSON.stringify(error));
+	});
+	},*/
+
 	/**
 	 *Test case for deleteTable WithEmpty  requestJSON.
 	 */
