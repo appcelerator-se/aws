@@ -866,7 +866,7 @@ describe("AWS SNS Tests!", {
 	 */
 	subscribeWithEmptyProtocol_as_async : function(callback) {
 		var params = {
-			'Endpoint' : 'rahul.upreti@globallogic.com',
+			'Endpoint' : 'test@test.com',
 			'Protocol' : '', //Protocol is empty
 			'TopicArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting'
 		};
@@ -881,7 +881,7 @@ describe("AWS SNS Tests!", {
 	 */
 	subscribeWithInvalidProtocol_as_async : function(callback) {
 		var params = {
-			'Endpoint' : 'rahul.upreti@globallogic.com',
+			'Endpoint' : 'test@test.com',
 			'Protocol' : 'invalidProtocol', //Protocol is invalid
 			'TopicArn' : 'arn:aws:sns:us-east-1:704687501311:LastTesting'
 		};
@@ -896,7 +896,7 @@ describe("AWS SNS Tests!", {
 	 */
 	subscribeWithEmptyTopicArn_as_async : function(callback) {
 		var params = {
-			'Endpoint' : 'rahul.upreti@globallogic.com',
+			'Endpoint' : 'test@test.com',
 			'Protocol' : 'email',
 			'TopicArn' : ''//TopicArn is empty
 		};
@@ -911,7 +911,7 @@ describe("AWS SNS Tests!", {
 	 */
 	subscribeWithInvalidTopicArn_as_async : function(callback) {
 		var params = {
-			'Endpoint' : 'rahul.upreti@globallogic.com',
+			'Endpoint' : 'test@test.com',
 			'Protocol' : 'email',
 			'TopicArn' : 'arn:aws:sns:us-east-1:704687501311'//TopicArn is invalid
 		};
