@@ -197,7 +197,14 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	if(params.hasOwnProperty('xmlTemplate')) {//for sending xml in request object
 		xhr.send(params.xmlTemplate);
 	} else if(this.uploadFile) {// for sending file in request object
-		xhr.send(fileContents);
+		if(Ti.Platform.osname !== 'android') {// with android content length is already present
+			xhr.send(fileContents);
+		} else {
+			xhr.send({
+				'content' : fileContents
+			});
+
+		}
 	} else {
 		xhr.send();
 	}
