@@ -155,9 +155,9 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	if(this.uploadFile) {
 
 		xhr.setRequestHeader('Content-Type', params.contentType);
-		if(!Ti.Platform.osname === 'android') {// with android content length is already present
+	//	if(!Ti.Platform.osname === 'android') {// with android content length is already present
 			xhr.setRequestHeader('Content-Length', params.contentLength);
-		}
+		//}
 	}
 	if(this.method === 'putBucketLifecycle' || this.method === 'deleteMultipleObjects') {
 		xhr.setRequestHeader('Content-MD5', params.contentMD5)
