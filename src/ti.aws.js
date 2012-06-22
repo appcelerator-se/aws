@@ -130,7 +130,10 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	params.url = this.endpoint;
 	params.stringToSign = '';
 	params.verb = this.verb;
-
+	//params.method = this.method;
+	if(this.method == 'getPresignedUrl') {
+		params.curDate = params.expires;
+	}
 	//get the file mime type and size from the file object passed by client
 	if(this.uploadFile) {
 		var fileContents = params.file.read();
@@ -139,14 +142,28 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	}
 
 	sessionOBJ.awsHelper.generateS3Params(params);
+	if(this.method == 'listVersions') {
+		params.url = 'https://' + params.bucketName + this.endpoint + params.subResource;
+	}
 	//generates stringTosign string and passes it back as part of 'params' parameter
 	var signature = sessionOBJ.sha.b64_hmac_sha1(sessionOBJ.utf8.encode(sessionOBJ.secretKey), sessionOBJ.utf8.encode(params.stringToSign));
-	var awsAuthHeader = "AWS " + sessionOBJ.accessKeyId + ":" + signature;
 
+	if(this.method == 'getPresignedUrl') {
+		var url = 'https://' + params.bucketName + this.endpoint + '?AWSAccessKeyId=' + sessionOBJ.accessKeyId + '&Expires=' + params.expires + '&Signature=' + signature;
+		cbOnData(url);
+		return;
+	}
+
+	var awsAuthHeader = "AWS " + sessionOBJ.accessKeyId + ":" + signature;
 	xhr.open(this.verb, params.url);
 	xhr.setRequestHeader('Authorization', awsAuthHeader);
 	xhr.setRequestHeader('Date', curDate);
-	xhr.setRequestHeader('Host', 's3.amazonaws.com');
+
+	if(this.method == 'listVersions') {
+		xhr.setRequestHeader('Host', params.bucketName + '.s3.amazonaws.com');
+	} else {
+		xhr.setRequestHeader('Host', 's3.amazonaws.com');
+	}
 	//set the content type if its required by the api.
 	if(this.contentType) {
 		xhr.setRequestHeader('Content-Type', params.contentType);
@@ -155,8 +172,8 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	if(this.uploadFile) {
 
 		xhr.setRequestHeader('Content-Type', params.contentType);
-	//	if(!Ti.Platform.osname === 'android') {// with android content length is already present
-			xhr.setRequestHeader('Content-Length', params.contentLength);
+		//if(!Ti.Platform.osname === 'android') {// with android content length is already present
+		xhr.setRequestHeader('Content-Length', params.contentLength);
 		//}
 	}
 	if(this.method === 'putBucketLifecycle' || this.method === 'deleteMultipleObjects') {
@@ -197,14 +214,7 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	if(params.hasOwnProperty('xmlTemplate')) {//for sending xml in request object
 		xhr.send(params.xmlTemplate);
 	} else if(this.uploadFile) {// for sending file in request object
-		if(Ti.Platform.osname !== 'android') {// with android content length is already present
-			xhr.send(fileContents);
-		} else {
-			xhr.send({
-				'content' : fileContents
-			});
-
-		}
+		xhr.send(fileContents);
 	} else {
 		xhr.send();
 	}
@@ -477,6 +487,24 @@ sessionOBJ.bedFrame.build(AWS, {
 		children : [{
 			method : 'getService'
 		}, {
+			method : 'getPresignedUrl',
+			endpoint : '.s3.amazonaws.com/',
+			validations : {
+				required : {
+					params : ['bucketName', 'expires']
+				}
+			}
+		}, {
+			method : 'listVersions',
+			verb : 'GET',
+			endpoint : '.s3.amazonaws.com/',
+			subResource : '?versions',
+			validations : {
+				required : {
+					params : ['bucketName']
+				}
+			}
+		}, {
 			method : 'deleteBucket',
 			verb : 'DELETE',
 			validations : {
@@ -512,7 +540,7 @@ sessionOBJ.bedFrame.build(AWS, {
 				}
 			}
 		}, {
-			method : 'getBucket',
+			method : 'listObjects',
 			validations : {
 				required : {
 					params : ['bucketName']
@@ -599,7 +627,7 @@ sessionOBJ.bedFrame.build(AWS, {
 				}
 			}
 		}, {
-			method : 'headBucket',
+			method : 'getObjectMetadata',
 			verb : 'HEAD',
 			validations : {
 				required : {
