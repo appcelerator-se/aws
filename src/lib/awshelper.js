@@ -113,22 +113,27 @@ awsHelper.generateSQSURL = function(actionName, params, accessKeyId, secretKey, 
  */
 awsHelper.generateS3Params = function(params) {
 	//check if the bucket name is passed by the user. If its passed then include it as part of stringtosign data
-	if(params.hasOwnProperty('bucketName')) {
+	if (params.hasOwnProperty('bucketName')) {
 		//check if objectName is passed by user if yes then include it as part of stringtosign data
-		if(params.hasOwnProperty('objectName')) {
-			//copySource is used by 'Put object copy and Upload part ' api's, which needs to be part of stringtosign
-			if(params.hasOwnProperty('copySource')) {
-				params.canonicalizedAmzHeaders = '\n' + 'x-amz-copy-source:' + params.copySource;
-			} else {
-				params.canonicalizedAmzHeaders = '';
-			}
-			if(params.hasOwnProperty('uploadId')) {
-				if(params.hasOwnProperty('partNumber')) {
-					params.stringToSign = params.verb + '\n' + params.contentMD5 + '\n' + params.contentType + '\n' + params.curDate + params.canonicalizedAmzHeaders + '\n/' + params.bucketName + '/' + params.objectName + params.subResource + 'partNumber=' + params.partNumber + '&' + 'uploadId=' + params.uploadId;
-					params.url = params.url.concat(params.bucketName + '/' + params.objectName + params.subResource + 'partNumber=' + params.partNumber + '&' + 'uploadId=' + params.uploadId);
+		if (params.hasOwnProperty('objectName') || params.hasOwnProperty('key')) {
+			//check if versionId is passed by user if yes then include it as part of stringtosign data
+			if (params.hasOwnProperty('versionId')) {
+				//copySource is used by 'Put object copy and Upload part ' api's, which needs to be part of stringtosign
+				if (params.hasOwnProperty('copySource')) {
+					params.canonicalizedAmzHeaders = '\n' + 'x-amz-copy-source:' + params.copySource;
 				} else {
-					params.stringToSign = params.verb + '\n' + params.contentMD5 + '\n' + params.contentType + '\n' + params.curDate + params.canonicalizedAmzHeaders + '\n/' + params.bucketName + '/' + params.objectName + params.subResource + 'uploadId=' + params.uploadId;
-					params.url = params.url.concat(params.bucketName + '/' + params.objectName + params.subResource + 'uploadId=' + params.uploadId);
+					params.canonicalizedAmzHeaders = '';
+				}
+				if (params.hasOwnProperty('uploadId')) {
+					if (params.hasOwnProperty('partNumber')) {
+						params.stringToSign = params.verb + '\n' + params.contentMD5 + '\n' + params.contentType + '\n' + params.curDate + params.canonicalizedAmzHeaders + '\n/' + params.bucketName + '/' + params.objectName + params.subResource + 'partNumber=' + params.partNumber + '&' + 'uploadId=' + params.uploadId;
+						params.url = params.url.concat(params.bucketName + '/' + params.objectName + params.subResource + 'partNumber=' + params.partNumber + '&' + 'uploadId=' + params.uploadId);
+					} else {
+						params.stringToSign = params.verb + '\n' + params.contentMD5 + '\n' + params.contentType + '\n' + params.curDate + params.canonicalizedAmzHeaders + '\n/' + params.bucketName + '/' + params.objectName + params.subResource + 'uploadId=' + params.uploadId;
+						params.url = params.url.concat(params.bucketName + '/' + params.objectName + params.subResource + 'uploadId=' + params.uploadId);
+					}
+				} else {
+					params.stringToSign = params.verb + '\n' + params.contentMD5 + '\n' + params.contentType + '\n' + params.curDate + params.canonicalizedAmzHeaders + '\n/' + params.bucketName + '/' + params.key + '?versionId=' + params.versionId;
 				}
 			} else {
 				params.stringToSign = params.verb + '\n' + params.contentMD5 + '\n' + params.contentType + '\n' + params.curDate + params.canonicalizedAmzHeaders + '\n/' + params.bucketName + '/' + params.objectName + params.subResource;

@@ -48,11 +48,11 @@ var sessionOBJ = {
 var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 	awsHelper.prepareExecutor(this);
 
-	if(awsHelper.validateApi(this, cbOnError, params) == false)
+	if (awsHelper.validateApi(this, cbOnError, params) == false)
 		return false;
 
 	//Calling generateSQSURL function for SQS and generateSignedURL for others
-	if(this.property === 'SQS') {
+	if (this.property === 'SQS') {
 		sUrl = sessionOBJ.awsHelper.generateSQSURL(this.action, params, sessionOBJ.accessKeyId, sessionOBJ.secretKey, this.endpoint, this.version);
 	} else {
 		sUrl = sessionOBJ.awsHelper.generateSignedURL(this.action, params, sessionOBJ.accessKeyId, sessionOBJ.secretKey, this.endpoint, this.version);
@@ -71,7 +71,7 @@ var defaultQueryExecutor = function(params, cbOnData, cbOnError) {
 var snsExecutor = function(params, cbOnData, cbOnError) {
 	awsHelper.prepareExecutor(this);
 
-	if(awsHelper.validateApi(this, cbOnError, params) == false)
+	if (awsHelper.validateApi(this, cbOnError, params) == false)
 		return false;
 
 	var xhr = awsHelper.createHttpObject(cbOnData, cbOnError);
@@ -80,7 +80,7 @@ var snsExecutor = function(params, cbOnData, cbOnError) {
 	params.Version = this.version;
 	payload = sessionOBJ.awsHelper.generatePayload(params, sessionOBJ.accessKeyId, sessionOBJ.secretKey, this.endpoint)
 
-	if(Ti.Platform.osname === 'iphone') {
+	if (Ti.Platform.osname === 'iphone') {
 		xhr.open(this.verb, this.endpoint + '?' + payload);
 	} else {
 		xhr.open(this.verb, this.endpoint);
@@ -88,7 +88,7 @@ var snsExecutor = function(params, cbOnData, cbOnError) {
 
 	xhr.setRequestHeader('Host', 'sns.us-east-1.amazonaws.com');
 
-	if(Ti.Platform.osname === 'iphone') {
+	if (Ti.Platform.osname === 'iphone') {
 		xhr.send();
 	} else {
 		xhr.send(payload);
@@ -106,22 +106,22 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 
 	awsHelper.prepareExecutor(this);
 
-	if(awsHelper.validateApi(this, cbOnError, params) == false)
+	if (awsHelper.validateApi(this, cbOnError, params) == false)
 		return false;
 
 	var xhr = Ti.Network.createHTTPClient();
 	params.contentType = '';
-	if(this.contentType) {
+	if (this.contentType) {
 		params.contentType = this.contentType;
 	}
 
-	if(this.method === 'putBucketLifecycle' || this.method === 'deleteMultipleObjects') {
+	if (this.method === 'putBucketLifecycle' || this.method === 'deleteMultipleObjects') {
 		params.contentMD5 = sessionOBJ.md5.b64_md5(params.xmlTemplate);
 	} else {
 		params.contentMD5 = '';
 	}
 
-	if(!params.hasOwnProperty('subResource')) {
+	if (!params.hasOwnProperty('subResource')) {
 		params.subResource = this.subResource;
 	}
 	var curDate = (new Date()).toUTCString();
@@ -131,24 +131,26 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	params.stringToSign = '';
 	params.verb = this.verb;
 	//params.method = this.method;
-	if(this.method == 'getPresignedUrl') {
+	if (this.method == 'getPresignedUrl') {
 		params.curDate = params.expires;
 	}
 	//get the file mime type and size from the file object passed by client
-	if(this.uploadFile) {
+	if (this.uploadFile) {
 		var fileContents = params.file.read();
 		params.contentType = fileContents.mimeType;
 		params.contentLength = params.file.size;
 	}
 
 	sessionOBJ.awsHelper.generateS3Params(params);
-	if(this.method == 'listVersions') {
+	if (this.method == 'listVersions') {
 		params.url = 'https://' + params.bucketName + this.endpoint + params.subResource;
+	} else if (this.method == 'deleteVersion') {
+		params.url = 'https://' + params.bucketName + this.endpoint + params.key + '?versionId=' + params.versionId;
 	}
 	//generates stringTosign string and passes it back as part of 'params' parameter
 	var signature = sessionOBJ.sha.b64_hmac_sha1(sessionOBJ.utf8.encode(sessionOBJ.secretKey), sessionOBJ.utf8.encode(params.stringToSign));
 
-	if(this.method == 'getPresignedUrl') {
+	if (this.method == 'getPresignedUrl') {
 		var url = 'https://' + params.bucketName + this.endpoint + '?AWSAccessKeyId=' + sessionOBJ.accessKeyId + '&Expires=' + params.expires + '&Signature=' + signature;
 		cbOnData(url);
 		return;
@@ -159,28 +161,28 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	xhr.setRequestHeader('Authorization', awsAuthHeader);
 	xhr.setRequestHeader('Date', curDate);
 
-	if(this.method == 'listVersions') {
+	if (this.method == 'listVersions' || this.method == 'deleteVersion') {
 		xhr.setRequestHeader('Host', params.bucketName + '.s3.amazonaws.com');
 	} else {
 		xhr.setRequestHeader('Host', 's3.amazonaws.com');
 	}
 	//set the content type if its required by the api.
-	if(this.contentType) {
+	if (this.contentType) {
 		xhr.setRequestHeader('Content-Type', params.contentType);
 	}
 	// For api's that upload files we need to pass content type and content length
-	if(this.uploadFile) {
+	if (this.uploadFile) {
 
 		xhr.setRequestHeader('Content-Type', params.contentType);
 		//if(!Ti.Platform.osname === 'android') {// with android content length is already present
 		xhr.setRequestHeader('Content-Length', params.contentLength);
 		//}
 	}
-	if(this.method === 'putBucketLifecycle' || this.method === 'deleteMultipleObjects') {
+	if (this.method === 'putBucketLifecycle' || this.method === 'deleteMultipleObjects') {
 		xhr.setRequestHeader('Content-MD5', params.contentMD5)
 	}
 	//used for apis like Put object copy and upload part-copy
-	if(params.hasOwnProperty('copySource')) {
+	if (params.hasOwnProperty('copySource')) {
 		xhr.setRequestHeader('x-amz-copy-source', params.copySource);
 		// will be passed by client
 	}
@@ -190,19 +192,19 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	xhr.onload = function(response) {
 		//For Get and POST xml is returned as response hence converting it to javascript object and passing back to user
 
-		if(this.connectionType == "GET" || this.connectionType == "POST" || method == "uploadPartCopy") {// Api's other then GET and POST does not return any xml as part of response object so passing the complete obect back to client
-			if(method === "getObjectTorrent" || method === "getObject" || method === "getBucketPolicy") {
-				if(cbOnData) {
+		if (this.connectionType == "GET" || this.connectionType == "POST" || method == "uploadPartCopy") {// Api's other then GET and POST does not return any xml as part of response object so passing the complete obect back to client
+			if (method === "getObjectTorrent" || method === "getObject" || method === "getBucketPolicy") {
+				if (cbOnData) {
 					cbOnData(this.responseText);
 				}
 			} else {
-				if(cbOnData) {
+				if (cbOnData) {
 					cbOnData(sessionOBJ.xmlToJSON.toJSON(this.responseText, true));
 				}
 			}
 
 		} else {// Api's other then GET and POST does not return any xml as part of response object so passing the complete obect back to client
-			if(cbOnData) {
+			if (cbOnData) {
 				cbOnData(this.responseText);
 			}
 		}
@@ -211,9 +213,9 @@ var s3Executor = function(params, cbOnData, cbOnError) {
 	xhr.onerror = function(e) {
 		awsHelper.httpError(this, cbOnError);
 	}
-	if(params.hasOwnProperty('xmlTemplate')) {//for sending xml in request object
+	if (params.hasOwnProperty('xmlTemplate')) {//for sending xml in request object
 		xhr.send(params.xmlTemplate);
-	} else if(this.uploadFile) {// for sending file in request object
+	} else if (this.uploadFile) {// for sending file in request object
 		xhr.send(fileContents);
 	} else {
 		xhr.send();
@@ -228,7 +230,7 @@ var s3Executor = function(params, cbOnData, cbOnError) {
  */
 var sesExecutor = function(params, cbOnData, cbOnError) {
 	awsHelper.prepareExecutor(this);
-	if(awsHelper.validateApi(this, cbOnError, params) == false)
+	if (awsHelper.validateApi(this, cbOnError, params) == false)
 		return false;
 
 	params.paramString = '';
@@ -274,14 +276,14 @@ var stsExecutor = function(params, cbOnData, cbOnError) {
 	}
 	sUrl = sessionOBJ.awsHelper.generatePayload(params, sessionOBJ.accessKeyId, sessionOBJ.secretKey, this.endpoint);
 
-	if(Ti.Platform.osname === 'iphone') {
+	if (Ti.Platform.osname === 'iphone') {
 		xhr.open(this.verb, this.endpoint + '?' + payload);
 	} else {
 		xhr.open(this.verb, this.endpoint);
 	}
 	xhr.setRequestHeader('Host', 'sts.amazonaws.com');
 
-	if(Ti.Platform.osname === 'iphone') {
+	if (Ti.Platform.osname === 'iphone') {
 		xhr.send();
 	} else {
 		xhr.send(payload);
@@ -298,14 +300,14 @@ var dynamoDbExecutor = function(params, cbOnData, cbOnError) {
 
 	awsHelper.prepareExecutor(this);
 
-	if(awsHelper.validateApi(this, cbOnError, params) == false)
+	if (awsHelper.validateApi(this, cbOnError, params) == false)
 		return false;
 
 	var expirationTime = (new Date((new Date).getTime() + ((new Date).getTimezoneOffset() * 60000))).toISODate();
 
 	var thisRef = this;
 
-	if((Ti.App.Properties.getString('tempExpiration') == null) || ((Ti.App.Properties.getString('tempExpiration') != null) && sessionOBJ.utility.compareTime(expirationTime, Ti.App.Properties.getString('tempExpiration'), 300))) {
+	if ((Ti.App.Properties.getString('tempExpiration') == null) || ((Ti.App.Properties.getString('tempExpiration') != null) && sessionOBJ.utility.compareTime(expirationTime, Ti.App.Properties.getString('tempExpiration'), 300))) {
 		AWS.STS.getSessionToken({
 
 		}, function(response) {
@@ -341,7 +343,7 @@ var dynamoDBCall = function(thisRef, params, cbOnData, cbOnError) {
 	var stringToSign = thisRef.verb + '\n' + '/' + '\n' + '' + '\n' + canonicalHeader + '\n' + JSON.stringify(params.requestJSON);
 
 	var signature = sessionOBJ.sha256.b64_hmac_sha256_sha256(secretAccessKey, stringToSign);
-	if(signature.substring(signature.length - 1) !== "=") {
+	if (signature.substring(signature.length - 1) !== "=") {
 		signature = signature + "=";
 	}
 
@@ -384,7 +386,7 @@ sessionOBJ.bedFrame.build(AWS, {
 	version : "2009-04-15",
 	executor : defaultQueryExecutor,
 	preparer : function() {
-		if(!this.action) {
+		if (!this.action) {
 			initCap = this.method.substr(0, 1).toUpperCase();
 			this.action = initCap + this.method.substr(1);
 			// Action is Usually same as Method Name, unless explicitly stated
@@ -502,6 +504,15 @@ sessionOBJ.bedFrame.build(AWS, {
 			validations : {
 				required : {
 					params : ['bucketName']
+				}
+			}
+		}, {
+			method : 'deleteVersion',
+			verb : 'DELETE',
+			endpoint : '.s3.amazonaws.com/',
+			validations : {
+				required : {
+					params : ['bucketName', 'key', 'versionId']
 				}
 			}
 		}, {
